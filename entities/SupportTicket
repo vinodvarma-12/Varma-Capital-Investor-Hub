@@ -1,0 +1,68 @@
+{
+  "name": "SupportTicket",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor who created the ticket"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Ticket subject"
+    },
+    "description": {
+      "type": "string",
+      "description": "Ticket description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "general",
+        "account",
+        "investment",
+        "redemption",
+        "technical",
+        "compliance"
+      ],
+      "default": "general"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of assigned support agent"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Resolution details"
+    },
+    "sla_due_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "SLA due date for response"
+    }
+  },
+  "required": [
+    "investor_email",
+    "subject",
+    "description"
+  ]
+}

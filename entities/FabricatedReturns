@@ -1,0 +1,45 @@
+{
+  "name": "FabricatedReturns",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of specific investor (empty for product-wide)"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "period": {
+      "type": "string",
+      "description": "Period identifier (YYYY-MM or YYYY)"
+    },
+    "return_percent": {
+      "type": "number",
+      "description": "Admin-set return percentage"
+    },
+    "nav_per_unit": {
+      "type": "number",
+      "description": "Admin-set NAV per unit"
+    },
+    "override_calculated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to override calculated P&L"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Admin notes for the adjustment"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when this return/NAV becomes effective"
+    }
+  },
+  "required": [
+    "product_id",
+    "period",
+    "effective_date"
+  ]
+}

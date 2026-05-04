@@ -1,0 +1,62 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "subscription",
+        "redemption",
+        "fee",
+        "penalty",
+        "dividend"
+      ],
+      "description": "Transaction type"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount"
+    },
+    "units": {
+      "type": "number",
+      "description": "Units involved in transaction"
+    },
+    "nav_per_unit": {
+      "type": "number",
+      "description": "NAV per unit at transaction time"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "investor_email",
+    "product_id",
+    "type",
+    "amount"
+  ]
+}

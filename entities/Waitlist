@@ -1,0 +1,60 @@
+{
+  "name": "Waitlist",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "description": "Full name of the person joining waitlist"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country of residence"
+    },
+    "investor_category": {
+      "type": "string",
+      "enum": [
+        "Accredited",
+        "HNW",
+        "Family Office",
+        "Other"
+      ],
+      "description": "Type of investor"
+    },
+    "amount_interested": {
+      "type": "number",
+      "description": "Investment amount they're interested in"
+    },
+    "source": {
+      "type": "string",
+      "default": "website",
+      "description": "How they found us"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or comments"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "closed"
+      ],
+      "default": "new",
+      "description": "Status of the waitlist entry"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

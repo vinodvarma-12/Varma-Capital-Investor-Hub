@@ -1,0 +1,48 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor (empty for global documents)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "statement",
+        "tax_document",
+        "agreement",
+        "compliance",
+        "notice"
+      ],
+      "description": "Document type"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the document file"
+    },
+    "period": {
+      "type": "string",
+      "description": "Period covered (e.g., 2024-Q1)"
+    },
+    "is_watermarked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether document has investor watermark"
+    },
+    "download_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times downloaded"
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "file_url"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "SystemSettings",
+  "type": "object",
+  "properties": {
+    "setting_key": {
+      "type": "string",
+      "description": "Unique identifier for the setting"
+    },
+    "setting_value": {
+      "type": "string",
+      "description": "JSON string value of the setting"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "branding",
+        "notifications",
+        "security",
+        "compliance",
+        "sla",
+        "general"
+      ],
+      "description": "Setting category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the setting"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "setting_key",
+    "setting_value",
+    "category"
+  ]
+}

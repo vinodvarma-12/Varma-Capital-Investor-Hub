@@ -1,0 +1,27 @@
+{
+  "name": "TicketMessage",
+  "type": "object",
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "description": "Reference to the SupportTicket"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email of the message sender"
+    },
+    "message": {
+      "type": "string",
+      "description": "Content of the message"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of an attached file, if any"
+    }
+  },
+  "required": [
+    "ticket_id",
+    "sender_email",
+    "message"
+  ]
+}

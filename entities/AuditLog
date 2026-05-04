@@ -1,0 +1,48 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of user who made the change"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "login",
+        "logout",
+        "download",
+        "upload"
+      ],
+      "description": "Type of action performed"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of entity affected (e.g., Investment, Product, User)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the affected entity"
+    },
+    "changes": {
+      "type": "object",
+      "description": "JSON object containing before/after values"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address of the user"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Browser/device information"
+    }
+  },
+  "required": [
+    "user_email",
+    "action",
+    "entity_type"
+  ]
+}

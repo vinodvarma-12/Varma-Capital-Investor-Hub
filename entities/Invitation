@@ -1,0 +1,47 @@
+{
+  "name": "Invitation",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email of the invited user"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full name of the invited user"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Status of the invitation"
+    },
+    "invitation_token": {
+      "type": "string",
+      "description": "Unique token for the invitation link"
+    },
+    "invited_by": {
+      "type": "string",
+      "description": "Email of the admin who sent the invitation"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "investor",
+        "admin",
+        "super_admin"
+      ],
+      "default": "investor",
+      "description": "Role to assign when invitation is accepted"
+    }
+  },
+  "required": [
+    "email",
+    "full_name",
+    "invitation_token"
+  ]
+}

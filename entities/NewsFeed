@@ -1,0 +1,32 @@
+{
+  "name": "NewsFeed",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the news source (e.g., Reuters)"
+    },
+    "url": {
+      "type": "string",
+      "description": "URL of the RSS feed"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "finance",
+        "crypto",
+        "world",
+        "technology"
+      ],
+      "default": "finance"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "url"
+  ]
+}

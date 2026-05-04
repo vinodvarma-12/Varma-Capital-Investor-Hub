@@ -1,0 +1,47 @@
+{
+  "name": "MarketTicker",
+  "type": "object",
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "description": "Ticker symbol"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "commodities",
+        "indices",
+        "crypto",
+        "forex"
+      ],
+      "description": "Market category"
+    },
+    "current_price": {
+      "type": "number",
+      "description": "Current price"
+    },
+    "change_percent": {
+      "type": "number",
+      "description": "24h change percentage"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last price update"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to display this ticker"
+    }
+  },
+  "required": [
+    "symbol",
+    "name",
+    "category"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "NAV",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "NAV date"
+    },
+    "nav_per_unit": {
+      "type": "number",
+      "description": "Net Asset Value per unit"
+    },
+    "total_aum": {
+      "type": "number",
+      "description": "Total Assets Under Management"
+    },
+    "is_official": {
+      "type": "boolean",
+      "description": "Whether this is official or indicative NAV",
+      "default": true
+    }
+  },
+  "required": [
+    "product_id",
+    "date",
+    "nav_per_unit"
+  ]
+}

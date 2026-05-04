@@ -1,0 +1,60 @@
+{
+  "name": "LockInOverrides",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor"
+    },
+    "investment_id": {
+      "type": "string",
+      "description": "Reference to specific investment"
+    },
+    "original_lock_months": {
+      "type": "number",
+      "description": "Original lock-in period in months"
+    },
+    "adjusted_lock_months": {
+      "type": "number",
+      "description": "Admin-adjusted lock-in period"
+    },
+    "new_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Admin-set lock-in end date"
+    },
+    "penalty_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "fixed",
+        "percentage",
+        "both"
+      ],
+      "default": "none"
+    },
+    "penalty_amount": {
+      "type": "number",
+      "description": "Fixed penalty amount",
+      "default": 0
+    },
+    "penalty_percent": {
+      "type": "number",
+      "description": "Penalty as percentage of withdrawal",
+      "default": 0
+    },
+    "reason": {
+      "type": "string",
+      "description": "Admin reason for adjustment"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of admin who approved"
+    }
+  },
+  "required": [
+    "investor_email",
+    "investment_id",
+    "adjusted_lock_months"
+  ]
+}

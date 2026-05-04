@@ -1,0 +1,46 @@
+{
+  "name": "AllocationRequest",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor making the request"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "requested_amount": {
+      "type": "number",
+      "description": "Requested investment amount"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "processing"
+      ],
+      "default": "pending"
+    },
+    "admin_notes": {
+      "type": "string",
+      "description": "Notes from admin review"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Email of admin who reviewed"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of admin review"
+    }
+  },
+  "required": [
+    "investor_email",
+    "product_id",
+    "requested_amount"
+  ]
+}

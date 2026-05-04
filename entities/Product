@@ -1,0 +1,75 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "minimum_ticket": {
+      "type": "number",
+      "description": "Minimum investment amount"
+    },
+    "lock_in_months": {
+      "type": "number",
+      "description": "Lock-in period in months"
+    },
+    "management_fee_percent": {
+      "type": "number",
+      "description": "Annual management fee percentage"
+    },
+    "performance_fee_percent": {
+      "type": "number",
+      "description": "Performance fee percentage"
+    },
+    "redemption_penalty_percent": {
+      "type": "number",
+      "description": "Early redemption penalty percentage",
+      "default": 0
+    },
+    "redemption_penalty_amount": {
+      "type": "number",
+      "description": "Fixed early redemption penalty amount",
+      "default": 0
+    },
+    "risk_band": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "very_high"
+      ],
+      "description": "Risk level"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "closed"
+      ],
+      "default": "active"
+    },
+    "high_water_mark": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether high water mark applies"
+    },
+    "hurdle_rate": {
+      "type": "number",
+      "description": "Minimum return rate before performance fees",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "minimum_ticket",
+    "lock_in_months",
+    "management_fee_percent"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "MarketingMaterial",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the material"
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief summary or description"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the file (PDF, image, etc.)"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "URL for a cover image or thumbnail"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "market_commentary",
+        "white_paper",
+        "webinar",
+        "article",
+        "report"
+      ],
+      "default": "article"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category"
+  ]
+}

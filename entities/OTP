@@ -1,0 +1,33 @@
+{
+  "name": "OTP",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the user requesting OTP"
+    },
+    "otp_code": {
+      "type": "string",
+      "description": "One-time password code (6-8 digits)"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the OTP expires"
+    },
+    "used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this OTP has been used"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Email of admin who created this OTP"
+    }
+  },
+  "required": [
+    "investor_email",
+    "otp_code",
+    "expires_at"
+  ]
+}

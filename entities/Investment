@@ -1,0 +1,54 @@
+{
+  "name": "Investment",
+  "type": "object",
+  "properties": {
+    "investor_email": {
+      "type": "string",
+      "description": "Email of the investor"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Reference to product"
+    },
+    "invested_amount": {
+      "type": "number",
+      "description": "Initial investment amount"
+    },
+    "current_units": {
+      "type": "number",
+      "description": "Current units held"
+    },
+    "lock_in_months": {
+      "type": "number",
+      "description": "Agreed lock-in period in months"
+    },
+    "lock_in_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When lock-in period ends"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "redeemed",
+        "suspended"
+      ],
+      "default": "active"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of initial purchase"
+    },
+    "cost_basis": {
+      "type": "number",
+      "description": "Average cost per unit"
+    }
+  },
+  "required": [
+    "investor_email",
+    "product_id",
+    "invested_amount"
+  ]
+}

@@ -1,0 +1,484 @@
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { User } from "@/entities/User";
+import { createPageUrl } from "@/utils";
+import { useAuth } from "@/lib/AuthContext";
+import { 
+  LayoutDashboard, 
+  PieChart, 
+  Package, 
+  Newspaper, 
+  MessageSquare, 
+  UserCircle, 
+  Settings,
+  Users,
+  FileText,
+  TrendingUp,
+  LogOut,
+  Menu,
+  Sun,
+  Moon,
+  Lock,
+  Shield, // Used for Super Admin Dashboard
+  History,
+  Lightbulb, // Used for Insights & Content
+  UserPlus // New import for Waitlist Management
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+// Public pages that don't require authentication
+const PUBLIC_PAGES = ['InvestorAuth', 'Waitlist', 'Legal', 'AcceptInvitation'];
+
+// Get the dashboard URL based on user role
+const getDashboardByRole = (role) => {
+  switch (role) {
+    case 'super_admin':
+      return createPageUrl('SuperAdminDashboard');
+    case 'admin':
+      return createPageUrl('AdminDashboard');
+    default:
+      return createPageUrl('Dashboard');
+  }
+};
+
+export default function Layout({ children, currentPageName }) {
+  const { logout, user: authUser, isAuthenticated, loading: authSessionLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(true);
+  const [showCompliancePopup, setShowCompliancePopup] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const currentPageNameRef = useRef(currentPageName);
+
+  useEffect(() => {
+    currentPageNameRef.current = currentPageName;
+  }, [currentPageName]);
+
+  // Disable SEO indexing for all internal pages
+  useEffect(() => {
+    // Add noindex meta tag
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.name = 'robots';
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.content = 'noindex, nofollow';
+
+    // Add noindex for Google specifically
+    let metaGooglebot = document.querySelector('meta[name="googlebot"]');
+    if (!metaGooglebot) {
+      metaGooglebot = document.createElement('meta');
+      metaGooglebot.name = 'googlebot';
+      document.head.appendChild(metaGooglebot);
+    }
+    metaGooglebot.content = 'noindex, nofollow';
+  }, []);
+
+  useEffect(() => {
+    const complianceAccepted = sessionStorage.getItem('compliance_accepted');
+    if (!complianceAccepted) {
+      setShowCompliancePopup(true);
+    }
+  }, []);
+
+  const isPublicPage = PUBLIC_PAGES.some(page => 
+    currentPageName === page || currentPageName?.startsWith('Legal')
+  );
+
+  // Guest on protected route → login (keeps currentPageName in its own effect so we don't refetch profile on every nav)
+  useEffect(() => {
+    if (authSessionLoading || isAuthenticated) return;
+    setUser(null);
+    setAuthChecked(true);
+    const onPublic = PUBLIC_PAGES.some(
+      (page) => currentPageName === page || currentPageName?.startsWith('Legal')
+    );
+    if (!onPublic) {
+      window.location.href = createPageUrl("InvestorAuth");
+    }
+  }, [authSessionLoading, isAuthenticated, currentPageName]);
+
+  // Load profile when Supabase session exists / changes (login without full reload left profile stale)
+  useEffect(() => {
+    if (authSessionLoading || !isAuthenticated) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setAuthChecked(false);
+      try {
+        const userData = await User.me();
+        if (cancelled) return;
+        setUser(userData);
+        setDarkMode(userData.preferences?.dark_mode ?? true);
+
+        const allowedRoles = ['investor', 'admin', 'super_admin'];
+        if (!allowedRoles.includes(userData.role)) {
+          console.error("User does not have required role");
+          await logout();
+          return;
+        }
+
+        setAuthChecked(true);
+      } catch {
+        console.error("User not authenticated");
+        if (cancelled) return;
+        setAuthChecked(true);
+        const onPublic = PUBLIC_PAGES.some(
+          (page) =>
+            currentPageNameRef.current === page ||
+            currentPageNameRef.current?.startsWith('Legal')
+        );
+        if (!onPublic) {
+          window.location.href = createPageUrl("InvestorAuth");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authSessionLoading, isAuthenticated, authUser?.id, logout]);
+
+  useEffect(() => {
+    if (!user || currentPageName !== 'InvestorAuth') return;
+    window.location.href = getDashboardByRole(user.role);
+  }, [user, currentPageName]);
+
+  const toggleDarkMode = async () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    if (user) {
+      await User.updateMyUserData({
+        preferences: { ...user.preferences, dark_mode: newDarkMode }
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+      const handleAcceptCompliance = () => {
+        sessionStorage.setItem('compliance_accepted', 'true');
+        setShowCompliancePopup(false);
+      };
+
+  // Base investor navigation that everyone can see
+  const investorNavItems = [
+    { title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
+    { title: "Portfolio", url: createPageUrl("Portfolio"), icon: PieChart },
+    { title: "Products", url: createPageUrl("Products"), icon: Package },
+    { title: "Markets", url: createPageUrl("Markets"), icon: TrendingUp },
+    { title: "Documents", url: createPageUrl("Documents"), icon: FileText },
+    { title: "News & Insights", url: createPageUrl("NewsAndInsights"), icon: Newspaper },
+    { title: "Support", url: createPageUrl("Support"), icon: MessageSquare },
+    { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
+  ];
+
+  // Admin-only features (in addition to investor features)
+  const adminOnlyItems = [
+    { title: "Admin Dashboard", url: createPageUrl("AdminDashboard"), icon: LayoutDashboard, divider: true },
+    { title: "Manage Investors", url: createPageUrl("AdminInvestors"), icon: Users },
+    { title: "Product Management", url: createPageUrl("AdminProducts"), icon: Package },
+    { title: "NAV Editor", url: createPageUrl("AdminNAV"), icon: TrendingUp },
+    { title: "Return Overrides", url: createPageUrl("AdminReturns"), icon: TrendingUp },
+    { title: "Document Upload", url: createPageUrl("AdminDocuments"), icon: FileText },
+    { title: "Support Queue", url: createPageUrl("AdminSupport"), icon: MessageSquare },
+    { title: "Waitlist Management", url: createPageUrl("AdminWaitlist"), icon: UserPlus },
+  ];
+
+  // Super Admin-only features (in addition to investor + admin features)
+  const superAdminOnlyItems = [
+    { title: "Super Admin Dashboard", url: createPageUrl("SuperAdminDashboard"), icon: Shield, divider: true },
+    { title: "Lock-in Management", url: createPageUrl("AdminLockIns"), icon: Lock },
+    { title: "Insights & Content", url: createPageUrl("AdminInsights"), icon: Lightbulb },
+    { title: "System Settings", url: createPageUrl("AdminSettings"), icon: Settings },
+    { title: "Audit Logs", url: createPageUrl("AdminAudit"), icon: History },
+  ];
+
+  const getNavigationItems = () => {
+    let navItems = [...investorNavItems];
+    
+    // Add admin features for admin and super_admin
+    if (user?.role === 'admin' || user?.role === 'super_admin') {
+      navItems = [...navItems, ...adminOnlyItems];
+    }
+    
+    // Add super admin features for super_admin only
+    if (user?.role === 'super_admin') {
+      navItems = [...navItems, ...superAdminOnlyItems];
+    }
+    
+    return navItems;
+  };
+
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case 'super_admin':
+        return <Badge className="bg-red-600 text-white text-xs"><Shield className="w-3 h-3 mr-1" />Super Admin</Badge>;
+      case 'admin':
+        return <Badge className="bg-blue-600 text-white text-xs"><Users className="w-3 h-3 mr-1" />Admin</Badge>;
+      default:
+        return <Badge className="bg-green-600 text-white text-xs"><UserCircle className="w-3 h-3 mr-1" />Investor</Badge>;
+    }
+  };
+
+  const navigationItems = getNavigationItems();
+
+  // Show public pages for unauthenticated users
+  if (!user && isPublicPage) {
+    return children;
+  }
+
+  // Show loading while checking auth for protected pages
+  if (!authChecked && !isPublicPage) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+        <div className="text-center space-y-4">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+            alt="Varma Capital" 
+            className="w-24 h-24 mx-auto"
+          />
+          <div className={darkMode ? 'text-white' : 'text-slate-900'}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+        <div className="text-center space-y-4">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+            alt="Varma Capital" 
+            className="w-24 h-24 mx-auto"
+          />
+          <div className={darkMode ? 'text-white' : 'text-slate-900'}>Loading Varma Capital Portal...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+        <div className={darkMode ? "dark" : ""}>
+          <style>{`
+            :root {
+              --background: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
+              --foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
+              --card: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
+              --card-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
+              --popover: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
+              --popover-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
+              --primary: 43 76% 52%;
+              --primary-foreground: 222.2 84% 4.9%;
+              --secondary: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
+              --secondary-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
+              --muted: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
+              --muted-foreground: ${darkMode ? '215 20% 65%' : '215.4 16.3% 46.9%'};
+              --accent: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
+              --accent-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
+              --destructive: 0 84% 60%;
+              --destructive-foreground: 210 40% 98%;
+              --border: ${darkMode ? '217 33% 17%' : '214.3 31.8% 91.4%'};
+              --input: ${darkMode ? '217 33% 17%' : '214.3 31.8% 91.4%'};
+              --ring: 43 76% 52%;
+              --gold: #d4af37;
+            }
+        
+        body {
+          background: hsl(var(--background));
+          color: hsl(var(--foreground));
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: ${darkMode ? 'hsl(217 33% 17%)' : 'hsl(210 40% 96%)'};
+        }
+        ::-webkit-scrollbar-thumb {
+          background: ${darkMode ? 'hsl(215 20% 65%)' : 'hsl(215.4 16.3% 46.9%)'};
+          border-radius: 3px;
+        }
+      `}</style>
+      
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <Sidebar className={`border-r ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-slate-200 bg-white'}`}>
+            <SidebarHeader className={`border-b p-6 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div className="flex items-center gap-3">
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                  alt="Varma Capital" 
+                  className="w-10 h-10 object-contain"
+                />
+                <div>
+                  <h2 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-slate-900'}`}>Varma Capital</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Investor Portal</p>
+                    {getRoleBadge(user.role)}
+                  </div>
+                </div>
+              </div>
+            </SidebarHeader>
+            
+            <SidebarContent className="p-2">
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {navigationItems.map((item) => (
+                      <div key={item.title}>
+                        {item.divider && (
+                          <div className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'} border-t ${darkMode ? 'border-slate-800' : 'border-slate-200'} mt-2 pt-4`}>
+                            {user?.role === 'super_admin' && item.title.includes('Super') ? 'Super Admin' : 
+                             user?.role === 'admin' && item.title.includes('Admin') ? 'Admin Tools' : ''}
+                          </div>
+                        )}
+                        <SidebarMenuItem>
+                          <SidebarMenuButton 
+                            asChild 
+                            className={`transition-all duration-200 rounded-xl mb-1 ${
+                                                              location.pathname === item.url || 
+                                                              (item.title === "News & Insights" && currentPageName === "NewsAndInsights") ? 
+                                                              `${darkMode ? 'bg-slate-800 text-[#d4af37]' : 'bg-amber-50 text-[#d4af37]'}` : 
+                                                              `${darkMode ? 'text-slate-300 hover:bg-slate-800 hover:text-[#d4af37]' : 'text-slate-700 hover:bg-slate-100 hover:text-[#d4af37]'}`
+                                                            }`}
+                          >
+                            <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
+                              <item.icon className="w-5 h-5" />
+                              <span className="font-medium">{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </div>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+
+            <SidebarFooter className={`border-t p-4 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8">
+                                          <AvatarFallback className="bg-[#d4af37] text-black text-sm font-semibold">
+                                            {user.full_name?.charAt(0) || user.email?.charAt(0)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-medium text-sm truncate ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                      {user.full_name || user.email}
+                    </p>
+                    <p className={`text-xs truncate capitalize ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {user.role?.replace('_', ' ')} {user.department && `• ${user.department}`}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleDarkMode}
+                    className={`flex-1 ${darkMode ? 'text-slate-400 hover:text-yellow-400 hover:bg-slate-800' : 'text-slate-600 hover:text-yellow-600 hover:bg-slate-100'}`}
+                  >
+                    {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className={`flex-1 ${darkMode ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-600 hover:text-red-600 hover:bg-slate-100'}`}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </SidebarFooter>
+          </Sidebar>
+
+          <main className={`flex-1 flex flex-col ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+            <header className={`border-b px-6 py-4 md:hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className={`p-2 rounded-lg transition-colors duration-200 ${darkMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-slate-100 text-slate-900'}`} />
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                  alt="Varma Capital" 
+                  className="w-8 h-8 object-contain"
+                />
+                <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Varma Capital</h1>
+                {getRoleBadge(user.role)}
+              </div>
+            </header>
+
+            <div className="flex-1 overflow-auto">
+                              {children}
+                            </div>
+
+                            {/* Footer */}
+                            <footer className={`border-t px-6 py-4 text-center text-sm ${darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-600'}`}>
+                              Varma Capital © 2025 — All Rights Reserved
+                            </footer>
+                          </main>
+                        </div>
+                      </SidebarProvider>
+
+                      {/* Compliance Popup */}
+                      <Dialog open={showCompliancePopup} onOpenChange={() => {}}>
+                        <DialogContent className={`${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} max-w-md`} onPointerDownOutside={(e) => e.preventDefault()}>
+                          <DialogHeader>
+                            <div className="flex justify-center mb-4">
+                              <img 
+                                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                                alt="Varma Capital" 
+                                className="w-12 h-12"
+                              />
+                            </div>
+                            <DialogTitle className={`text-center ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                              Important Disclosure
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className={`text-center py-4 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                            <p>This portal is for informational purposes only. Past performance is not indicative of future results.</p>
+                          </div>
+                          <DialogFooter className="sm:justify-center">
+                            <Button 
+                              onClick={handleAcceptCompliance}
+                              className="bg-[#d4af37] text-black hover:bg-[#c4a030] px-8"
+                            >
+                              I Understand
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  );
+                }
