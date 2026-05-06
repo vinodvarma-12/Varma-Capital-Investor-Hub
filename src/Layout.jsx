@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
@@ -15,7 +15,6 @@ import {
   FileText,
   TrendingUp,
   LogOut,
-  Menu,
   Sun,
   Moon,
   Lock,
@@ -104,6 +103,19 @@ export default function Layout({ children, currentPageName }) {
       setShowCompliancePopup(true);
     }
   }, []);
+
+  // Theme tokens live on :root / html.light in index.css; html must carry .dark or .light
+  // so body inherits --foreground and Tailwind `dark:` variants match the shell.
+  useEffect(() => {
+    const el = document.documentElement;
+    if (darkMode) {
+      el.classList.add("dark");
+      el.classList.remove("light");
+    } else {
+      el.classList.remove("dark");
+      el.classList.add("light");
+    }
+  }, [darkMode]);
 
   const isPublicPage = PUBLIC_PAGES.some(page => 
     currentPageName === page || currentPageName?.startsWith('Legal')
@@ -287,36 +299,8 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-        <div className={darkMode ? "dark" : ""}>
+        <>
           <style>{`
-            :root {
-              --background: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
-              --foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
-              --card: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
-              --card-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
-              --popover: ${darkMode ? '222 84% 4.9%' : '0 0% 100%'};
-              --popover-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
-              --primary: 43 76% 52%;
-              --primary-foreground: 222.2 84% 4.9%;
-              --secondary: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
-              --secondary-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
-              --muted: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
-              --muted-foreground: ${darkMode ? '215 20% 65%' : '215.4 16.3% 46.9%'};
-              --accent: ${darkMode ? '217 33% 17%' : '210 40% 96%'};
-              --accent-foreground: ${darkMode ? '210 40% 98%' : '222.2 84% 4.9%'};
-              --destructive: 0 84% 60%;
-              --destructive-foreground: 210 40% 98%;
-              --border: ${darkMode ? '217 33% 17%' : '214.3 31.8% 91.4%'};
-              --input: ${darkMode ? '217 33% 17%' : '214.3 31.8% 91.4%'};
-              --ring: 43 76% 52%;
-              --gold: #d4af37;
-            }
-        
-        body {
-          background: hsl(var(--background));
-          color: hsl(var(--foreground));
-        }
-        
         /* Custom scrollbar */
         ::-webkit-scrollbar {
           width: 6px;
@@ -329,7 +313,7 @@ export default function Layout({ children, currentPageName }) {
           border-radius: 3px;
         }
       `}</style>
-      
+
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <Sidebar className={`border-r ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-slate-200 bg-white'}`}>
@@ -479,6 +463,6 @@ export default function Layout({ children, currentPageName }) {
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>
-                    </div>
+                    </>
                   );
                 }

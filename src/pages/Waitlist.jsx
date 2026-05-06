@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { Waitlist } from "@/entities/Waitlist";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { CheckCircle, ArrowLeft } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function WaitlistPage() {
   const [formData, setFormData] = useState({
@@ -38,7 +37,9 @@ export default function WaitlistPage() {
         amount_interested: formData.amount_interested ? parseFloat(formData.amount_interested) : null
       };
 
-      await Waitlist.create(submissionData);
+      // await Waitlist.create(submissionData);
+      const { error } = await supabase.from("waitlist_entries").insert(submissionData);
+      if (error) throw error;
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting waitlist form:", error);
@@ -107,6 +108,7 @@ export default function WaitlistPage() {
               <div>
                 <Label htmlFor="full_name" className="text-gray-300">Full Name *</Label>
                 <Input
+                  type="text"
                   id="full_name"
                   value={formData.full_name}
                   onChange={(e) => handleInputChange('full_name', e.target.value)}
@@ -145,6 +147,7 @@ export default function WaitlistPage() {
                 <Label htmlFor="country" className="text-gray-300">Country</Label>
                 <Input
                   id="country"
+                  type="text"
                   value={formData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
                   className="bg-gray-800 border-gray-700 mt-1"
@@ -158,14 +161,14 @@ export default function WaitlistPage() {
                   value={formData.investor_category} 
                   onValueChange={(value) => handleInputChange('investor_category', value)}
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-1">
+                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-1 text-gray-300">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="Accredited">Accredited</SelectItem>
-                    <SelectItem value="HNW">HNW</SelectItem>
-                    <SelectItem value="Family Office">Family Office</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectItem className="text-white" value="Accredited">Accredited</SelectItem>
+                    <SelectItem className="text-white" value="HNW">HNW</SelectItem>
+                    <SelectItem className="text-white" value="Family Office">Family Office</SelectItem>
+                    <SelectItem className="text-white" value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
