@@ -43,6 +43,7 @@ externalPort = 3001
 [userenv.shared]
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 build = ["pnpm", "run", "build"]
 publicDir = "dist"
+run = ["pnpm", "run", "start"]
