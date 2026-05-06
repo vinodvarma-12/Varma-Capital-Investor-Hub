@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    window.location.href = '/InvestorAuth';
+    window.location.href = '/investorauth';
   }, []);
 
   return (
