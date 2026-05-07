@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Shield, FileText, AlertTriangle } from "lucide-react";
 
 export default function Legal() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'privacy';
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'privacy';
 
   return (
     <div className="min-h-screen bg-gray-950 p-6">

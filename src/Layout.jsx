@@ -130,9 +130,9 @@ export default function Layout({ children, currentPageName }) {
       (page) => currentPageName === page || currentPageName?.startsWith('Legal')
     );
     if (!onPublic) {
-      window.location.href = createPageUrl("InvestorAuth");
+      navigate(createPageUrl("InvestorAuth"));
     }
-  }, [authSessionLoading, isAuthenticated, currentPageName]);
+  }, [authSessionLoading, isAuthenticated, currentPageName, navigate]);
 
   // Load profile when Supabase session exists / changes (login without full reload left profile stale)
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function Layout({ children, currentPageName }) {
             currentPageNameRef.current?.startsWith('Legal')
         );
         if (!onPublic) {
-          window.location.href = createPageUrl("InvestorAuth");
+          navigate(createPageUrl("InvestorAuth"));
         }
       }
     })();
@@ -174,12 +174,12 @@ export default function Layout({ children, currentPageName }) {
     return () => {
       cancelled = true;
     };
-  }, [authSessionLoading, isAuthenticated, authUser?.id, logout]);
+  }, [authSessionLoading, isAuthenticated, authUser?.id, logout, navigate]);
 
   useEffect(() => {
     if (!user || currentPageName !== 'InvestorAuth') return;
-    window.location.href = getDashboardByRole(user.role);
-  }, [user, currentPageName]);
+    navigate(getDashboardByRole(user.role));
+  }, [user, currentPageName, navigate]);
 
   const toggleDarkMode = async () => {
     const newDarkMode = !darkMode;

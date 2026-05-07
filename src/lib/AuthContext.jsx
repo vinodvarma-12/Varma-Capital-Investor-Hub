@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,8 +34,8 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
-    window.location.href = '/investorauth';
-  }, []);
+    navigate('/investorauth');
+  }, [navigate]);
 
   return (
     <AuthContext.Provider

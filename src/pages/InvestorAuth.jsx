@@ -30,13 +30,10 @@ export default function InvestorAuth() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
       const role = profile?.role ?? "investor";
       if (role === "super_admin") {
-        // window.location.href = createPageUrl("SuperAdminDashboard");
         navigate("/SuperAdminDashboard");
       } else if (role === "admin") {
-        // window.location.href = createPageUrl("AdminDashboard");
         navigate("/AdminDashboard");
       } else {
-        // window.location.href = createPageUrl("Dashboard");
         navigate("/Dashboard");
       }
     } catch {
@@ -77,13 +74,10 @@ export default function InvestorAuth() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", u.id).single();
       const role = profile?.role ?? "investor";
       if (role === "super_admin") {
-        // window.location.href = createPageUrl("SuperAdminDashboard");
         navigate("/SuperAdminDashboard");
       } else if (role === "admin") {
-        // window.location.href = createPageUrl("AdminDashboard");
         navigate("/AdminDashboard");
       } else {
-        // window.location.href = createPageUrl("Dashboard");
         navigate("/Dashboard");
       }
     } catch (err) {

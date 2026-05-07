@@ -11,9 +11,11 @@ export default function NavigationTracker() {
 
     // Post navigation changes to parent window
     useEffect(() => {
+        const origin =
+            typeof window !== 'undefined' && typeof window.origin === 'string' ? window.origin : '';
         window.parent?.postMessage({
             type: "app_changed_url",
-            url: window.location.href
+            url: `${origin}${location.pathname}${location.search}${location.hash}`
         }, '*');
     }, [location]);
 

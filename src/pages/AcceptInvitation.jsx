@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { CheckCircle, XCircle, Loader, Eye, EyeOff } from "lucide-react";
 
 export default function AcceptInvitation() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('loading'); // loading, setup, success, error
   const [message, setMessage] = useState('');
   const [invitation, setInvitation] = useState(null);
@@ -17,23 +21,23 @@ export default function AcceptInvitation() {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
-    processInvitation();
-  }, []);
+    let cancelled = false;
 
-  const processInvitation = async () => {
+    const processInvitation = async () => {
     try {
-      // Get token from URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
+      const token = searchParams.get('token');
       
       if (!token) {
-        setStatus('error');
-        setMessage('Invalid invitation link. No token provided.');
+        if (!cancelled) {
+          setStatus('error');
+          setMessage('Invalid invitation link. No token provided.');
+        }
         return;
       }
 
       // Fetch invitation via backend function (no auth required)
       const response = await invokeEdgeFunction('get-invitation', { token });
+      if (cancelled) return;
       // const res = await fetch(
       //   `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-invitation`,
       //   {
@@ -49,35 +53,49 @@ export default function AcceptInvitation() {
       // const response = await res.json();
       
       if (!response.success || !response.invitation) {
-        setStatus('error');
-        setMessage(response.error || 'Invalid or expired invitation link.');
+        if (!cancelled) {
+          setStatus('error');
+          setMessage(response.error || 'Invalid or expired invitation link.');
+        }
         return;
       }
 
       const invitationRecord = response.invitation;
-      setInvitation(invitationRecord);
+      if (!cancelled) setInvitation(invitationRecord);
 
       if (invitationRecord.status === 'accepted') {
-        setStatus('error');
-        setMessage('This invitation has already been used. Please login with your credentials.');
+        if (!cancelled) {
+          setStatus('error');
+          setMessage('This invitation has already been used. Please login with your credentials.');
+        }
         return;
       }
 
       if (invitationRecord.status === 'expired') {
-        setStatus('error');
-        setMessage('This invitation has expired. Please contact support for a new invitation.');
+        if (!cancelled) {
+          setStatus('error');
+          setMessage('This invitation has expired. Please contact support for a new invitation.');
+        }
         return;
       }
 
       // Show password setup form
-      setStatus('setup');
+      if (!cancelled) setStatus('setup');
 
     } catch (error) {
       console.error('Error processing invitation:', error);
-      setStatus('error');
-      setMessage('An error occurred while processing your invitation. Please try again or contact support.');
+      if (!cancelled) {
+        setStatus('error');
+        setMessage('An error occurred while processing your invitation. Please try again or contact support.');
+      }
     }
-  };
+    };
+
+    processInvitation();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
 
   const validatePassword = () => {
     if (password.length < 8) {
@@ -117,14 +135,9 @@ export default function AcceptInvitation() {
     }
   };
 
-  const handleContinue = () => {
-    window.location.href = '/';
-  };
-
   const handleGoToLogin = () => {
-    window.location.href = '/#/InvestorAuth';
+    navigate(createPageUrl('InvestorAuth'));
   };
-
 
 
   return (

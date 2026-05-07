@@ -50,10 +50,7 @@ export const User = {
     return data
   },
 
-  async logout(shouldRedirect) {
+  async logout() {
     await supabase.auth.signOut()
-    if (shouldRedirect && typeof window !== 'undefined') {
-      window.location.href = '/#/InvestorAuth'
-    }
   },
 }
