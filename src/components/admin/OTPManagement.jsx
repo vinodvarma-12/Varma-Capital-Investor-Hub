@@ -83,17 +83,17 @@ export default function OTPManagement({ investorEmail }) {
   }
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
+    <Card className="bg-zinc-950 border border-[#ccab6c]/30">
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-white flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-yellow-400" />
+            <KeyRound className="w-5 h-5 text-[#fedea0]" />
             One-Time Passwords (OTP)
           </CardTitle>
           <Button 
             onClick={handleGenerateOTP} 
             disabled={generating}
-            className="bg-yellow-400 text-black hover:bg-yellow-500"
+            className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
           >
             {generating ? (
               <>
@@ -112,33 +112,33 @@ export default function OTPManagement({ investorEmail }) {
       
       <CardContent>
         {loading ? (
-          <div className="text-center py-4 text-gray-400">Loading OTPs...</div>
+          <div className="text-center py-4 text-[#ccab6c]/90">Loading OTPs...</div>
         ) : otps.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800">
-                  <TableHead className="text-gray-400">Code</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Created</TableHead>
-                  <TableHead className="text-gray-400">Expires</TableHead>
-                  <TableHead className="text-gray-400">Created By</TableHead>
+                <TableRow className="border-[#ccab6c]/25">
+                  <TableHead className="text-[#ccab6c]/90">Code</TableHead>
+                  <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                  <TableHead className="text-[#ccab6c]/90">Created</TableHead>
+                  <TableHead className="text-[#ccab6c]/90">Expires</TableHead>
+                  <TableHead className="text-[#ccab6c]/90">Created By</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {otps.map((otp) => (
-                  <TableRow key={otp.id} className="border-gray-800">
+                  <TableRow key={otp.id} className="border-[#ccab6c]/25">
                     <TableCell className="text-white font-mono">
                       {maskOTP(otp.otp_code)}
                     </TableCell>
                     <TableCell>{getOTPStatus(otp)}</TableCell>
-                    <TableCell className="text-gray-300">
+                    <TableCell className="text-zinc-300">
                       {format(new Date(otp.created_date), 'MMM dd, HH:mm')}
                     </TableCell>
-                    <TableCell className="text-gray-300">
+                    <TableCell className="text-zinc-300">
                       {format(new Date(otp.expires_at), 'MMM dd, HH:mm')}
                     </TableCell>
-                    <TableCell className="text-gray-300 text-sm">
+                    <TableCell className="text-zinc-300 text-sm">
                       {otp.created_by}
                     </TableCell>
                   </TableRow>
@@ -148,14 +148,14 @@ export default function OTPManagement({ investorEmail }) {
           </div>
         ) : (
           <div className="text-center py-8">
-            <KeyRound className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">No OTPs generated for this investor</p>
-            <p className="text-gray-500 text-sm mt-2">Click "Generate New OTP" to create one</p>
+            <KeyRound className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+            <p className="text-[#ccab6c]/90">No OTPs generated for this investor</p>
+            <p className="text-zinc-500 text-sm mt-2">Click "Generate New OTP" to create one</p>
           </div>
         )}
         
-        <div className="mt-4 p-3 bg-gray-800 rounded-lg">
-          <p className="text-gray-400 text-xs">
+        <div className="mt-4 p-3 bg-zinc-900 rounded-lg">
+          <p className="text-[#ccab6c]/90 text-xs">
             <strong>Note:</strong> OTPs expire in 15 minutes and can only be used once. 
             A new OTP invalidates any existing active OTPs for security.
           </p>

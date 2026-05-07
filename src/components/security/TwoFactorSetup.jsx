@@ -136,14 +136,14 @@ export default function TwoFactorSetup({ user, onUpdate }) {
   // Already enabled state
   if (is2FAEnabled && step === 1) {
     return (
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-zinc-950 border border-[#ccab6c]/30">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Shield className="w-6 h-6 text-green-500" />
               <div>
                 <CardTitle className="text-white">Two-Factor Authentication</CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-[#ccab6c]/90">
                   Your account is protected with 2FA
                 </CardDescription>
               </div>
@@ -172,10 +172,10 @@ export default function TwoFactorSetup({ user, onUpdate }) {
 
         {/* Disable 2FA Dialog */}
         <Dialog open={showDisableDialog} onOpenChange={setShowDisableDialog}>
-          <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
             <DialogHeader>
               <DialogTitle className="text-white">Disable Two-Factor Authentication</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogDescription className="text-[#ccab6c]/90">
                 Enter your current 2FA code or a recovery code to disable 2FA.
               </DialogDescription>
             </DialogHeader>
@@ -189,12 +189,12 @@ export default function TwoFactorSetup({ user, onUpdate }) {
               )}
 
               <div>
-                <Label className="text-gray-300">Verification Code</Label>
+                <Label className="text-zinc-300">Verification Code</Label>
                 <Input
                   value={disableCode}
                   onChange={(e) => setDisableCode(e.target.value)}
                   placeholder="Enter 6-digit code or recovery code"
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                 />
               </div>
             </div>
@@ -218,13 +218,13 @@ export default function TwoFactorSetup({ user, onUpdate }) {
   }
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
+    <Card className="bg-zinc-950 border border-[#ccab6c]/30">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Shield className="w-6 h-6 text-yellow-500" />
+          <Shield className="w-6 h-6 text-[#b38922]" />
           <div>
             <CardTitle className="text-white">Two-Factor Authentication</CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-[#ccab6c]/90">
               Add an extra layer of security to your account
             </CardDescription>
           </div>
@@ -243,21 +243,21 @@ export default function TwoFactorSetup({ user, onUpdate }) {
         {step === 1 && (
           <div className="space-y-6">
             <div className="grid gap-4">
-              <div className="flex items-start gap-3 p-4 bg-gray-800 rounded-lg">
-                <Smartphone className="w-5 h-5 text-yellow-500 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-zinc-900 rounded-lg">
+                <Smartphone className="w-5 h-5 text-[#b38922] mt-0.5" />
                 <div>
                   <h4 className="text-white font-medium">Authenticator App Required</h4>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-[#ccab6c]/90 text-sm">
                     You'll need an authenticator app like Google Authenticator, Authy, or 1Password.
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-4 bg-gray-800 rounded-lg">
-                <Key className="w-5 h-5 text-yellow-500 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-zinc-900 rounded-lg">
+                <Key className="w-5 h-5 text-[#b38922] mt-0.5" />
                 <div>
                   <h4 className="text-white font-medium">Recovery Codes</h4>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-[#ccab6c]/90 text-sm">
                     You'll receive backup codes in case you lose access to your authenticator.
                   </p>
                 </div>
@@ -267,7 +267,7 @@ export default function TwoFactorSetup({ user, onUpdate }) {
             <Button 
               onClick={handleStartSetup}
               disabled={loading}
-              className="w-full bg-yellow-500 text-black hover:bg-yellow-600"
+              className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -284,7 +284,7 @@ export default function TwoFactorSetup({ user, onUpdate }) {
           <div className="space-y-6">
             <div className="text-center space-y-4">
               <h3 className="text-lg font-medium text-white">Scan QR Code</h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-[#ccab6c]/90 text-sm">
                 Open your authenticator app and scan this QR code
               </p>
               
@@ -299,9 +299,9 @@ export default function TwoFactorSetup({ user, onUpdate }) {
 
               {/* Manual Entry */}
               <div className="text-left space-y-2">
-                <p className="text-gray-400 text-sm">Can't scan? Enter this code manually:</p>
+                <p className="text-[#ccab6c]/90 text-sm">Can't scan? Enter this code manually:</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 p-3 bg-gray-800 rounded text-sm text-yellow-400 font-mono overflow-x-auto">
+                  <code className="flex-1 p-3 bg-zinc-900 rounded text-sm text-[#fedea0] font-mono overflow-x-auto">
                     {showSecret ? setupData.secret : '••••••••••••••••••••••••••••••••'}
                   </code>
                   <Button 
@@ -324,12 +324,12 @@ export default function TwoFactorSetup({ user, onUpdate }) {
 
             {/* Verification Input */}
             <div className="space-y-3">
-              <Label className="text-gray-300">Enter the 6-digit code from your app</Label>
+              <Label className="text-zinc-300">Enter the 6-digit code from your app</Label>
               <Input
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
-                className="bg-gray-800 border-gray-700 text-center text-2xl tracking-widest"
+                className="bg-zinc-900 border-[#ccab6c]/20 text-center text-2xl tracking-widest"
                 maxLength={6}
               />
             </div>
@@ -337,7 +337,7 @@ export default function TwoFactorSetup({ user, onUpdate }) {
             <Button 
               onClick={handleVerify}
               disabled={loading || verificationCode.length !== 6}
-              className="w-full bg-yellow-500 text-black hover:bg-yellow-600"
+              className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Verify and Enable
@@ -368,16 +368,16 @@ export default function TwoFactorSetup({ user, onUpdate }) {
                 </Button>
               </div>
               
-              <Alert className="bg-yellow-900/20 border-yellow-800">
-                <AlertTriangle className="w-4 h-4 text-yellow-400" />
-                <AlertDescription className="text-yellow-300">
+              <Alert className="bg-[#b38922]/15 border-[#8a6a1a]/55">
+                <AlertTriangle className="w-4 h-4 text-[#fedea0]" />
+                <AlertDescription className="text-[#fedea0]">
                   Save these codes in a secure location. Each code can only be used once.
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-2 gap-2 p-4 bg-gray-800 rounded-lg">
+              <div className="grid grid-cols-2 gap-2 p-4 bg-zinc-900 rounded-lg">
                 {setupData.recoveryCodes.map((code, index) => (
-                  <code key={index} className="text-sm font-mono text-gray-300 p-2 bg-gray-900 rounded text-center">
+                  <code key={index} className="text-sm font-mono text-zinc-300 p-2 bg-zinc-950 rounded text-center">
                     {code}
                   </code>
                 ))}
@@ -390,7 +390,7 @@ export default function TwoFactorSetup({ user, onUpdate }) {
                 setSetupData(null);
                 setVerificationCode("");
               }}
-              className="w-full bg-yellow-500 text-black hover:bg-yellow-600"
+              className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
             >
               Done
             </Button>

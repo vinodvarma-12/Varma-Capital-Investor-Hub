@@ -52,10 +52,10 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
         <div>
           <Label>Product</Label>
           <Select value={formData.product_id} onValueChange={(val) => setFormData({...formData, product_id: val})} required>
-            <SelectTrigger className="bg-gray-800 border-gray-700">
+            <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
               <SelectValue placeholder="Select product" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
               {products.map(p => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
               ))}
@@ -68,7 +68,7 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
             value={formData.period} 
             onChange={(e) => setFormData({...formData, period: e.target.value})} 
             placeholder="e.g., 2024-01 or 2024"
-            className="bg-gray-800 border-gray-700"
+            className="bg-zinc-900 border-[#ccab6c]/20"
             required
           />
         </div>
@@ -77,10 +77,10 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
       <div>
         <Label>Investor (leave blank for all investors in this product)</Label>
         <Select value={formData.investor_email || "all"} onValueChange={(val) => setFormData({...formData, investor_email: val === "all" ? "" : val})}>
-          <SelectTrigger className="bg-gray-800 border-gray-700">
+          <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
             <SelectValue placeholder="All investors" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-700">
+          <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
             <SelectItem value="all">All Investors (Product-wide)</SelectItem>
             {investors.map(inv => (
               <SelectItem key={inv.email} value={inv.email}>
@@ -99,10 +99,10 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
             step="0.01"
             value={formData.return_percent} 
             onChange={(e) => setFormData({...formData, return_percent: parseFloat(e.target.value) || 0})} 
-            className="bg-gray-800 border-gray-700"
+            className="bg-zinc-900 border-[#ccab6c]/20"
             required
           />
-          <p className="text-xs text-gray-400 mt-1">This will be shown as the investor's P&L</p>
+          <p className="text-xs text-[#ccab6c]/90 mt-1">This will be shown as the investor's P&L</p>
         </div>
         <div>
           <Label>NAV per Unit (optional)</Label>
@@ -111,7 +111,7 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
             step="0.0001"
             value={formData.nav_per_unit} 
             onChange={(e) => setFormData({...formData, nav_per_unit: parseFloat(e.target.value) || 0})} 
-            className="bg-gray-800 border-gray-700"
+            className="bg-zinc-900 border-[#ccab6c]/20"
           />
         </div>
       </div>
@@ -122,7 +122,7 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
           type="date" 
           value={formData.effective_date} 
           onChange={(e) => setFormData({...formData, effective_date: e.target.value})} 
-          className="bg-gray-800 border-gray-700"
+          className="bg-zinc-900 border-[#ccab6c]/20"
           required
         />
       </div>
@@ -142,13 +142,13 @@ const ReturnForm = ({ returnData, products, investors, onSave, onCancel }) => {
           value={formData.admin_notes} 
           onChange={(e) => setFormData({...formData, admin_notes: e.target.value})} 
           placeholder="Reason for this return override..."
-          className="bg-gray-800 border-gray-700"
+          className="bg-zinc-900 border-[#ccab6c]/20"
         />
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel} className="border-gray-600">Cancel</Button>
-        <Button type="submit" className="bg-yellow-400 text-black hover:bg-yellow-500">
+        <Button type="button" variant="outline" onClick={onCancel} className="border-zinc-600">Cancel</Button>
+        <Button type="submit" className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
           {returnData?.id ? 'Update Return' : 'Set Return'}
         </Button>
       </div>
@@ -239,28 +239,28 @@ export default function AdminReturns() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading return overrides...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Return Overrides</h1>
-            <p className="text-gray-400">Manually set monthly/annual performance % per investor or product</p>
+            <p className="text-[#ccab6c]/90">Manually set monthly/annual performance % per investor or product</p>
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openNew} className="bg-yellow-400 text-black hover:bg-yellow-500">
+              <Button onClick={openNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                 <Plus className="w-4 h-4 mr-2" />
                 Set Return Override
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="text-white">
                   {editingReturn ? 'Edit Return Override' : 'Set Return Override'}
@@ -281,15 +281,15 @@ export default function AdminReturns() {
         </div>
 
         {/* Filter */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <Label className="text-gray-400">Filter by Product:</Label>
+              <Label className="text-[#ccab6c]/90">Filter by Product:</Label>
               <Select value={filterProduct} onValueChange={setFilterProduct}>
-                <SelectTrigger className="w-64 bg-gray-800 border-gray-700">
+                <SelectTrigger className="w-64 bg-zinc-900 border-[#ccab6c]/20">
                   <SelectValue placeholder="All Products" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectItem value="all">All Products</SelectItem>
                   {products.map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -301,10 +301,10 @@ export default function AdminReturns() {
         </Card>
 
         {/* Returns Table */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-yellow-400" />
+              <TrendingUp className="w-5 h-5 text-[#fedea0]" />
               Return Overrides ({filteredReturns.length})
             </CardTitle>
           </CardHeader>
@@ -313,26 +313,26 @@ export default function AdminReturns() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-gray-800">
-                      <TableHead className="text-gray-400">Product</TableHead>
-                      <TableHead className="text-gray-400">Investor</TableHead>
-                      <TableHead className="text-gray-400">Period</TableHead>
-                      <TableHead className="text-gray-400">Return %</TableHead>
-                      <TableHead className="text-gray-400">NAV/Unit</TableHead>
-                      <TableHead className="text-gray-400">Status</TableHead>
-                      <TableHead className="text-gray-400">Effective Date</TableHead>
-                      <TableHead className="text-gray-400">Actions</TableHead>
+                    <TableRow className="border-[#ccab6c]/25">
+                      <TableHead className="text-[#ccab6c]/90">Product</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Investor</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Period</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Return %</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">NAV/Unit</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Effective Date</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredReturns.map((ret) => (
-                      <TableRow key={ret.id} className="border-gray-800">
+                      <TableRow key={ret.id} className="border-[#ccab6c]/25">
                         <TableCell className="text-white font-medium">
                           {getProductName(ret.product_id)}
                         </TableCell>
                         <TableCell>
                           {ret.investor_email ? (
-                            <span className="text-gray-300">{ret.investor_email}</span>
+                            <span className="text-zinc-300">{ret.investor_email}</span>
                           ) : (
                             <Badge className="bg-blue-900 text-blue-400">
                               <Users className="w-3 h-3 mr-1" />
@@ -340,26 +340,26 @@ export default function AdminReturns() {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-gray-300">{ret.period}</TableCell>
+                        <TableCell className="text-zinc-300">{ret.period}</TableCell>
                         <TableCell className={`font-bold ${ret.return_percent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {ret.return_percent >= 0 ? '+' : ''}{ret.return_percent?.toFixed(2)}%
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {ret.nav_per_unit ? `$${ret.nav_per_unit.toFixed(4)}` : '-'}
                         </TableCell>
                         <TableCell>
                           {ret.override_calculated ? (
-                            <Badge className="bg-yellow-900 text-yellow-400">Active Override</Badge>
+                            <Badge className="bg-[#b38922]/25 text-[#fedea0]">Active Override</Badge>
                           ) : (
                             <Badge variant="secondary">Inactive</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {format(new Date(ret.effective_date), 'MMM dd, yyyy')}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => openEdit(ret)} className="text-yellow-400">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(ret)} className="text-[#fedea0]">
                               <Edit className="w-3 h-3 mr-1" /> Edit
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => handleDelete(ret.id)} className="text-red-400">
@@ -374,20 +374,20 @@ export default function AdminReturns() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <TrendingUp className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">No return overrides set</p>
-                <p className="text-gray-500 text-sm mt-2">Set return overrides to control what investors see as their P&L</p>
+                <TrendingUp className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+                <p className="text-[#ccab6c]/90 text-lg">No return overrides set</p>
+                <p className="text-zinc-500 text-sm mt-2">Set return overrides to control what investors see as their P&L</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Info Card */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white text-lg">How Return Overrides Work</CardTitle>
           </CardHeader>
-          <CardContent className="text-gray-400 space-y-2">
+          <CardContent className="text-[#ccab6c]/90 space-y-2">
             <p>• <strong className="text-white">Product-wide returns:</strong> Leave investor field blank to apply a return % to all investors in a product.</p>
             <p>• <strong className="text-white">Investor-specific returns:</strong> Select a specific investor to override their individual return.</p>
             <p>• <strong className="text-white">Priority:</strong> Investor-specific overrides take precedence over product-wide returns.</p>

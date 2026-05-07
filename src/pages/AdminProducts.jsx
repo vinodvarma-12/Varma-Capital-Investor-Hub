@@ -68,7 +68,7 @@ const ProductForm = ({ product, onSave }) => {
         <div><Label>Redemption Penalty ($)</Label><Input type="number" value={formData.redemption_penalty_amount} onChange={e => handleChange('redemption_penalty_amount', parseFloat(e.target.value))} /></div>
       </div>
       <div className="flex items-center space-x-2"><Switch id="hwm" checked={formData.high_water_mark} onCheckedChange={val => handleChange('high_water_mark', val)} /><Label htmlFor="hwm">High Water Mark</Label></div>
-      <Button type="submit" className="w-full bg-yellow-400 text-black hover:bg-yellow-500">Save Product</Button>
+      <Button type="submit" className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]">Save Product</Button>
     </form>
   );
 };
@@ -134,21 +134,21 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Product Management</h1>
-            <p className="text-gray-400">Add, edit, and manage investment products</p>
+            <p className="text-[#ccab6c]/90">Add, edit, and manage investment products</p>
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openFormForNew} className="bg-yellow-400 text-black hover:bg-yellow-500">
+              <Button onClick={openFormForNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 New Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800 text-white">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
               <DialogHeader>
                 <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
               </DialogHeader>
@@ -157,32 +157,32 @@ export default function AdminProducts() {
           </Dialog>
         </div>
         
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader><CardTitle className="text-white">All Products</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Name</TableHead>
-                    <TableHead className="text-gray-400">Risk Band</TableHead>
-                    <TableHead className="text-gray-400">Min. Ticket</TableHead>
-                    <TableHead className="text-gray-400">Lock-in</TableHead>
-                    <TableHead className="text-gray-400">Mgt. Fee</TableHead>
-                    <TableHead className="text-gray-400">Perf. Fee</TableHead>
-                    <TableHead className="text-gray-400">Status</TableHead>
-                    <TableHead className="text-gray-400">Actions</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Name</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Risk Band</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Min. Ticket</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Lock-in</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Mgt. Fee</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Perf. Fee</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {products.map(product => (
-                    <TableRow key={product.id} className="border-gray-800">
+                    <TableRow key={product.id} className="border-[#ccab6c]/25">
                       <TableCell className="font-medium text-white">{product.name}</TableCell>
-                      <TableCell className="capitalize text-gray-300">{product.risk_band}</TableCell>
-                      <TableCell className="text-gray-300">${product.minimum_ticket?.toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-300">{product.lock_in_months} months</TableCell>
-                      <TableCell className="text-gray-300">{product.management_fee_percent}%</TableCell>
-                      <TableCell className="text-gray-300">{product.performance_fee_percent || 0}%</TableCell>
+                      <TableCell className="capitalize text-zinc-300">{product.risk_band}</TableCell>
+                      <TableCell className="text-zinc-300">${product.minimum_ticket?.toLocaleString()}</TableCell>
+                      <TableCell className="text-zinc-300">{product.lock_in_months} months</TableCell>
+                      <TableCell className="text-zinc-300">{product.management_fee_percent}%</TableCell>
+                      <TableCell className="text-zinc-300">{product.performance_fee_percent || 0}%</TableCell>
                       <TableCell><Badge variant={product.status === 'active' ? 'default' : 'secondary'}>{product.status}</Badge></TableCell>
                       <TableCell>
                         <div className="flex gap-2">

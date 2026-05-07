@@ -141,8 +141,8 @@ export default function AcceptInvitation() {
 
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
-      <Card className="bg-gray-900 border-gray-800 w-full max-w-md">
+    <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <Card className="bg-zinc-950 border border-[#ccab6c]/30 w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
@@ -152,14 +152,14 @@ export default function AcceptInvitation() {
             />
           </div>
           <CardTitle className="text-white text-2xl">Varma Capital</CardTitle>
-          <p className="text-gray-400">Investor Portal</p>
+          <p className="text-[#ccab6c]/90">Investor Portal</p>
         </CardHeader>
         
         <CardContent className="text-center space-y-6">
           {status === 'loading' && (
             <div className="space-y-4">
-              <Loader className="w-12 h-12 mx-auto text-yellow-400 animate-spin" />
-              <p className="text-gray-300">Processing your invitation...</p>
+              <Loader className="w-12 h-12 mx-auto text-[#fedea0] animate-spin" />
+              <p className="text-zinc-300">Processing your invitation...</p>
             </div>
           )}
 
@@ -167,49 +167,49 @@ export default function AcceptInvitation() {
             <div className="space-y-6 text-left">
               <div className="text-center space-y-2">
                 <h3 className="text-xl font-semibold text-white">Welcome, {invitation.full_name}!</h3>
-                <p className="text-gray-400 text-sm">Create a password to activate your account</p>
+                <p className="text-[#ccab6c]/90 text-sm">Create a password to activate your account</p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-gray-300">Email</Label>
+                  <Label className="text-zinc-300">Email</Label>
                   <Input 
                     type="email" 
                     value={invitation.email} 
                     disabled 
-                    className="bg-gray-800 border-gray-700 text-gray-400"
+                    className="bg-zinc-900 border-[#ccab6c]/20 text-[#ccab6c]/90"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300">Password</Label>
+                  <Label className="text-zinc-300">Password</Label>
                   <div className="relative">
                     <Input 
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Create a strong password"
-                      className="bg-gray-800 border-gray-700 pr-10"
+                      className="bg-zinc-900 border-[#ccab6c]/20 pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ccab6c]/90 hover:text-white"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+                  <p className="text-xs text-zinc-500 mt-1">Minimum 8 characters</p>
                 </div>
 
                 <div>
-                  <Label className="text-gray-300">Confirm Password</Label>
+                  <Label className="text-zinc-300">Confirm Password</Label>
                   <Input 
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
 
@@ -220,7 +220,7 @@ export default function AcceptInvitation() {
                 <Button 
                   onClick={handleCreateAccount}
                   disabled={isSubmitting || !password || !confirmPassword}
-                  className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                  className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
                 >
                   {isSubmitting ? (
                     <>
@@ -240,11 +240,11 @@ export default function AcceptInvitation() {
               <CheckCircle className="w-12 h-12 mx-auto text-green-400" />
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-white">Account Created!</h3>
-                <p className="text-gray-300">{message}</p>
+                <p className="text-zinc-300">{message}</p>
               </div>
               <Button 
                 onClick={handleGoToLogin}
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
               >
                 Go to Login
               </Button>
@@ -256,7 +256,7 @@ export default function AcceptInvitation() {
               <XCircle className="w-12 h-12 mx-auto text-red-400" />
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-white">Invitation Error</h3>
-                <p className="text-gray-300">{message}</p>
+                <p className="text-zinc-300">{message}</p>
               </div>
               <Button 
                 onClick={handleGoToLogin}

@@ -65,15 +65,15 @@ const InviteInvestorForm = ({ onInvite, onDone }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
             <div>
                 <Label htmlFor="fullName">Full Name</Label>
-                <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} required className="bg-gray-800 border-gray-700" />
+                <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} required className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
             <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-gray-800 border-gray-700"/>
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-zinc-900 border-[#ccab6c]/20"/>
             </div>
             <DialogFooter>
                  <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
-                 <Button type="submit" disabled={isSubmitting} className="bg-yellow-400 text-black hover:bg-yellow-500">
+                 <Button type="submit" disabled={isSubmitting} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                     {isSubmitting ? 'Sending...' : 'Send Invitation'}
                 </Button>
             </DialogFooter>
@@ -169,10 +169,10 @@ export default function AdminInvestors() {
   const getKycBadge = (status) => {
       const styles = {
           verified: 'bg-green-900 text-green-400 border-green-700',
-          pending: 'bg-yellow-900 text-yellow-400 border-yellow-700',
+          pending: 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45',
           rejected: 'bg-red-900 text-red-400 border-red-700',
       }
-      return <Badge variant="outline" className={`capitalize ${styles[status] || 'bg-gray-700'}`}>{status}</Badge>
+      return <Badge variant="outline" className={`capitalize ${styles[status] || 'bg-zinc-800'}`}>{status}</Badge>
   }
 
   const handleViewInvestor = (investor) => {
@@ -182,28 +182,28 @@ export default function AdminInvestors() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading Investor CRM...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-screen-2xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white flex items-center gap-3"><Users /> Investor Management</h1>
-            <p className="text-gray-400">View, edit, and manage investor accounts.</p>
+            <p className="text-[#ccab6c]/90">View, edit, and manage investor accounts.</p>
           </div>
           <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
+                <Button className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                     <PlusCircle className="w-4 h-4 mr-2" />
                     Invite Investor
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
                 <DialogHeader>
                     <DialogTitle className="text-white">Invite New Investor</DialogTitle>
                 </DialogHeader>
@@ -212,16 +212,16 @@ export default function AdminInvestors() {
           </Dialog>
         </div>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-white">All Investors ({filteredInvestors.length})</CardTitle>
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ccab6c]/90"/>
                   <Input
                     placeholder="Search by name, email, ID..."
-                    className="pl-8 bg-gray-800 border-gray-700"
+                    className="pl-8 bg-zinc-900 border-[#ccab6c]/20"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -235,32 +235,32 @@ export default function AdminInvestors() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800 hover:bg-gray-800/20">
-                    <TableHead className="text-gray-400">Name</TableHead>
-                    <TableHead className="text-gray-400">Investor ID</TableHead>
-                    <TableHead className="text-gray-400">KYC Status</TableHead>
-                    <TableHead className="text-gray-400 text-right">Total Invested</TableHead>
-                    <TableHead className="text-gray-400 text-right">Current Value</TableHead>
-                    <TableHead className="text-gray-400 text-right">P&L</TableHead>
-                    <TableHead className="text-gray-400">Next Lock-in Expiry</TableHead>
-                    <TableHead className="text-gray-400">Actions</TableHead>
+                  <TableRow className="border-[#ccab6c]/25 hover:bg-zinc-900/20">
+                    <TableHead className="text-[#ccab6c]/90">Name</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Investor ID</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">KYC Status</TableHead>
+                    <TableHead className="text-[#ccab6c]/90 text-right">Total Invested</TableHead>
+                    <TableHead className="text-[#ccab6c]/90 text-right">Current Value</TableHead>
+                    <TableHead className="text-[#ccab6c]/90 text-right">P&L</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Next Lock-in Expiry</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredInvestors.map(investor => {
                     const metrics = getInvestorMetrics(investor.email);
                     return (
-                      <TableRow key={investor.id} className="border-gray-800 hover:bg-gray-800/20">
+                      <TableRow key={investor.id} className="border-[#ccab6c]/25 hover:bg-zinc-900/20">
                         <TableCell>
                           <div className="font-medium text-white">{investor.full_name}</div>
-                          <div className="text-sm text-gray-400">{investor.email}</div>
+                          <div className="text-sm text-[#ccab6c]/90">{investor.email}</div>
                         </TableCell>
-                        <TableCell className="text-gray-300 font-mono text-xs">{investor.investor_id}</TableCell>
+                        <TableCell className="text-zinc-300 font-mono text-xs">{investor.investor_id}</TableCell>
                         <TableCell>{getKycBadge(investor.kyc_status)}</TableCell>
-                        <TableCell className="text-gray-300 text-right font-medium">${metrics.totalInvested.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                        <TableCell className="text-zinc-300 text-right font-medium">${metrics.totalInvested.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                         <TableCell className="text-white text-right font-bold">${metrics.currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                         <TableCell className={`text-right font-medium ${metrics.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>{metrics.pnl.toFixed(2)}%</TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {metrics.nextLockIn ? new Date(metrics.nextLockIn).toLocaleDateString() : <Badge variant="secondary">None</Badge>}
                         </TableCell>
                         <TableCell>
@@ -283,7 +283,7 @@ export default function AdminInvestors() {
 
         {/* Investor Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="bg-gray-950 border-gray-800 text-white max-w-6xl h-[90vh] overflow-hidden">
+          <DialogContent className="bg-black border-[#ccab6c]/25 text-white max-w-6xl h-[90vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="text-xl">Investor Details</DialogTitle>
             </DialogHeader>

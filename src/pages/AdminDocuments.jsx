@@ -78,16 +78,16 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
             value={formData.title} 
             onChange={(e) => setFormData(prev => ({...prev, title: e.target.value}))}
             required 
-            className="bg-gray-800 border-gray-700"
+            className="bg-zinc-900 border-[#ccab6c]/20"
           />
         </div>
         <div>
           <Label>Document Type</Label>
           <Select value={formData.type} onValueChange={(val) => setFormData(prev => ({...prev, type: val}))}>
-            <SelectTrigger className="bg-gray-800 border-gray-700">
+            <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
               <SelectItem value="statement">Statement</SelectItem>
               <SelectItem value="tax_document">Tax Document</SelectItem>
               <SelectItem value="agreement">Agreement</SelectItem>
@@ -102,10 +102,10 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
         <div>
           <Label>Investor (Leave empty for global document)</Label>
           <Select value={formData.investor_email} onValueChange={(val) => setFormData(prev => ({...prev, investor_email: val}))}>
-            <SelectTrigger className="bg-gray-800 border-gray-700">
+            <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
               <SelectValue placeholder="Select investor or leave blank" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
               <SelectItem value={null}>Global Document (All Investors)</SelectItem>
               {investors.map(investor => (
                 <SelectItem key={investor.id} value={investor.email}>
@@ -121,7 +121,7 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
             value={formData.period} 
             onChange={(e) => setFormData(prev => ({...prev, period: e.target.value}))}
             placeholder="e.g., 2024-Q1, 2024-12"
-            className="bg-gray-800 border-gray-700"
+            className="bg-zinc-900 border-[#ccab6c]/20"
           />
         </div>
       </div>
@@ -132,7 +132,7 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
           type="file" 
           onChange={(e) => handleFileUpload(e.target.files[0])}
           disabled={isUploading}
-          className="bg-gray-800 border-gray-700"
+          className="bg-zinc-900 border-[#ccab6c]/20"
           accept=".pdf,.doc,.docx,.xls,.xlsx"
         />
         {formData.file_url && (
@@ -146,7 +146,7 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
           checked={formData.is_watermarked}
           onCheckedChange={(val) => setFormData(prev => ({...prev, is_watermarked: val}))}
         />
-        <Label htmlFor="watermarked" className="text-gray-300">
+        <Label htmlFor="watermarked" className="text-zinc-300">
           Document is watermarked with investor details
         </Label>
       </div>
@@ -158,7 +158,7 @@ const DocumentForm = ({ document, investors, onSave, onCancel }) => {
         <Button 
           type="submit" 
           disabled={isUploading || !formData.title || !formData.file_url}
-          className="bg-yellow-400 text-black hover:bg-yellow-500"
+          className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
         >
           {isUploading ? 'Uploading...' : document ? 'Update Document' : 'Create Document'}
         </Button>
@@ -278,9 +278,9 @@ export default function AdminDocuments() {
       tax_document: "bg-green-900 text-green-400 border-green-700",
       agreement: "bg-purple-900 text-purple-400 border-purple-700",
       compliance: "bg-red-900 text-red-400 border-red-700",
-      notice: "bg-yellow-900 text-yellow-400 border-yellow-700"
+      notice: "bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45"
     };
-    return colors[type] || "bg-gray-700 text-gray-300 border-gray-600";
+    return colors[type] || "bg-zinc-800 text-zinc-300 border-zinc-600";
   };
 
   const documentTypes = [...new Set(documents.map(doc => doc.type))];
@@ -288,29 +288,29 @@ export default function AdminDocuments() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading documents...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Document Management</h1>
-            <p className="text-gray-400">Upload, manage, and distribute investor documents</p>
+            <p className="text-[#ccab6c]/90">Upload, manage, and distribute investor documents</p>
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openNewForm} className="bg-yellow-400 text-black hover:bg-yellow-500">
+              <Button onClick={openNewForm} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                 <Plus className="w-4 h-4 mr-2" />
                 Upload Document
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="text-white">
                   {editingDocument ? 'Edit Document' : 'Upload New Document'}
@@ -327,7 +327,7 @@ export default function AdminDocuments() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Filter className="w-5 h-5" />
@@ -337,20 +337,20 @@ export default function AdminDocuments() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ccab6c]/90" />
                 <Input
                   placeholder="Search documents..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-gray-800 border-gray-700"
+                  className="pl-10 bg-zinc-900 border-[#ccab6c]/20"
                 />
               </div>
               
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="bg-gray-800 border-gray-700">
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectItem value="all">All Types</SelectItem>
                   {documentTypes.map(type => (
                     <SelectItem key={type} value={type} className="capitalize">
@@ -361,10 +361,10 @@ export default function AdminDocuments() {
               </Select>
 
               <Select value={investorFilter} onValueChange={setInvestorFilter}>
-                <SelectTrigger className="bg-gray-800 border-gray-700">
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectValue placeholder="All Investors" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectItem value="all">All Documents</SelectItem>
                   <SelectItem value="global">Global Documents</SelectItem>
                   {documentInvestors.map(email => (
@@ -382,7 +382,7 @@ export default function AdminDocuments() {
                   setTypeFilter("all");
                   setInvestorFilter("all");
                 }}
-                className="border-gray-600 text-gray-300"
+                className="border-zinc-600 text-zinc-300"
               >
                 Clear Filters
               </Button>
@@ -391,7 +391,7 @@ export default function AdminDocuments() {
         </Card>
 
         {/* Documents Table */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white">
               All Documents ({filteredDocuments.length})
@@ -402,22 +402,22 @@ export default function AdminDocuments() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-gray-800">
-                      <TableHead className="text-gray-400">Document</TableHead>
-                      <TableHead className="text-gray-400">Type</TableHead>
-                      <TableHead className="text-gray-400">Investor</TableHead>
-                      <TableHead className="text-gray-400">Period</TableHead>
-                      <TableHead className="text-gray-400">Downloads</TableHead>
-                      <TableHead className="text-gray-400">Date Added</TableHead>
-                      <TableHead className="text-gray-400">Actions</TableHead>
+                    <TableRow className="border-[#ccab6c]/25">
+                      <TableHead className="text-[#ccab6c]/90">Document</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Type</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Investor</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Period</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Downloads</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Date Added</TableHead>
+                      <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredDocuments.map((document) => (
-                      <TableRow key={document.id} className="border-gray-800">
+                      <TableRow key={document.id} className="border-[#ccab6c]/25">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-yellow-400" />
+                            <FileText className="w-5 h-5 text-[#fedea0]" />
                             <div>
                               <p className="font-medium text-white">{document.title}</p>
                               {document.is_watermarked && (
@@ -437,23 +437,23 @@ export default function AdminDocuments() {
                           <div className="flex items-center gap-2">
                             {document.investor_email ? (
                               <>
-                                <Users className="w-4 h-4 text-gray-400" />
+                                <Users className="w-4 h-4 text-[#ccab6c]/90" />
                                 <span className="text-white">{getInvestorName(document.investor_email)}</span>
                               </>
                             ) : (
                               <>
-                                <span className="text-yellow-400 font-medium">Global</span>
+                                <span className="text-[#fedea0] font-medium">Global</span>
                               </>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {document.period || '-'}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {document.download_count || 0}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {format(new Date(document.created_date), 'MMM dd, yyyy')}
                         </TableCell>
                         <TableCell>
@@ -462,7 +462,7 @@ export default function AdminDocuments() {
                               variant="ghost"
                               size="sm"
                               onClick={() => window.open(document.file_url, '_blank')}
-                              className="text-gray-400 hover:text-white"
+                              className="text-[#ccab6c]/90 hover:text-white"
                             >
                               <Eye className="w-3 h-3 mr-1" />
                               View
@@ -471,7 +471,7 @@ export default function AdminDocuments() {
                               variant="ghost"
                               size="sm"
                               onClick={() => openEditForm(document)}
-                              className="text-yellow-400 hover:text-yellow-300"
+                              className="text-[#fedea0] hover:text-[#fedea0]"
                             >
                               <Edit className="w-3 h-3 mr-1" />
                               Edit
@@ -494,9 +494,9 @@ export default function AdminDocuments() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">No documents found</p>
-                <p className="text-gray-500 text-sm mt-2">
+                <FileText className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+                <p className="text-[#ccab6c]/90 text-lg">No documents found</p>
+                <p className="text-zinc-500 text-sm mt-2">
                   {searchTerm || typeFilter !== "all" || investorFilter !== "all"
                     ? "Try adjusting your search or filters" 
                     : "Upload your first document to get started"

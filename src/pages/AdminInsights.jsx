@@ -83,7 +83,7 @@ const MaterialForm = ({ material, onSave, onDone }) => {
       <div>
         <Label>Content File (PDF, etc.)</Label>
         <Input type="file" onChange={e => handleFileUpload(e.target.files[0])} disabled={isUploading} />
-        {formData.file_url && <a href={formData.file_url} target="_blank" className="text-xs text-yellow-400 truncate">{formData.file_url}</a>}
+        {formData.file_url && <a href={formData.file_url} target="_blank" className="text-xs text-[#fedea0] truncate">{formData.file_url}</a>}
       </div>
 
        <div>
@@ -94,7 +94,7 @@ const MaterialForm = ({ material, onSave, onDone }) => {
       
       <DialogFooter>
         <Button variant="ghost" onClick={onDone}>Cancel</Button>
-        <Button type="submit" className="bg-yellow-400 text-black hover:bg-yellow-500" disabled={isUploading}>
+        <Button type="submit" className="bg-[#fedea0] text-black hover:bg-[#ccab6c]" disabled={isUploading}>
             {isUploading ? 'Uploading...' : 'Save Material'}
         </Button>
       </DialogFooter>
@@ -166,21 +166,21 @@ export default function AdminInsights() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Insights & Content</h1>
-            <p className="text-gray-400">Manage articles, reports, and other content for investors.</p>
+            <p className="text-[#ccab6c]/90">Manage articles, reports, and other content for investors.</p>
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openFormForNew} className="bg-yellow-400 text-black hover:bg-yellow-500">
+              <Button onClick={openFormForNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 New Material
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800 text-white">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
               <DialogHeader>
                 <DialogTitle>{editingMaterial ? 'Edit Material' : 'Create New Material'}</DialogTitle>
               </DialogHeader>
@@ -189,25 +189,25 @@ export default function AdminInsights() {
           </Dialog>
         </div>
         
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader><CardTitle className="text-white">All Materials</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Title</TableHead>
-                    <TableHead className="text-gray-400">Category</TableHead>
-                    <TableHead className="text-gray-400">Created</TableHead>
-                    <TableHead className="text-gray-400">Actions</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Title</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Category</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Created</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {materials.map(material => (
-                    <TableRow key={material.id} className="border-gray-800">
+                    <TableRow key={material.id} className="border-[#ccab6c]/25">
                       <TableCell className="font-medium text-white">{material.title}</TableCell>
                       <TableCell><Badge variant="outline" className="capitalize">{material.category.replace("_", " ")}</Badge></TableCell>
-                      <TableCell className="text-gray-300">{new Date(material.created_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-zinc-300">{new Date(material.created_date).toLocaleDateString()}</TableCell>
                       <TableCell className="space-x-2">
                         <Button variant="outline" size="sm" onClick={() => openFormForEdit(material)}><Edit className="w-3 h-3 mr-1"/> Edit</Button>
                         <Button variant="destructive" size="sm" onClick={() => handleDelete(material.id)}><Trash2 className="w-3 h-3 mr-1"/> Delete</Button>

@@ -41,15 +41,15 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
   };
 
   return (
-    <Card className="bg-gray-900 border-gray-800 w-full max-w-md">
+    <Card className="bg-zinc-950 border border-[#ccab6c]/30 w-full max-w-md">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-yellow-500" />
+          <div className="w-16 h-16 bg-[#b38922]/15 rounded-full flex items-center justify-center">
+            <Shield className="w-8 h-8 text-[#b38922]" />
           </div>
         </div>
         <CardTitle className="text-white">Two-Factor Authentication</CardTitle>
-        <CardDescription className="text-gray-400">
+        <CardDescription className="text-[#ccab6c]/90">
           {useRecoveryCode 
             ? "Enter one of your recovery codes" 
             : "Enter the 6-digit code from your authenticator app"}
@@ -65,7 +65,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
         )}
 
         <div className="space-y-2">
-          <Label className="text-gray-300">
+          <Label className="text-zinc-300">
             {useRecoveryCode ? "Recovery Code" : "Verification Code"}
           </Label>
           <Input
@@ -78,7 +78,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
               }
             }}
             placeholder={useRecoveryCode ? "XXXX-XXXX" : "000000"}
-            className="bg-gray-800 border-gray-700 text-center text-xl tracking-widest"
+            className="bg-zinc-900 border-[#ccab6c]/20 text-center text-xl tracking-widest"
             maxLength={useRecoveryCode ? 9 : 6}
             onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
           />
@@ -87,7 +87,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
         <Button 
           onClick={handleVerify}
           disabled={loading || (!useRecoveryCode && code.length !== 6)}
-          className="w-full bg-yellow-500 text-black hover:bg-yellow-600"
+          className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
           Verify
@@ -101,7 +101,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
               setCode("");
               setError("");
             }}
-            className="text-sm text-yellow-500 hover:text-yellow-400"
+            className="text-sm text-[#b38922] hover:text-[#fedea0]"
           >
             {useRecoveryCode ? (
               <>Use authenticator app instead</>
@@ -115,7 +115,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
               <button
                 type="button"
                 onClick={onCancel}
-                className="text-sm text-gray-400 hover:text-gray-300"
+                className="text-sm text-[#ccab6c]/90 hover:text-zinc-300"
               >
                 Cancel and go back
               </button>

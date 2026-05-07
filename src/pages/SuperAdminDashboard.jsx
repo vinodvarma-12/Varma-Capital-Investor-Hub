@@ -117,44 +117,44 @@ export default function SuperAdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading super admin dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Shield className="w-8 h-8 text-yellow-400" />
+            <Shield className="w-8 h-8 text-[#fedea0]" />
             Super Admin Dashboard
           </h1>
-          <p className="text-gray-400">Complete system overview and administrative controls</p>
+          <p className="text-[#ccab6c]/90">Complete system overview and administrative controls</p>
         </div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Total Users
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">{users.length}</div>
-              <div className="text-sm text-gray-400 mt-1">
+              <div className="text-sm text-[#ccab6c]/90 mt-1">
                 {metrics.totalInvestors} Investors • {metrics.totalAdmins} Admins • {metrics.totalSuperAdmins} Super Admins
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Total AUM
               </CardTitle>
@@ -163,37 +163,37 @@ export default function SuperAdminDashboard() {
               <div className="text-2xl font-bold text-white">
                 ${metrics.totalAUM.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-400 mt-1">
+              <div className="text-sm text-[#ccab6c]/90 mt-1">
                 Across {metrics.activeProducts} active products
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Pending Actions
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-400">{metrics.pendingRequests}</div>
-              <div className="text-sm text-gray-400 mt-1">
+              <div className="text-2xl font-bold text-[#fedea0]">{metrics.pendingRequests}</div>
+              <div className="text-sm text-[#ccab6c]/90 mt-1">
                 Allocation requests awaiting review
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 Support Issues
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-400">{metrics.openTickets}</div>
-              <div className="text-sm text-gray-400 mt-1">
+              <div className="text-sm text-[#ccab6c]/90 mt-1">
                 Open support tickets
               </div>
             </CardContent>
@@ -203,7 +203,7 @@ export default function SuperAdminDashboard() {
         {/* Charts Row */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Growth Chart */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <TrendingUp className="w-5 h-5" />
@@ -246,7 +246,7 @@ export default function SuperAdminDashboard() {
           </Card>
 
           {/* User Roles Breakdown */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <UserCheck className="w-5 h-5" />
@@ -255,21 +255,21 @@ export default function SuperAdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-red-400" />
                     <span className="text-white font-medium">Super Admins</span>
                   </div>
                   <Badge className="bg-red-600 text-white">{metrics.totalSuperAdmins}</Badge>
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-blue-400" />
                     <span className="text-white font-medium">Admins</span>
                   </div>
                   <Badge className="bg-blue-600 text-white">{metrics.totalAdmins}</Badge>
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-gray-800">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-green-400" />
                     <span className="text-white font-medium">Investors</span>
@@ -284,11 +284,11 @@ export default function SuperAdminDashboard() {
         {/* Actions Required & Recent Activity */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Pending Allocation Requests */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
                 Pending Allocation Requests
-                <Badge variant="outline" className="bg-yellow-900 text-yellow-400">
+                <Badge variant="outline" className="bg-[#b38922]/25 text-[#fedea0]">
                   {allocationRequests.length}
                 </Badge>
               </CardTitle>
@@ -297,14 +297,14 @@ export default function SuperAdminDashboard() {
               {allocationRequests.length > 0 ? (
                 <div className="space-y-4">
                   {allocationRequests.slice(0, 5).map((request) => (
-                    <div key={request.id} className="border border-gray-800 rounded-lg p-4 space-y-3">
+                    <div key={request.id} className="border border-[#ccab6c]/25 rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-white">{request.investor_email}</p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-[#ccab6c]/90">
                             Product: {products.find(p => p.id === request.product_id)?.name}
                           </p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-[#ccab6c]/90">
                             Amount: ${request.requested_amount?.toLocaleString()}
                           </p>
                         </div>
@@ -332,13 +332,13 @@ export default function SuperAdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">No pending requests</p>
+                <p className="text-[#ccab6c]/90 text-center py-8">No pending requests</p>
               )}
             </CardContent>
           </Card>
 
           {/* Recent System Activity */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Activity className="w-5 h-5" />
@@ -348,16 +348,16 @@ export default function SuperAdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {auditLogs.slice(0, 8).map((log) => (
-                  <div key={log.id} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-b-0">
+                  <div key={log.id} className="flex items-center justify-between py-2 border-b border-[#ccab6c]/25 last:border-b-0">
                     <div className="flex-1">
                       <p className="text-white text-sm">
                         <span className="font-medium">{log.user_email}</span>
-                        <span className="text-gray-400 mx-2">•</span>
+                        <span className="text-[#ccab6c]/90 mx-2">•</span>
                         <span className="capitalize">{log.action}</span>
-                        <span className="text-gray-400 mx-2">•</span>
-                        <span className="text-gray-400">{log.entity_type}</span>
+                        <span className="text-[#ccab6c]/90 mx-2">•</span>
+                        <span className="text-[#ccab6c]/90">{log.entity_type}</span>
                       </p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="text-zinc-500 text-xs">
                         {format(new Date(log.created_date), 'MMM dd, HH:mm')}
                       </p>
                     </div>

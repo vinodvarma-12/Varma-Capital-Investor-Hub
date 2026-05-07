@@ -69,7 +69,7 @@ export default function Products() {
   const getRiskBadgeColor = (risk) => {
     const colors = {
       low: 'bg-green-900 text-green-400 border-green-700',
-      medium: 'bg-yellow-900 text-yellow-400 border-yellow-700',
+      medium: 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45',
       high: 'bg-orange-900 text-orange-400 border-orange-700',
       very_high: 'bg-red-900 text-red-400 border-red-700'
     };
@@ -78,32 +78,32 @@ export default function Products() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading products...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">Investment Products</h1>
-          <p className="text-gray-400">Explore our range of investment opportunities</p>
+          <p className="text-[#ccab6c]/90">Explore our range of investment opportunities</p>
         </div>
 
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <Card key={product.id} className="bg-gray-900 border-gray-800 relative overflow-hidden">
+            <Card key={product.id} className="bg-zinc-950 border border-[#ccab6c]/30 relative overflow-hidden">
               {/* Locked Overlay */}
-              <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-gray-800 border-2 border-yellow-400/50 flex items-center justify-center mb-4">
-                  <Lock className="w-8 h-8 text-yellow-400" />
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-[#b38922]/50 flex items-center justify-center mb-4">
+                  <Lock className="w-8 h-8 text-[#fedea0]" />
                 </div>
                 <p className="text-white font-semibold text-lg">Coming Soon</p>
-                <p className="text-gray-400 text-sm mt-1">Contact admin to unlock</p>
+                <p className="text-[#ccab6c]/90 text-sm mt-1">Contact admin to unlock</p>
               </div>
 
               <CardHeader className="pb-4">
@@ -115,20 +115,20 @@ export default function Products() {
                       {product.risk_band?.replace('_', ' ').toUpperCase()} RISK
                     </Badge>
                   </div>
-                  <Package className="w-8 h-8 text-yellow-400" />
+                  <Package className="w-8 h-8 text-[#fedea0]" />
                 </div>
               </CardHeader>
               
               <CardContent className="space-y-6">
                 {/* Description */}
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-zinc-300 text-sm leading-relaxed">
                   {product.description}
                 </p>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                    <div className="flex items-center gap-1 text-[#ccab6c]/90 text-xs">
                       <DollarSign className="w-3 h-3" />
                       Min Investment
                     </div>
@@ -138,7 +138,7 @@ export default function Products() {
                   </div>
                   
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                    <div className="flex items-center gap-1 text-[#ccab6c]/90 text-xs">
                       <Lock className="w-3 h-3" />
                       Lock-in Period
                     </div>
@@ -148,7 +148,7 @@ export default function Products() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                    <div className="flex items-center gap-1 text-[#ccab6c]/90 text-xs">
                       <TrendingUp className="w-3 h-3" />
                       Management Fee
                     </div>
@@ -158,7 +158,7 @@ export default function Products() {
                   </div>
 
                   <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                    <div className="flex items-center gap-1 text-[#ccab6c]/90 text-xs">
                       <Clock className="w-3 h-3" />
                       Performance Fee
                     </div>
@@ -171,19 +171,19 @@ export default function Products() {
                 {/* Additional Features */}
                 <div className="space-y-2">
                   {product.high_water_mark && (
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <div className="w-1 h-1 bg-yellow-400 rounded-full" />
+                    <div className="flex items-center gap-2 text-sm text-[#ccab6c]/90">
+                      <div className="w-1 h-1 bg-[#fedea0] rounded-full" />
                       High Water Mark Applied
                     </div>
                   )}
                   {product.hurdle_rate > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <div className="w-1 h-1 bg-yellow-400 rounded-full" />
+                    <div className="flex items-center gap-2 text-sm text-[#ccab6c]/90">
+                      <div className="w-1 h-1 bg-[#fedea0] rounded-full" />
                       Hurdle Rate: {product.hurdle_rate}%
                     </div>
                   )}
                   {(product.redemption_penalty_percent > 0 || product.redemption_penalty_amount > 0) && (
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <div className="flex items-center gap-2 text-sm text-[#ccab6c]/90">
                       <div className="w-1 h-1 bg-red-400 rounded-full" />
                       Early Redemption Penalty Applies
                     </div>
@@ -194,13 +194,13 @@ export default function Products() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button 
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold"
+                      className="w-full bg-[#fedea0] hover:bg-[#ccab6c] text-black font-semibold"
                       onClick={() => setSelectedProduct(product)}
                     >
                       Request Allocation
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-gray-900 border-gray-800">
+                  <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
                     <DialogHeader>
                       <DialogTitle className="text-white">
                         Request Allocation - {selectedProduct?.name}
@@ -208,25 +208,25 @@ export default function Products() {
                     </DialogHeader>
                     <div className="space-y-6 py-4">
                       <div className="space-y-2">
-                        <Label className="text-gray-300">Investment Amount (USD)</Label>
+                        <Label className="text-zinc-300">Investment Amount (USD)</Label>
                         <Input
                           type="number"
                           placeholder="Enter amount"
                           value={requestAmount}
                           onChange={(e) => setRequestAmount(e.target.value)}
                           min={selectedProduct?.minimum_ticket}
-                          className="bg-gray-800 border-gray-700 text-white"
+                          className="bg-zinc-900 border-[#ccab6c]/20 text-white"
                         />
                         {selectedProduct && (
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-[#ccab6c]/90">
                             Minimum investment: ${selectedProduct.minimum_ticket?.toLocaleString()}
                           </p>
                         )}
                       </div>
 
-                      <div className="bg-gray-800 rounded-lg p-4 space-y-2">
+                      <div className="bg-zinc-900 rounded-lg p-4 space-y-2">
                         <h4 className="font-semibold text-white">Important Information:</h4>
-                        <ul className="text-sm text-gray-300 space-y-1">
+                        <ul className="text-sm text-zinc-300 space-y-1">
                           <li>• This is a request and requires admin approval</li>
                           <li>• Funds will be locked for {selectedProduct?.lock_in_months} months</li>
                           <li>• Management fee: {selectedProduct?.management_fee_percent}% per annum</li>
@@ -237,7 +237,7 @@ export default function Products() {
                       <div className="flex gap-3">
                         <Button 
                           variant="outline" 
-                          className="flex-1 border-gray-600 text-gray-300"
+                          className="flex-1 border-zinc-600 text-zinc-300"
                           onClick={() => {
                             setSelectedProduct(null);
                             setRequestAmount('');
@@ -246,7 +246,7 @@ export default function Products() {
                           Cancel
                         </Button>
                         <Button 
-                          className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black"
+                          className="flex-1 bg-[#fedea0] hover:bg-[#ccab6c] text-black"
                           onClick={handleAllocationRequest}
                           disabled={
                             isSubmitting || 
@@ -267,9 +267,9 @@ export default function Products() {
 
         {products.length === 0 && (
           <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">No products available</p>
-            <p className="text-gray-500 text-sm mt-2">Check back later for new investment opportunities</p>
+            <Package className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+            <p className="text-[#ccab6c]/90 text-lg">No products available</p>
+            <p className="text-zinc-500 text-sm mt-2">Check back later for new investment opportunities</p>
           </div>
         )}
       </div>

@@ -97,26 +97,26 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading admin dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-gray-400">Manage your investor portal and monitor key metrics</p>
+          <p className="text-[#ccab6c]/90">Manage your investor portal and monitor key metrics</p>
         </div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Total Investors
               </CardTitle>
@@ -126,9 +126,9 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Total AUM
               </CardTitle>
@@ -140,9 +140,9 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Active Products
               </CardTitle>
@@ -152,21 +152,21 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Pending Requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-400">{metrics.pendingRequests}</div>
+              <div className="text-2xl font-bold text-[#fedea0]">{metrics.pendingRequests}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* AUM Growth Chart */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
@@ -204,11 +204,11 @@ export default function AdminDashboard() {
 
         {/* Pending Allocation Requests */}
         <div className="grid lg:grid-cols-2 gap-6">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
                 Pending Allocation Requests
-                <Badge variant="outline" className="bg-yellow-900 text-yellow-400">
+                <Badge variant="outline" className="bg-[#b38922]/25 text-[#fedea0]">
                   {allocationRequests.length}
                 </Badge>
               </CardTitle>
@@ -217,14 +217,14 @@ export default function AdminDashboard() {
               {allocationRequests.length > 0 ? (
                 <div className="space-y-4">
                   {allocationRequests.slice(0, 5).map((request) => (
-                    <div key={request.id} className="border border-gray-800 rounded-lg p-4 space-y-3">
+                    <div key={request.id} className="border border-[#ccab6c]/25 rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-white">{request.investor_email}</p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-[#ccab6c]/90">
                             Product: {products.find(p => p.id === request.product_id)?.name}
                           </p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-[#ccab6c]/90">
                             Amount: ${request.requested_amount?.toLocaleString()}
                           </p>
                         </div>
@@ -252,13 +252,13 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">No pending requests</p>
+                <p className="text-[#ccab6c]/90 text-center py-8">No pending requests</p>
               )}
             </CardContent>
           </Card>
 
           {/* Open Support Tickets */}
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader>
               <CardTitle className="text-white flex items-center justify-between">
                 Open Support Tickets
@@ -271,24 +271,24 @@ export default function AdminDashboard() {
               {supportTickets.length > 0 ? (
                 <div className="space-y-4">
                   {supportTickets.slice(0, 5).map((ticket) => (
-                    <div key={ticket.id} className="border border-gray-800 rounded-lg p-4">
+                    <div key={ticket.id} className="border border-[#ccab6c]/25 rounded-lg p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <p className="font-medium text-white">{ticket.subject}</p>
-                          <p className="text-sm text-gray-400">{ticket.investor_email}</p>
+                          <p className="text-sm text-[#ccab6c]/90">{ticket.investor_email}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className={`text-xs ${
                             ticket.priority === 'urgent' ? 'border-red-400 text-red-400' :
                             ticket.priority === 'high' ? 'border-orange-400 text-orange-400' :
-                            ticket.priority === 'medium' ? 'border-yellow-400 text-yellow-400' :
-                            'border-gray-400 text-gray-400'
+                            ticket.priority === 'medium' ? 'border-[#b38922] text-[#fedea0]' :
+                            'border-[#ccab6c]/45 text-[#ccab6c]/90'
                           }`}>
                             {ticket.priority}
                           </Badge>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-300 mb-3 line-clamp-2">
+                      <p className="text-sm text-zinc-300 mb-3 line-clamp-2">
                         {ticket.description}
                       </p>
                       <Badge variant="outline" className="text-xs">
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">No open tickets</p>
+                <p className="text-[#ccab6c]/90 text-center py-8">No open tickets</p>
               )}
             </CardContent>
           </Card>

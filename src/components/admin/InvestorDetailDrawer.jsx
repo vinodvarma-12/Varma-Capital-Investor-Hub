@@ -86,19 +86,19 @@ const EditInvestmentForm = ({ investment, onSave, onCancel }) => {
         <div className="space-y-4">
             <div>
                 <Label>Invested Amount</Label>
-                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="bg-gray-800 border-gray-700" />
+                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
             <div>
                 <Label>Current Units</Label>
-                <Input type="number" value={units} onChange={e => setUnits(e.target.value)} className="bg-gray-800 border-gray-700" />
+                <Input type="number" value={units} onChange={e => setUnits(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
             <div>
                 <Label>Reason for Change</Label>
-                <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+                <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
             <DialogFooter>
                 <Button variant="outline" onClick={onCancel}>Cancel</Button>
-                <Button onClick={handleSave} disabled={!reason} className="bg-yellow-400 text-black hover:bg-yellow-500">Save Changes</Button>
+                <Button onClick={handleSave} disabled={!reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">Save Changes</Button>
             </DialogFooter>
         </div>
     );
@@ -169,7 +169,7 @@ const EditLockInForm = ({ investment, onSave, onCancel }) => {
                 <div>
                   <Label>Lock-in Period</Label>
                   <Select value={lockInMonths.toString()} onValueChange={val => setLockInMonths(val)}>
-                    <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {lockInPresets.map(p => <SelectItem key={p.months} value={p.months.toString()}>{p.label}</SelectItem>)}
                     </SelectContent>
@@ -177,14 +177,14 @@ const EditLockInForm = ({ investment, onSave, onCancel }) => {
                 </div>
                 <div>
                   <Label>New End Date</Label>
-                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required className="bg-gray-800 border-gray-700" />
+                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required className="bg-zinc-900 border-[#ccab6c]/20" />
                 </div>
               </div>
 
               <div>
                 <Label>Early Redemption Penalty</Label>
                 <Select value={penaltyType} onValueChange={setPenaltyType}>
-                    <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="none">No Penalty</SelectItem>
                         <SelectItem value="fixed">Fixed Amount</SelectItem>
@@ -197,24 +197,24 @@ const EditLockInForm = ({ investment, onSave, onCancel }) => {
             {(penaltyType === 'fixed' || penaltyType === 'both') && (
                 <div>
                 <Label>Fixed Penalty Amount ($)</Label>
-                <Input type="number" value={penaltyAmount} onChange={e => setPenaltyAmount(e.target.value)} className="bg-gray-800 border-gray-700" />
+                <Input type="number" value={penaltyAmount} onChange={e => setPenaltyAmount(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
                 </div>
             )}
             {(penaltyType === 'percentage' || penaltyType === 'both') && (
                  <div>
                 <Label>Penalty Percentage (%)</Label>
-                <Input type="number" step="0.1" value={penaltyPercent} onChange={e => setPenaltyPercent(e.target.value)} className="bg-gray-800 border-gray-700" />
+                <Input type="number" step="0.1" value={penaltyPercent} onChange={e => setPenaltyPercent(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
                 </div>
             )}
             
             <div>
                 <Label>Reason for Change</Label>
-                <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+                <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
 
             <DialogFooter>
                 <Button variant="outline" onClick={onCancel}>Cancel</Button>
-                <Button onClick={handleSave} disabled={!reason} className="bg-yellow-400 text-black hover:bg-yellow-500">Save Changes</Button>
+                <Button onClick={handleSave} disabled={!reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">Save Changes</Button>
             </DialogFooter>
         </div>
     )
@@ -243,7 +243,7 @@ const HoldingsTab = ({ investments, products, investorEmail, onDataChange }) => 
     };
 
     return (
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2"><Briefcase /> Holdings</CardTitle>
                 <div className="flex gap-2">
@@ -258,7 +258,7 @@ const HoldingsTab = ({ investments, products, investorEmail, onDataChange }) => 
             <CardContent>
                 <Table>
                     <TableHeader>
-                        <TableRow className="hover:bg-gray-800/20">
+                        <TableRow className="hover:bg-zinc-900/20">
                             <TableHead>Product</TableHead>
                             <TableHead>Invested</TableHead>
                             <TableHead>Units</TableHead>
@@ -268,7 +268,7 @@ const HoldingsTab = ({ investments, products, investorEmail, onDataChange }) => 
                     </TableHeader>
                     <TableBody>
                         {investments.map(inv => (
-                            <TableRow key={inv.id} className="hover:bg-gray-800/20">
+                            <TableRow key={inv.id} className="hover:bg-zinc-900/20">
                                 <TableCell className="font-medium">{getProductName(inv.product_id)}</TableCell>
                                 <TableCell>${inv.invested_amount?.toLocaleString()}</TableCell>
                                 <TableCell>{inv.current_units?.toLocaleString()}</TableCell>
@@ -438,7 +438,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
     };
 
     return (
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2"><DollarSign /> Portfolio Overview</CardTitle>
                 {isSuperAdmin && !isEditing && (
@@ -457,7 +457,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                                     type="number" 
                                     value={formData.totalInvested} 
                                     onChange={e => setFormData({...formData, totalInvested: e.target.value})}
-                                    className="bg-gray-800 border-gray-700"
+                                    className="bg-zinc-900 border-[#ccab6c]/20"
                                 />
                             </div>
                             <div>
@@ -466,7 +466,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                                     type="number" 
                                     value={formData.currentValue} 
                                     onChange={e => setFormData({...formData, currentValue: e.target.value})}
-                                    className="bg-gray-800 border-gray-700"
+                                    className="bg-zinc-900 border-[#ccab6c]/20"
                                 />
                             </div>
                             <div>
@@ -476,7 +476,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                                     step="0.01"
                                     value={formData.pnlPercent} 
                                     onChange={e => setFormData({...formData, pnlPercent: e.target.value})}
-                                    className="bg-gray-800 border-gray-700"
+                                    className="bg-zinc-900 border-[#ccab6c]/20"
                                 />
                             </div>
                             <div>
@@ -485,7 +485,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                                     type="date" 
                                     value={formData.nextLockInDate} 
                                     onChange={e => setFormData({...formData, nextLockInDate: e.target.value})}
-                                    className="bg-gray-800 border-gray-700"
+                                    className="bg-zinc-900 border-[#ccab6c]/20"
                                 />
                             </div>
                         </div>
@@ -495,7 +495,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                                 value={reason} 
                                 onChange={e => setReason(e.target.value)}
                                 placeholder="Explain why these values are being changed..."
-                                className="bg-gray-800 border-gray-700"
+                                className="bg-zinc-900 border-[#ccab6c]/20"
                             />
                         </div>
                         <div className="flex gap-2 justify-end">
@@ -503,7 +503,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                             <Button 
                                 onClick={handleSave} 
                                 disabled={saving || !reason.trim()}
-                                className="bg-yellow-400 text-black hover:bg-yellow-500"
+                                className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
                             >
                                 {saving ? 'Saving...' : 'Save Changes'}
                             </Button>
@@ -512,21 +512,21 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div className="space-y-1">
-                            <p className="text-sm text-gray-400">Total Invested</p>
+                            <p className="text-sm text-[#ccab6c]/90">Total Invested</p>
                             <p className="text-2xl font-bold text-white">${parseFloat(formData.totalInvested).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-sm text-gray-400">Current Value</p>
+                            <p className="text-sm text-[#ccab6c]/90">Current Value</p>
                             <p className="text-2xl font-bold text-white">${parseFloat(formData.currentValue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-sm text-gray-400">P&L</p>
+                            <p className="text-sm text-[#ccab6c]/90">P&L</p>
                             <p className={`text-2xl font-bold ${parseFloat(formData.pnlPercent) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {parseFloat(formData.pnlPercent) >= 0 ? '+' : ''}{parseFloat(formData.pnlPercent).toFixed(2)}%
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-sm text-gray-400">Next Lock-in Expiry</p>
+                            <p className="text-sm text-[#ccab6c]/90">Next Lock-in Expiry</p>
                             <p className="text-2xl font-bold text-white">
                                 {formData.nextLockInDate ? format(new Date(formData.nextLockInDate), 'MMM dd, yyyy') : 'None'}
                             </p>
@@ -574,15 +574,15 @@ const AuditTab = ({ investor }) => {
     }, [investor]);
 
     return (
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
             <CardHeader><CardTitle className="flex items-center gap-2"><History /> Audit Trail</CardTitle></CardHeader>
             <CardContent>
                 {loading ? <p>Loading logs...</p> : (
                 <Table>
-                    <TableHeader><TableRow className="hover:bg-gray-800/20"><TableHead>Timestamp</TableHead><TableHead>Admin</TableHead><TableHead>Action</TableHead><TableHead>Entity</TableHead><TableHead>Changes</TableHead></TableRow></TableHeader>
+                    <TableHeader><TableRow className="hover:bg-zinc-900/20"><TableHead>Timestamp</TableHead><TableHead>Admin</TableHead><TableHead>Action</TableHead><TableHead>Entity</TableHead><TableHead>Changes</TableHead></TableRow></TableHeader>
                     <TableBody>
                         {logs.map(log => (
-                            <TableRow key={log.id} className="hover:bg-gray-800/20">
+                            <TableRow key={log.id} className="hover:bg-zinc-900/20">
                                 <TableCell>{format(new Date(log.created_date), 'PPpp')}</TableCell>
                                 <TableCell>{log.user_email}</TableCell>
                                 <TableCell><Badge variant="outline" className="capitalize">{log.action}</Badge></TableCell>
@@ -601,20 +601,20 @@ const AuditTab = ({ investor }) => {
 export default function InvestorDetailDrawer({ investor, investments, products, navs, onDataChange }) {
 
     // Dummy data for tabs not yet built
-    const PerformanceTab = () => <Card className="bg-gray-900 border-gray-800"><CardHeader><CardTitle>Performance</CardTitle></CardHeader><CardContent><p className="text-gray-500">Performance charts and admin controls for NAV/Return overrides will be available here in the next update.</p></CardContent></Card>
-    const TransactionsTab = () => <Card className="bg-gray-900 border-gray-800"><CardHeader><CardTitle>Transactions</CardTitle></CardHeader><CardContent><p className="text-gray-500">Investor transaction history will be displayed here.</p></CardContent></Card>
-    const DocumentsTab = () => <Card className="bg-gray-900 border-gray-800"><CardHeader><CardTitle>Documents</CardTitle></CardHeader><CardContent><p className="text-gray-500">Investor-specific and global documents will be listed here.</p></CardContent></Card>
-    const TicketsTab = () => <Card className="bg-gray-900 border-gray-800"><CardHeader><CardTitle>Support Tickets</CardTitle></CardHeader><CardContent><p className="text-gray-500">Support ticket history for this investor will be displayed here.</p></CardContent></Card>
+    const PerformanceTab = () => <Card className="bg-zinc-950 border border-[#ccab6c]/30"><CardHeader><CardTitle>Performance</CardTitle></CardHeader><CardContent><p className="text-zinc-500">Performance charts and admin controls for NAV/Return overrides will be available here in the next update.</p></CardContent></Card>
+    const TransactionsTab = () => <Card className="bg-zinc-950 border border-[#ccab6c]/30"><CardHeader><CardTitle>Transactions</CardTitle></CardHeader><CardContent><p className="text-zinc-500">Investor transaction history will be displayed here.</p></CardContent></Card>
+    const DocumentsTab = () => <Card className="bg-zinc-950 border border-[#ccab6c]/30"><CardHeader><CardTitle>Documents</CardTitle></CardHeader><CardContent><p className="text-zinc-500">Investor-specific and global documents will be listed here.</p></CardContent></Card>
+    const TicketsTab = () => <Card className="bg-zinc-950 border border-[#ccab6c]/30"><CardHeader><CardTitle>Support Tickets</CardTitle></CardHeader><CardContent><p className="text-zinc-500">Support ticket history for this investor will be displayed here.</p></CardContent></Card>
 
     return (
         <div className="p-6 h-full flex flex-col">
             <div className="flex-shrink-0">
                 <h2 className="text-2xl font-bold">{investor.full_name}</h2>
-                <p className="text-gray-400">{investor.email}</p>
+                <p className="text-[#ccab6c]/90">{investor.email}</p>
             </div>
 
             <Tabs defaultValue="overview" className="mt-6 flex-grow flex flex-col">
-                <TabsList className="bg-gray-800 border-gray-700">
+                <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="holdings">Holdings</TabsTrigger>
                     <TabsTrigger value="performance">Performance</TabsTrigger>

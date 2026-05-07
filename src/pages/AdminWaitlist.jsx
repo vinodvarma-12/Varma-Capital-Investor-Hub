@@ -66,7 +66,7 @@ const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-white">Waitlist Entry Details</DialogTitle>
         </DialogHeader>
@@ -74,50 +74,50 @@ const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
         <div className="space-y-4 max-h-96 overflow-y-auto">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gray-300">Full Name</Label>
+              <Label className="text-zinc-300">Full Name</Label>
               <Input
                 value={editData.full_name || ''}
                 onChange={(e) => setEditData({...editData, full_name: e.target.value})}
-                className="bg-gray-800 border-gray-700"
+                className="bg-zinc-900 border-[#ccab6c]/20"
               />
             </div>
             <div>
-              <Label className="text-gray-300">Email</Label>
+              <Label className="text-zinc-300">Email</Label>
               <Input
                 value={editData.email || ''}
                 onChange={(e) => setEditData({...editData, email: e.target.value})}
-                className="bg-gray-800 border-gray-700"
+                className="bg-zinc-900 border-[#ccab6c]/20"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gray-300">Phone</Label>
+              <Label className="text-zinc-300">Phone</Label>
               <Input
                 value={editData.phone || ''}
                 onChange={(e) => setEditData({...editData, phone: e.target.value})}
-                className="bg-gray-800 border-gray-700"
+                className="bg-zinc-900 border-[#ccab6c]/20"
               />
             </div>
             <div>
-              <Label className="text-gray-300">Country</Label>
+              <Label className="text-zinc-300">Country</Label>
               <Input
                 value={editData.country || ''}
                 onChange={(e) => setEditData({...editData, country: e.target.value})}
-                className="bg-gray-800 border-gray-700"
+                className="bg-zinc-900 border-[#ccab6c]/20"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gray-300">Status</Label>
+              <Label className="text-zinc-300">Status</Label>
               <Select 
                 value={editData.status || 'new'} 
                 onValueChange={(val) => setEditData({...editData, status: val})}
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700">
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -129,12 +129,12 @@ const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
               </Select>
             </div>
             <div>
-              <Label className="text-gray-300">Investor Category</Label>
+              <Label className="text-zinc-300">Investor Category</Label>
               <Select 
                 value={editData.investor_category || ''} 
                 onValueChange={(val) => setEditData({...editData, investor_category: val})}
               >
-                <SelectTrigger className="bg-gray-800 border-gray-700">
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -148,28 +148,28 @@ const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
           </div>
 
           <div>
-            <Label className="text-gray-300">Amount Interested (USD)</Label>
+            <Label className="text-zinc-300">Amount Interested (USD)</Label>
             <Input
               type="number"
               value={editData.amount_interested || ''}
               onChange={(e) => setEditData({...editData, amount_interested: parseFloat(e.target.value) || null})}
-              className="bg-gray-800 border-gray-700"
+              className="bg-zinc-900 border-[#ccab6c]/20"
             />
           </div>
 
           <div>
-            <Label className="text-gray-300">Notes</Label>
+            <Label className="text-zinc-300">Notes</Label>
             <Textarea
               value={editData.notes || ''}
               onChange={(e) => setEditData({...editData, notes: e.target.value})}
-              className="bg-gray-800 border-gray-700 h-24"
+              className="bg-zinc-900 border-[#ccab6c]/20 h-24"
             />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={loading} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={loading} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>
@@ -262,48 +262,48 @@ export default function AdminWaitlist() {
   const getStatusBadge = (status) => {
     const colors = {
       new: 'bg-blue-900 text-blue-400 border-blue-700',
-      contacted: 'bg-yellow-900 text-yellow-400 border-yellow-700',
+      contacted: 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45',
       qualified: 'bg-green-900 text-green-400 border-green-700',
-      closed: 'bg-gray-700 text-gray-300 border-gray-600'
+      closed: 'bg-zinc-800 text-zinc-300 border-zinc-600'
     };
-    return <Badge variant="outline" className={`capitalize ${colors[status] || 'bg-gray-700'}`}>{status}</Badge>;
+    return <Badge variant="outline" className={`capitalize ${colors[status] || 'bg-zinc-800'}`}>{status}</Badge>;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading waitlist...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <UserPlus className="w-8 h-8 text-yellow-400" />
+              <UserPlus className="w-8 h-8 text-[#fedea0]" />
               Waitlist Management
             </h1>
-            <p className="text-gray-400">Manage investor waitlist and lead pipeline</p>
+            <p className="text-[#ccab6c]/90">Manage investor waitlist and lead pipeline</p>
           </div>
-          <Button onClick={exportToCsv} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={exportToCsv} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
         </div>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-white">Waitlist Entries ({filteredEntries.length})</CardTitle>
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#ccab6c]/90"/>
                   <Input
                     placeholder="Search by name or email..."
-                    className="pl-8 bg-gray-800 border-gray-700 w-64"
+                    className="pl-8 bg-zinc-900 border-[#ccab6c]/20 w-64"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -336,31 +336,31 @@ export default function AdminWaitlist() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Created</TableHead>
-                    <TableHead className="text-gray-400">Name</TableHead>
-                    <TableHead className="text-gray-400">Contact</TableHead>
-                    <TableHead className="text-gray-400">Category</TableHead>
-                    <TableHead className="text-gray-400 text-right">Amount</TableHead>
-                    <TableHead className="text-gray-400">Status</TableHead>
-                    <TableHead className="text-gray-400">Actions</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Created</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Name</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Contact</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Category</TableHead>
+                    <TableHead className="text-[#ccab6c]/90 text-right">Amount</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredEntries.map((entry) => (
-                    <TableRow key={entry.id} className="border-gray-800">
-                      <TableCell className="text-gray-300">
+                    <TableRow key={entry.id} className="border-[#ccab6c]/25">
+                      <TableCell className="text-zinc-300">
                         {format(new Date(entry.created_date), 'MMM dd, yyyy')}
                       </TableCell>
                       <TableCell>
                         <div className="font-medium text-white">{entry.full_name}</div>
-                        <div className="text-sm text-gray-400">{entry.country}</div>
+                        <div className="text-sm text-[#ccab6c]/90">{entry.country}</div>
                       </TableCell>
                       <TableCell>
                         <div className="text-white">{entry.email}</div>
-                        <div className="text-sm text-gray-400">{entry.phone}</div>
+                        <div className="text-sm text-[#ccab6c]/90">{entry.phone}</div>
                       </TableCell>
-                      <TableCell className="text-gray-300">{entry.investor_category || '-'}</TableCell>
+                      <TableCell className="text-zinc-300">{entry.investor_category || '-'}</TableCell>
                       <TableCell className="text-right text-white font-medium">
                         {entry.amount_interested ? `$${entry.amount_interested.toLocaleString()}` : '-'}
                       </TableCell>
@@ -392,8 +392,8 @@ export default function AdminWaitlist() {
             
             {filteredEntries.length === 0 && (
               <div className="text-center py-12">
-                <UserPlus className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">No waitlist entries found</p>
+                <UserPlus className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                <p className="text-[#ccab6c]/90">No waitlist entries found</p>
               </div>
             )}
           </CardContent>

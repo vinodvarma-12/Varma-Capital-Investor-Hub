@@ -38,16 +38,16 @@ function parseNewsLLMResponse(result, source) {
 }
 
 const NewsArticleCard = ({ article }) => (
-  <Card className="bg-gray-900 border-gray-800 flex flex-col h-full hover:border-yellow-400/50 transition-colors duration-200">
+  <Card className="bg-zinc-950 border border-[#ccab6c]/30 flex flex-col h-full hover:border-[#b38922]/50 transition-colors duration-200">
     <CardHeader>
       <CardTitle className="text-white text-lg leading-snug">{article.title}</CardTitle>
     </CardHeader>
     <CardContent className="flex-grow">
-      <p className="text-gray-400 text-sm line-clamp-3">{article.summary}</p>
+      <p className="text-[#ccab6c]/90 text-sm line-clamp-3">{article.summary}</p>
     </CardContent>
     <CardFooter className="flex justify-between items-center">
-      <Badge variant="secondary" className="bg-gray-800 text-gray-300">{article.source}</Badge>
-      <Button asChild variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-300">
+      <Badge variant="secondary" className="bg-zinc-900 text-zinc-300">{article.source}</Badge>
+      <Button asChild variant="ghost" size="sm" className="text-[#fedea0] hover:text-[#fedea0]">
         <a href={article.url} target="_blank" rel="noopener noreferrer">
           Read More <ExternalLink className="w-3 h-3 ml-2" />
         </a>
@@ -57,17 +57,17 @@ const NewsArticleCard = ({ article }) => (
 );
 
 const MarketingMaterialCard = ({ material }) => (
-    <Card className="bg-gray-900 border-gray-800 flex flex-col h-full hover:border-yellow-400/50 transition-colors duration-200">
+    <Card className="bg-zinc-950 border border-[#ccab6c]/30 flex flex-col h-full hover:border-[#b38922]/50 transition-colors duration-200">
         {material.thumbnail_url && <img src={material.thumbnail_url} alt={material.title} className="rounded-t-lg h-40 object-cover" />}
         <CardHeader>
             <CardTitle className="text-white text-lg leading-snug">{material.title}</CardTitle>
             <Badge variant="outline" className="w-fit mt-2 capitalize">{material.category.replace('_', ' ')}</Badge>
         </CardHeader>
         <CardContent className="flex-grow">
-            <p className="text-gray-400 text-sm line-clamp-3">{material.description}</p>
+            <p className="text-[#ccab6c]/90 text-sm line-clamp-3">{material.description}</p>
         </CardContent>
         <CardFooter>
-            <Button asChild variant="outline" className="w-full text-yellow-400 border-yellow-400/50 hover:bg-yellow-400 hover:text-black">
+            <Button asChild variant="outline" className="w-full text-[#fedea0] border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black">
                 <a href={material.file_url} target="_blank" rel="noopener noreferrer">
                     {material.file_url ? 'Download' : 'Read More'} <Download className="w-3 h-3 ml-2" />
                 </a>
@@ -152,16 +152,16 @@ const NewsSection = ({ category }) => {
     }, [category]);
 
     if (loading) {
-        return <div className="text-center py-16 text-gray-400">Loading news...</div>;
+        return <div className="text-center py-16 text-[#ccab6c]/90">Loading news...</div>;
     }
     
     if (articles.length === 0) {
        return (
          <div className="col-span-full text-center py-16">
-            <Rss className="w-12 h-12 mx-auto text-gray-600 mb-4" />
-            <p className="text-lg text-gray-400">Could not load news articles.</p>
+            <Rss className="w-12 h-12 mx-auto text-zinc-600 mb-4" />
+            <p className="text-lg text-[#ccab6c]/90">Could not load news articles.</p>
             {loadError && (
-              <p className="text-sm text-gray-500 mt-3 max-w-lg mx-auto">{loadError}</p>
+              <p className="text-sm text-zinc-500 mt-3 max-w-lg mx-auto">{loadError}</p>
             )}
           </div>
        );
@@ -196,14 +196,14 @@ const VarmaSection = () => {
     }, []);
 
     if (loading) {
-        return <div className="text-center py-16 text-gray-400">Loading materials...</div>;
+        return <div className="text-center py-16 text-[#ccab6c]/90">Loading materials...</div>;
     }
     
     if (materials.length === 0) {
        return (
          <div className="col-span-full text-center py-16">
-            <FileText className="w-12 h-12 mx-auto text-gray-600 mb-4" />
-            <p className="text-lg text-gray-400">No materials available at this time.</p>
+            <FileText className="w-12 h-12 mx-auto text-zinc-600 mb-4" />
+            <p className="text-lg text-[#ccab6c]/90">No materials available at this time.</p>
           </div>
        );
     }
@@ -220,22 +220,22 @@ const VarmaSection = () => {
 
 export default function NewsAndInsights() {
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white">News & Insights</h1>
-          <p className="text-gray-400">Market updates and exclusive content from Varma Capital</p>
+          <p className="text-[#ccab6c]/90">Market updates and exclusive content from Varma Capital</p>
         </div>
 
         <Tabs defaultValue="finance" className="space-y-6">
-          <TabsList className="bg-gray-800 border-gray-700">
-            <TabsTrigger value="finance" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+            <TabsTrigger value="finance" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Finance
             </TabsTrigger>
-            <TabsTrigger value="crypto" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="crypto" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Crypto
             </TabsTrigger>
-            <TabsTrigger value="varma" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="varma" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Varma Materials
             </TabsTrigger>
           </TabsList>

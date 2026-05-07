@@ -51,23 +51,23 @@ export default function WaitlistPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col">
+      <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex items-center justify-center p-6">
-          <Card className="bg-gray-900 border-gray-800 w-full max-w-md">
+          <Card className="bg-zinc-950 border border-[#ccab6c]/30 w-full max-w-md">
             <CardContent className="text-center py-12 space-y-6">
               <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle className="w-8 h-8 text-green-400" />
               </div>
               
               <div className="space-y-2">
-                <p className="text-gray-300 text-lg">
+                <p className="text-zinc-300 text-lg">
                   Thank you for your interest. Our team will contact you soon.
                 </p>
               </div>
 
               <div className="pt-4">
                 <Link to={createPageUrl("InvestorAuth")}>
-                  <Button variant="outline" className="w-full border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-black">
+                  <Button variant="outline" className="w-full border-[#b38922] text-[#fedea0] hover:bg-[#fedea0] hover:text-black">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Login
                   </Button>
@@ -76,7 +76,7 @@ export default function WaitlistPage() {
             </CardContent>
           </Card>
         </div>
-        <footer className="text-center py-6 text-gray-500 text-sm border-t border-gray-800">
+        <footer className="text-center py-6 text-zinc-500 text-sm border-t border-[#ccab6c]/25">
           Varma Capital © 2025 | All Rights Reserved
         </footer>
       </div>
@@ -84,7 +84,7 @@ export default function WaitlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       <div className="flex-1 p-6">
         <div className="max-w-lg mx-auto space-y-6">
           {/* Header */}
@@ -96,75 +96,75 @@ export default function WaitlistPage() {
             />
             <div>
               <h1 className="text-2xl font-bold text-white">Join the Varma Capital Waitlist</h1>
-              <p className="text-gray-400 mt-2">
+              <p className="text-[#ccab6c]/90 mt-2">
                 Our fund is currently invite-only. Submit your interest below.
               </p>
             </div>
           </div>
 
           {/* Waitlist Form */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="bg-zinc-950 border border-[#ccab6c]/30 rounded-xl p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="full_name" className="text-gray-300">Full Name *</Label>
+                <Label htmlFor="full_name" className="text-zinc-300">Full Name *</Label>
                 <Input
                   type="text"
                   id="full_name"
                   value={formData.full_name}
                   onChange={(e) => handleInputChange('full_name', e.target.value)}
                   required
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <Label htmlFor="email" className="text-gray-300">Email *</Label>
+                <Label htmlFor="email" className="text-zinc-300">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   required
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <Label htmlFor="phone" className="text-gray-300">Phone (optional)</Label>
+                <Label htmlFor="phone" className="text-zinc-300">Phone (optional)</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
 
               <div>
-                <Label htmlFor="country" className="text-gray-300">Country</Label>
+                <Label htmlFor="country" className="text-zinc-300">Country</Label>
                 <Input
                   id="country"
                   type="text"
                   value={formData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="United States"
                 />
               </div>
 
               <div>
-                <Label className="text-gray-300">Investor Category</Label>
+                <Label className="text-zinc-300">Investor Category</Label>
                 <Select 
                   value={formData.investor_category} 
                   onValueChange={(value) => handleInputChange('investor_category', value)}
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 mt-1 text-gray-300">
+                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1 text-zinc-300">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
                     <SelectItem className="text-white" value="Accredited">Accredited</SelectItem>
                     <SelectItem className="text-white" value="HNW">HNW</SelectItem>
                     <SelectItem className="text-white" value="Family Office">Family Office</SelectItem>
@@ -174,25 +174,25 @@ export default function WaitlistPage() {
               </div>
 
               <div>
-                <Label htmlFor="amount_interested" className="text-gray-300">Estimated Investment Amount (optional)</Label>
+                <Label htmlFor="amount_interested" className="text-zinc-300">Estimated Investment Amount (optional)</Label>
                 <Input
                   id="amount_interested"
                   type="number"
                   value={formData.amount_interested}
                   onChange={(e) => handleInputChange('amount_interested', e.target.value)}
-                  className="bg-gray-800 border-gray-700 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="USD"
                   min="0"
                 />
               </div>
 
               <div>
-                <Label htmlFor="notes" className="text-gray-300">Notes</Label>
+                <Label htmlFor="notes" className="text-zinc-300">Notes</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={(e) => handleInputChange('notes', e.target.value)}
-                  className="bg-gray-800 border-gray-700 h-20 mt-1"
+                  className="bg-zinc-900 border-[#ccab6c]/20 h-20 mt-1"
                   placeholder="Any additional information..."
                 />
               </div>
@@ -201,7 +201,7 @@ export default function WaitlistPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#d4af37] text-black hover:bg-[#c4a030] font-semibold py-3"
+                  className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c] font-semibold py-3"
                 >
                   {loading ? "Submitting..." : "Submit to Waitlist"}
                 </Button>
@@ -209,7 +209,7 @@ export default function WaitlistPage() {
 
               <div className="text-center">
                 <Link to={createPageUrl("InvestorAuth")}>
-                  <Button variant="link" className="text-[#d4af37] hover:text-[#c4a030]">
+                  <Button variant="link" className="text-[#fedea0] hover:text-[#c4a030]">
                     Already have an account? Sign in
                   </Button>
                 </Link>
@@ -220,7 +220,7 @@ export default function WaitlistPage() {
       </div>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-gray-500 text-sm border-t border-gray-800">
+      <footer className="text-center py-6 text-zinc-500 text-sm border-t border-[#ccab6c]/25">
         Varma Capital © 2025 | All Rights Reserved
       </footer>
     </div>

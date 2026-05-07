@@ -63,12 +63,12 @@ const LockInAdjustmentForm = ({ investment, products, onSave, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-gray-800 p-4 rounded-lg">
+      <div className="bg-zinc-900 p-4 rounded-lg">
         <h4 className="font-semibold text-white mb-2">Current Investment</h4>
-        <p className="text-gray-300">Investor: {investment.investor_email}</p>
-        <p className="text-gray-300">Product: {products.find(p => p.id === investment.product_id)?.name}</p>
-        <p className="text-gray-300">Current Lock-in: {investment.lock_in_months} months</p>
-        <p className="text-gray-300">Current End Date: {format(new Date(investment.lock_in_end_date), 'MMM dd, yyyy')}</p>
+        <p className="text-zinc-300">Investor: {investment.investor_email}</p>
+        <p className="text-zinc-300">Product: {products.find(p => p.id === investment.product_id)?.name}</p>
+        <p className="text-zinc-300">Current Lock-in: {investment.lock_in_months} months</p>
+        <p className="text-zinc-300">Current End Date: {format(new Date(investment.lock_in_end_date), 'MMM dd, yyyy')}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -150,7 +150,7 @@ const LockInAdjustmentForm = ({ investment, products, onSave, onCancel }) => {
 
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" className="bg-yellow-400 text-black hover:bg-yellow-500">
+        <Button type="submit" className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
           Apply Lock-in Adjustment
         </Button>
       </div>
@@ -265,27 +265,27 @@ export default function AdminLockIns() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading lock-in management...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">Lock-in Management</h1>
-            <p className="text-gray-400">Manage investor lock-in periods and early redemption penalties</p>
+            <p className="text-[#ccab6c]/90">Manage investor lock-in periods and early redemption penalties</p>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <Label className="text-gray-300">Filter by Status:</Label>
+              <Label className="text-zinc-300">Filter by Status:</Label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
@@ -302,10 +302,10 @@ export default function AdminLockIns() {
         </Card>
 
         {/* Investments Table */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-yellow-400" />
+              <Clock className="w-5 h-5 text-[#fedea0]" />
               Investment Lock-in Status
             </CardTitle>
           </CardHeader>
@@ -313,15 +313,15 @@ export default function AdminLockIns() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Investor</TableHead>
-                    <TableHead className="text-gray-400">Product</TableHead>
-                    <TableHead className="text-gray-400">Amount</TableHead>
-                    <TableHead className="text-gray-400">Lock Period</TableHead>
-                    <TableHead className="text-gray-400">End Date</TableHead>
-                    <TableHead className="text-gray-400">Status</TableHead>
-                    <TableHead className="text-gray-400">Days Left</TableHead>
-                    <TableHead className="text-gray-400">Actions</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Investor</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Product</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Amount</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Lock Period</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">End Date</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Days Left</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -331,20 +331,20 @@ export default function AdminLockIns() {
                     const isExpiringSoon = daysLeft !== null && daysLeft <= 30 && daysLeft > 0;
                     
                     return (
-                      <TableRow key={investment.id} className="border-gray-800">
+                      <TableRow key={investment.id} className="border-[#ccab6c]/25">
                         <TableCell className="text-white font-medium">
                           {getUserName(investment.investor_email)}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {getProductName(investment.product_id)}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           ${investment.invested_amount?.toLocaleString()}
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {investment.lock_in_months} months
                         </TableCell>
-                        <TableCell className="text-gray-300">
+                        <TableCell className="text-zinc-300">
                           {format(new Date(investment.lock_in_end_date), 'MMM dd, yyyy')}
                         </TableCell>
                         <TableCell>
@@ -365,14 +365,14 @@ export default function AdminLockIns() {
                         <TableCell>
                           {daysLeft !== null ? (
                             <div className={`font-medium ${
-                              isExpiringSoon ? 'text-yellow-400' : 
-                              daysLeft === 0 ? 'text-green-400' : 'text-gray-300'
+                              isExpiringSoon ? 'text-[#fedea0]' : 
+                              daysLeft === 0 ? 'text-green-400' : 'text-zinc-300'
                             }`}>
                               {isExpiringSoon && <AlertTriangle className="w-4 h-4 inline mr-1" />}
                               {daysLeft} days
                             </div>
                           ) : (
-                            <span className="text-gray-500">-</span>
+                            <span className="text-zinc-500">-</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -387,7 +387,7 @@ export default function AdminLockIns() {
                                 Adjust
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+                            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
                               <DialogHeader>
                                 <DialogTitle className="text-white">Adjust Lock-in Period</DialogTitle>
                               </DialogHeader>
@@ -413,7 +413,7 @@ export default function AdminLockIns() {
         </Card>
 
         {/* Recent Lock-in Adjustments */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white">Recent Lock-in Adjustments</CardTitle>
           </CardHeader>
@@ -421,25 +421,25 @@ export default function AdminLockIns() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Date</TableHead>
-                    <TableHead className="text-gray-400">Investor</TableHead>
-                    <TableHead className="text-gray-400">Change</TableHead>
-                    <TableHead className="text-gray-400">Penalties</TableHead>
-                    <TableHead className="text-gray-400">Approved By</TableHead>
-                    <TableHead className="text-gray-400">Reason</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Date</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Investor</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Change</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Penalties</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Approved By</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Reason</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {lockInOverrides.slice(0, 10).map((override) => (
-                    <TableRow key={override.id} className="border-gray-800">
-                      <TableCell className="text-gray-300">
+                    <TableRow key={override.id} className="border-[#ccab6c]/25">
+                      <TableCell className="text-zinc-300">
                         {format(new Date(override.created_date), 'MMM dd, yyyy')}
                       </TableCell>
                       <TableCell className="text-white font-medium">
                         {getUserName(override.investor_email)}
                       </TableCell>
-                      <TableCell className="text-gray-300">
+                      <TableCell className="text-zinc-300">
                         {override.original_lock_months}m → {override.adjusted_lock_months}m
                       </TableCell>
                       <TableCell>
@@ -453,10 +453,10 @@ export default function AdminLockIns() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-gray-300">
+                      <TableCell className="text-zinc-300">
                         {getUserName(override.approved_by)}
                       </TableCell>
-                      <TableCell className="text-gray-300 max-w-xs truncate">
+                      <TableCell className="text-zinc-300 max-w-xs truncate">
                         {override.reason}
                       </TableCell>
                     </TableRow>

@@ -22,6 +22,13 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
 import { format, differenceInDays } from "date-fns";
+import {
+  GOLD_LIGHT,
+  GOLD_MID,
+  GOLD_DEEP,
+  GOLD_DEEPER,
+  ALLOCATION_COLORS,
+} from "@/lib/varmaTheme";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -204,56 +211,81 @@ export default function Dashboard() {
   const chartData = getPortfolioChartData();
   const allocationData = getAllocationData();
 
-  const COLORS = ['#F7931A', '#6B8CEF', '#00D395', '#8B5CF6'];
+  const cardSurface = darkMode
+    ? "bg-zinc-950 border border-[#ccab6c]/30"
+    : "bg-white border border-[#ccab6c]/45 shadow-sm";
+  const rowDivider = darkMode ? "border-[#ccab6c]/20" : "border-[#ccab6c]/25";
+  const subtitle = darkMode ? "text-[#ccab6c]/85" : "text-stone-600";
+  const kpiLabel = darkMode ? "text-[#ccab6c]/90" : "text-stone-600";
+  const kpiValue = darkMode ? "text-[#fedea0]" : "text-stone-900";
+  const sectionTitle = darkMode ? "text-white" : "text-stone-900";
+  const bodyMuted = darkMode ? "text-zinc-400" : "text-stone-600";
+  const legendMuted = darkMode ? "text-zinc-300" : "text-stone-700";
+  const pendingMuted = darkMode ? "text-zinc-500" : "text-stone-400";
+  const neutralAmount = darkMode ? "text-zinc-300" : "text-stone-700";
+
+  const tooltipStyle = {
+    backgroundColor: darkMode ? "#0c0c0c" : "#FFFFFF",
+    border: `1px solid ${darkMode ? `${GOLD_MID}55` : `${GOLD_MID}90`}`,
+    borderRadius: "8px",
+    color: darkMode ? "#fafafa" : "#1c1917",
+  };
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <div className={darkMode ? 'text-white' : 'text-slate-900'}>Loading your portfolio...</div>
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-black" : "bg-stone-50"}`}>
+        <div className={darkMode ? "text-[#fedea0]" : "text-stone-900"}>Loading your portfolio...</div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen p-6 ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div className={`min-h-screen p-6 ${darkMode ? "bg-black" : "bg-stone-50"}`}>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+        <div
+          className="space-y-2 rounded-2xl px-3 py-4 sm:px-4"
+          style={{
+            background: darkMode
+              ? "radial-gradient(ellipse 120% 200% at 50% 0%, rgba(254, 222, 160, 0.08), transparent 55%)"
+              : "radial-gradient(ellipse 120% 200% at 50% 0%, rgba(204, 171, 108, 0.14), transparent 55%)",
+          }}
+        >
+          <h1 className={`text-3xl font-bold ${sectionTitle}`}>
             Welcome back, {user?.full_name?.split(' ')[0] || 'Investor'}
           </h1>
-          <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
+          <p className={subtitle}>
             Here's your portfolio overview for {format(new Date(), 'MMMM yyyy')}
           </p>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader className="pb-3">
-              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                <DollarSign className="w-4 h-4" />
+              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${kpiLabel}`}>
+                <DollarSign className="w-4 h-4 shrink-0 text-[#b38922]" />
                 Invested Amount
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              <div className={`text-2xl font-bold ${kpiValue}`}>
                 ${metrics.totalInvested.toLocaleString()}
               </div>
             </CardContent>
           </Card>
 
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader className="pb-3">
-              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                <TrendingUp className="w-4 h-4" />
+              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${kpiLabel}`}>
+                <TrendingUp className="w-4 h-4 shrink-0 text-[#b38922]" />
                 Current Value
               </CardTitle>
             </CardHeader>
             <CardContent>
               {metrics.currentValue !== null ? (
                 <>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                  <div className={`text-2xl font-bold ${kpiValue}`}>
                     ${metrics.currentValue.toLocaleString()}
                   </div>
                   <div className={`text-sm flex items-center gap-1 mt-1 ${
@@ -264,17 +296,17 @@ export default function Dashboard() {
                   </div>
                 </>
               ) : (
-                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                <div className={`text-2xl font-bold ${pendingMuted}`}>
                   Data Pending
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader className="pb-3">
-              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                <PieChart className="w-4 h-4" />
+              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${kpiLabel}`}>
+                <PieChart className="w-4 h-4 shrink-0 text-[#b38922]" />
                 Total P&L
               </CardTitle>
             </CardHeader>
@@ -286,39 +318,39 @@ export default function Dashboard() {
                   }`}>
                     {metrics.totalPnL >= 0 ? '+' : ''}${metrics.totalPnL.toLocaleString()}
                   </div>
-                  <div className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <div className={`text-sm mt-1 ${bodyMuted}`}>
                     {metrics.totalPnLPercent?.toFixed(2)}%
                   </div>
                 </>
               ) : (
-                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                <div className={`text-2xl font-bold ${pendingMuted}`}>
                   Data Pending
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader className="pb-3">
-              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                <Lock className="w-4 h-4" />
+              <CardTitle className={`text-sm font-medium flex items-center gap-2 ${kpiLabel}`}>
+                <Lock className="w-4 h-4 shrink-0 text-[#b38922]" />
                 Lock-in Status
               </CardTitle>
             </CardHeader>
             <CardContent>
               {nextExpiry ? (
                 <div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                  <div className={`text-2xl font-bold ${kpiValue}`}>
                     {differenceInDays(new Date(nextExpiry.lock_in_end_date), new Date())} days
                   </div>
-                  <div className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <div className={`text-sm mt-1 ${bodyMuted}`}>
                     Until next unlock
                   </div>
                 </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold text-green-500">Unlocked</div>
-                  <div className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <div className={`text-sm mt-1 ${bodyMuted}`}>
                     All positions available
                   </div>
                 </div>
@@ -330,11 +362,18 @@ export default function Dashboard() {
         {/* Charts Row */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Portfolio Growth Chart */}
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader>
-              <CardTitle className={`flex items-center justify-between ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              <CardTitle className={`flex items-center justify-between ${sectionTitle}`}>
                 Portfolio Growth
-                <Badge variant="secondary" className={darkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'}>
+                <Badge
+                  variant="secondary"
+                  className={
+                    darkMode
+                      ? "border border-[#ccab6c]/40 bg-[#b38922]/15 text-[#fedea0]"
+                      : "border border-[#b38922]/35 bg-[#fedea0]/35 text-[#8a6818]"
+                  }
+                >
                   12M
                 </Badge>
               </CardTitle>
@@ -343,23 +382,17 @@ export default function Dashboard() {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#E5E7EB'} />
-                    <XAxis dataKey="month" stroke={darkMode ? '#9CA3AF' : '#6B7280'} />
-                    <YAxis stroke={darkMode ? '#9CA3AF' : '#6B7280'} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: darkMode ? '#1F2937' : '#FFFFFF', 
-                        border: `1px solid ${darkMode ? '#374151' : '#E5E7EB'}`,
-                        borderRadius: '8px',
-                        color: darkMode ? '#fff' : '#000'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#FFD700" 
+                    <CartesianGrid strokeDasharray="3 3" stroke={`${GOLD_MID}33`} />
+                    <XAxis dataKey="month" stroke={GOLD_MID} tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }} />
+                    <YAxis stroke={GOLD_MID} tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={GOLD_DEEP}
                       strokeWidth={3}
-                      dot={{ fill: '#FFD700', strokeWidth: 2, r: 4 }}
+                      dot={{ fill: GOLD_LIGHT, stroke: GOLD_DEEP, strokeWidth: 2, r: 4 }}
+                      activeDot={{ fill: GOLD_LIGHT, stroke: GOLD_DEEP, r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -368,9 +401,9 @@ export default function Dashboard() {
           </Card>
 
           {/* Asset Allocation */}
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader>
-              <CardTitle className={darkMode ? 'text-white' : 'text-slate-900'}>Asset Allocation</CardTitle>
+              <CardTitle className={sectionTitle}>Asset Allocation</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -384,17 +417,10 @@ export default function Dashboard() {
                       dataKey="value"
                     >
                       {allocationData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={ALLOCATION_COLORS[index % ALLOCATION_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: darkMode ? '#1F2937' : '#FFFFFF', 
-                        border: `1px solid ${darkMode ? '#374151' : '#E5E7EB'}`,
-                        borderRadius: '8px',
-                        color: darkMode ? '#fff' : '#000'
-                      }}
-                    />
+                    <Tooltip contentStyle={tooltipStyle} />
                   </RechartsPieChart>
                 </ResponsiveContainer>
               </div>
@@ -402,15 +428,15 @@ export default function Dashboard() {
                 {allocationData.map((item, index) => (
                   <div key={item.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div 
+                      <div
                         className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        style={{ backgroundColor: ALLOCATION_COLORS[index % ALLOCATION_COLORS.length] }}
                       />
-                      <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                      <span className={`text-sm ${legendMuted}`}>
                         {item.name}
                       </span>
                     </div>
-                    <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                    <span className={`text-sm font-medium ${darkMode ? "text-[#fedea0]" : "text-stone-900"}`}>
                       ${item.value.toLocaleString()}
                     </span>
                   </div>
@@ -423,38 +449,41 @@ export default function Dashboard() {
         {/* Recent Activity & Documents */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Recent Transactions */}
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader>
-              <CardTitle className={darkMode ? 'text-white' : 'text-slate-900'}>Recent Activity</CardTitle>
+              <CardTitle className={sectionTitle}>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {transactions.length > 0 ? transactions.slice(0, 5).map((transaction) => (
-                  <div key={transaction.id} className={`flex items-center justify-between py-3 border-b last:border-b-0 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                  <div key={transaction.id} className={`flex items-center justify-between py-3 border-b last:border-b-0 ${rowDivider}`}>
                     <div className="space-y-1">
-                      <p className={`font-medium capitalize ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                      <p className={`font-medium capitalize ${sectionTitle}`}>
                         {transaction.type}
                       </p>
-                      <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                      <p className={`text-sm ${bodyMuted}`}>
                         {format(new Date(transaction.transaction_date), 'MMM dd, yyyy')}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className={`font-medium ${
-                        transaction.type === 'subscription' ? 'text-green-500' : 
-                        transaction.type === 'redemption' ? 'text-red-500' : 
-                        darkMode ? 'text-slate-300' : 'text-slate-700'
+                        transaction.type === 'subscription' ? 'text-green-500' :
+                        transaction.type === 'redemption' ? 'text-red-500' :
+                        neutralAmount
                       }`}>
                         {transaction.type === 'subscription' ? '+' : transaction.type === 'redemption' ? '-' : ''}
                         ${transaction.amount?.toLocaleString()}
                       </p>
-                      <Badge variant="outline" className="text-xs mt-1">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs mt-1 ${darkMode ? "border-[#ccab6c]/50 text-[#ccab6c]" : "border-[#b38922]/45 text-[#8a6818]"}`}
+                      >
                         {transaction.status}
                       </Badge>
                     </div>
                   </div>
                 )) : (
-                  <p className={`text-center py-8 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <p className={`text-center py-8 ${bodyMuted}`}>
                     No recent transactions
                   </p>
                 )}
@@ -463,30 +492,34 @@ export default function Dashboard() {
           </Card>
 
           {/* Available Documents */}
-          <Card className={darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}>
+          <Card className={cardSurface}>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className={darkMode ? 'text-white' : 'text-slate-900'}>Recent Documents</CardTitle>
-              <Bell className="w-5 h-5 text-yellow-500" />
+              <CardTitle className={sectionTitle}>Recent Documents</CardTitle>
+              <Bell className="w-5 h-5 text-[#fedea0]" />
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {documents.length > 0 ? documents.map((doc) => (
-                  <div key={doc.id} className={`flex items-center justify-between py-3 border-b last:border-b-0 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+                  <div key={doc.id} className={`flex items-center justify-between py-3 border-b last:border-b-0 ${rowDivider}`}>
                     <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-yellow-500" />
+                      <FileText className="w-5 h-5 text-[#fedea0]" />
                       <div>
-                        <p className={`font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                        <p className={`font-medium ${sectionTitle}`}>
                           {doc.title}
                         </p>
-                        <p className={`text-sm capitalize ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <p className={`text-sm capitalize ${bodyMuted}`}>
                           {doc.type.replace('_', ' ')}
                         </p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-black"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={
+                        darkMode
+                          ? "border-[#b38922] text-[#fedea0] hover:bg-[#b38922]/25 hover:text-[#fedea0]"
+                          : "border-[#b38922] text-[#8a6818] hover:bg-[#fedea0]/40 hover:text-[#5c4510]"
+                      }
                     >
                       <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
                         Download
@@ -494,7 +527,7 @@ export default function Dashboard() {
                     </Button>
                   </div>
                 )) : (
-                  <p className={`text-center py-8 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <p className={`text-center py-8 ${bodyMuted}`}>
                     No documents available
                   </p>
                 )}

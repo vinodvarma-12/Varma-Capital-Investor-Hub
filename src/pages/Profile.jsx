@@ -11,7 +11,7 @@ import { UserCircle, Mail, Phone, Home, Banknote, Bell, ShieldCheck, KeyRound, E
 import TwoFactorSetup from "@/components/security/TwoFactorSetup";
 
 const ProfileSection = ({ title, icon, children }) => (
-  <Card className="bg-gray-900 border-gray-800">
+  <Card className="bg-zinc-950 border border-[#ccab6c]/30">
     <CardHeader className="flex flex-row items-center gap-3">
       {icon}
       <CardTitle className="text-white">{title}</CardTitle>
@@ -24,9 +24,9 @@ const ProfileSection = ({ title, icon, children }) => (
 
 const InfoRow = ({ label, value, icon }) => (
   <div className="flex items-start">
-    <div className="w-8 text-gray-400">{icon}</div>
+    <div className="w-8 text-[#ccab6c]/90">{icon}</div>
     <div className="flex-1">
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-sm text-[#ccab6c]/90">{label}</p>
       <p className="text-white font-medium">{value || '-'}</p>
     </div>
   </div>
@@ -41,10 +41,10 @@ const EditRow = ({ label, value, name, onChange, icon }) => {
 
     return (
       <div className="flex items-center">
-        <div className="w-8 text-gray-400">{icon}</div>
+        <div className="w-8 text-[#ccab6c]/90">{icon}</div>
         <div className="flex-1 space-y-1">
-          <Label htmlFor={name} className="text-sm text-gray-400">{label}</Label>
-          <Input id={name} name={name} value={value || ''} onChange={handleChange} className="bg-gray-800 border-gray-700 text-white"/>
+          <Label htmlFor={name} className="text-sm text-[#ccab6c]/90">{label}</Label>
+          <Input id={name} name={name} value={value || ''} onChange={handleChange} className="bg-zinc-900 border-[#ccab6c]/20 text-white"/>
         </div>
       </div>
     );
@@ -118,26 +118,26 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading your profile...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Profile Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Avatar className="w-24 h-24">
-              <AvatarFallback className="text-4xl bg-yellow-400 text-black font-semibold">
+              <AvatarFallback className="text-4xl bg-[#fedea0] text-black font-semibold">
                 {user?.full_name?.charAt(0) || user?.email?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
-              <p className="text-lg text-gray-400">{user?.email}</p>
+              <p className="text-lg text-[#ccab6c]/90">{user?.email}</p>
               <Badge className="mt-2" variant={user?.kyc_status === 'verified' ? 'default' : 'destructive'}>
                 <ShieldCheck className="w-3 h-3 mr-1"/>
                 KYC {user?.kyc_status?.toUpperCase()}
@@ -151,7 +151,7 @@ export default function Profile() {
                   setIsEditing(false);
                   setEditableUser(JSON.parse(JSON.stringify(user))); // Reset editableUser to original
                 }}><X className="w-4 h-4 mr-2"/>Cancel</Button>
-                <Button onClick={handleSave} className="bg-yellow-400 text-black hover:bg-yellow-500"><Save className="w-4 h-4 mr-2"/>Save</Button>
+                <Button onClick={handleSave} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"><Save className="w-4 h-4 mr-2"/>Save</Button>
               </div>
             ) : (
               <Button onClick={() => setIsEditing(true)}><Edit className="w-4 h-4 mr-2"/>Edit Profile</Button>
@@ -161,7 +161,7 @@ export default function Profile() {
 
         {/* Profile Details Grid */}
         <div className="grid lg:grid-cols-2 gap-6">
-          <ProfileSection title="Personal Information" icon={<UserCircle className="w-5 h-5 text-yellow-400"/>}>
+          <ProfileSection title="Personal Information" icon={<UserCircle className="w-5 h-5 text-[#fedea0]"/>}>
             {isEditing ? (
               <>
                 <EditRow label="Full Name" name="full_name" value={editableUser.full_name} onChange={handleInputChange} icon={<UserCircle className="w-4 h-4"/>}/>
@@ -184,7 +184,7 @@ export default function Profile() {
             )}
           </ProfileSection>
 
-          <ProfileSection title="Bank Details" icon={<Banknote className="w-5 h-5 text-yellow-400"/>}>
+          <ProfileSection title="Bank Details" icon={<Banknote className="w-5 h-5 text-[#fedea0]"/>}>
             {isEditing ? (
               <>
                 <EditRow label="Bank Name" name="bank_details.bank_name" value={editableUser.bank_details?.bank_name} onChange={handleInputChange} icon={<Banknote className="w-4 h-4"/>}/>
@@ -198,7 +198,7 @@ export default function Profile() {
             )}
           </ProfileSection>
 
-          <ProfileSection title="Preferences" icon={<Bell className="w-5 h-5 text-yellow-400"/>}>
+          <ProfileSection title="Preferences" icon={<Bell className="w-5 h-5 text-[#fedea0]"/>}>
             <div className="flex items-center justify-between">
               <Label htmlFor="email_notifications" className="text-white">Email Notifications</Label>
               <Switch id="email_notifications" checked={preferences.email_notifications} onCheckedChange={(val) => handlePreferenceChange('email_notifications', val)}/>
@@ -209,11 +209,11 @@ export default function Profile() {
             </div>
           </ProfileSection>
 
-          <ProfileSection title="Security" icon={<KeyRound className="w-5 h-5 text-yellow-400"/>}>
+          <ProfileSection title="Security" icon={<KeyRound className="w-5 h-5 text-[#fedea0]"/>}>
             <div className="flex items-center justify-between">
               <div>
                  <Label className="text-white">Login Method</Label>
-                 <p className="text-sm text-gray-400">Your account is secured by Google SSO. All password management is handled directly by Google for the highest level of security.</p>
+                 <p className="text-sm text-[#ccab6c]/90">Your account is secured by Google SSO. All password management is handled directly by Google for the highest level of security.</p>
               </div>
               <Button asChild variant="outline">
                 <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer">

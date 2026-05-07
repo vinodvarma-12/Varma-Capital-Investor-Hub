@@ -270,14 +270,14 @@ export default function Layout({ children, currentPageName }) {
   // Show loading while checking auth for protected pages
   if (!authChecked && !isPublicPage) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <div className="text-center space-y-4">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="space-y-4 text-center">
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
             alt="Varma Capital" 
-            className="w-24 h-24 mx-auto"
+            className="mx-auto h-24 w-24"
           />
-          <div className={darkMode ? 'text-white' : 'text-slate-900'}>Loading...</div>
+          <div className="text-muted-foreground">Loading...</div>
         </div>
       </div>
     );
@@ -285,14 +285,14 @@ export default function Layout({ children, currentPageName }) {
 
   if (!user) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <div className="text-center space-y-4">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="space-y-4 text-center">
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
             alt="Varma Capital" 
-            className="w-24 h-24 mx-auto"
+            className="mx-auto h-24 w-24"
           />
-          <div className={darkMode ? 'text-white' : 'text-slate-900'}>Loading Varma Capital Portal...</div>
+          <div className="text-muted-foreground">Loading Varma Capital Portal...</div>
         </div>
       </div>
     );
@@ -301,23 +301,20 @@ export default function Layout({ children, currentPageName }) {
   return (
         <>
           <style>{`
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-          width: 6px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track {
-          background: ${darkMode ? 'hsl(217 33% 17%)' : 'hsl(210 40% 96%)'};
+          background: ${darkMode ? '#0a0a0a' : '#f5f5f4'};
         }
         ::-webkit-scrollbar-thumb {
-          background: ${darkMode ? 'hsl(215 20% 65%)' : 'hsl(215.4 16.3% 46.9%)'};
+          background: ${darkMode ? '#b3892266' : '#ccab6c'};
           border-radius: 3px;
         }
       `}</style>
 
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
-          <Sidebar className={`border-r ${darkMode ? 'border-slate-800 bg-slate-950' : 'border-slate-200 bg-white'}`}>
-            <SidebarHeader className={`border-b p-6 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+          <Sidebar className="border-r border-sidebar-border bg-sidebar">
+            <SidebarHeader className="border-b border-sidebar-border p-6">
               <div className="flex items-center gap-3">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
@@ -325,9 +322,9 @@ export default function Layout({ children, currentPageName }) {
                   className="w-10 h-10 object-contain"
                 />
                 <div>
-                  <h2 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-slate-900'}`}>Varma Capital</h2>
+                  <h2 className="font-bold text-lg text-sidebar-foreground">Varma Capital</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Investor Portal</p>
+                    <p className="text-xs text-muted-foreground">Investor Portal</p>
                     {getRoleBadge(user.role)}
                   </div>
                 </div>
@@ -341,7 +338,7 @@ export default function Layout({ children, currentPageName }) {
                     {navigationItems.map((item) => (
                       <div key={item.title}>
                         {item.divider && (
-                          <div className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-500' : 'text-slate-400'} border-t ${darkMode ? 'border-slate-800' : 'border-slate-200'} mt-2 pt-4`}>
+                          <div className="border-t border-sidebar-border mt-2 px-4 py-2 pt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             {user?.role === 'super_admin' && item.title.includes('Super') ? 'Super Admin' : 
                              user?.role === 'admin' && item.title.includes('Admin') ? 'Admin Tools' : ''}
                           </div>
@@ -352,8 +349,8 @@ export default function Layout({ children, currentPageName }) {
                             className={`transition-all duration-200 rounded-xl mb-1 ${
                                                               location.pathname === item.url || 
                                                               (item.title === "News & Insights" && currentPageName === "NewsAndInsights") ? 
-                                                              `${darkMode ? 'bg-slate-800 text-[#d4af37]' : 'bg-amber-50 text-[#d4af37]'}` : 
-                                                              `${darkMode ? 'text-slate-300 hover:bg-slate-800 hover:text-[#d4af37]' : 'text-slate-700 hover:bg-slate-100 hover:text-[#d4af37]'}`
+                                                              'bg-sidebar-accent text-[#fedea0] dark:text-[#fedea0] light:bg-[#fedea0]/30 light:text-[#8a6818]' : 
+                                                              'text-sidebar-foreground hover:bg-sidebar-accent hover:text-[#fedea0] light:hover:text-[#b38922]'
                                                             }`}
                           >
                             <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
@@ -369,19 +366,19 @@ export default function Layout({ children, currentPageName }) {
               </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter className={`border-t p-4 ${darkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+            <SidebarFooter className="border-t border-sidebar-border p-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-8 h-8">
-                                          <AvatarFallback className="bg-[#d4af37] text-black text-sm font-semibold">
+                                          <AvatarFallback className="bg-[#b38922] text-black text-sm font-semibold">
                                             {user.full_name?.charAt(0) || user.email?.charAt(0)}
                                           </AvatarFallback>
                                         </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-medium text-sm truncate ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                    <p className="truncate text-sm font-medium text-sidebar-foreground">
                       {user.full_name || user.email}
                     </p>
-                    <p className={`text-xs truncate capitalize ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <p className="truncate text-xs capitalize text-muted-foreground">
                       {user.role?.replace('_', ' ')} {user.department && `• ${user.department}`}
                     </p>
                   </div>
@@ -392,7 +389,7 @@ export default function Layout({ children, currentPageName }) {
                     variant="ghost"
                     size="sm"
                     onClick={toggleDarkMode}
-                    className={`flex-1 ${darkMode ? 'text-slate-400 hover:text-yellow-400 hover:bg-slate-800' : 'text-slate-600 hover:text-yellow-600 hover:bg-slate-100'}`}
+                    className="flex-1 text-muted-foreground hover:bg-sidebar-accent hover:text-[#fedea0]"
                   >
                     {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   </Button>
@@ -400,7 +397,7 @@ export default function Layout({ children, currentPageName }) {
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className={`flex-1 ${darkMode ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-600 hover:text-red-600 hover:bg-slate-100'}`}
+                    className="flex-1 text-muted-foreground hover:bg-sidebar-accent hover:text-red-400"
                   >
                     <LogOut className="w-4 h-4" />
                   </Button>
@@ -409,16 +406,16 @@ export default function Layout({ children, currentPageName }) {
             </SidebarFooter>
           </Sidebar>
 
-          <main className={`flex-1 flex flex-col ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
-            <header className={`border-b px-6 py-4 md:hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+          <main className="flex flex-1 flex-col bg-background">
+            <header className="border-b border-border bg-card px-6 py-4 md:hidden">
               <div className="flex items-center gap-4">
-                <SidebarTrigger className={`p-2 rounded-lg transition-colors duration-200 ${darkMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-slate-100 text-slate-900'}`} />
+                <SidebarTrigger className="rounded-lg p-2 text-foreground transition-colors duration-200 hover:bg-accent" />
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
                   alt="Varma Capital" 
                   className="w-8 h-8 object-contain"
                 />
-                <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Varma Capital</h1>
+                <h1 className="text-xl font-semibold text-foreground">Varma Capital</h1>
                 {getRoleBadge(user.role)}
               </div>
             </header>
@@ -427,9 +424,8 @@ export default function Layout({ children, currentPageName }) {
                               {children}
                             </div>
 
-                            {/* Footer */}
-                            <footer className={`border-t px-6 py-4 text-center text-sm ${darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-600'}`}>
-                              Varma Capital © 2025 — All Rights Reserved
+                            <footer className="border-t border-border bg-card px-6 py-4 text-center text-sm text-muted-foreground">
+                              Varma Capital © 2026 — All Rights Reserved
                             </footer>
                           </main>
                         </div>
@@ -437,7 +433,7 @@ export default function Layout({ children, currentPageName }) {
 
                       {/* Compliance Popup */}
                       <Dialog open={showCompliancePopup} onOpenChange={() => {}}>
-                        <DialogContent className={`${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} max-w-md`} onPointerDownOutside={(e) => e.preventDefault()}>
+                        <DialogContent className="max-w-md border-border bg-card" onPointerDownOutside={(e) => e.preventDefault()}>
                           <DialogHeader>
                             <div className="flex justify-center mb-4">
                               <img 
@@ -446,17 +442,17 @@ export default function Layout({ children, currentPageName }) {
                                 className="w-12 h-12"
                               />
                             </div>
-                            <DialogTitle className={`text-center ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                            <DialogTitle className="text-center text-card-foreground">
                               Important Disclosure
                             </DialogTitle>
                           </DialogHeader>
-                          <div className={`text-center py-4 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                          <div className="py-4 text-center text-muted-foreground">
                             <p>This portal is for informational purposes only. Past performance is not indicative of future results.</p>
                           </div>
                           <DialogFooter className="sm:justify-center">
                             <Button 
                               onClick={handleAcceptCompliance}
-                              className="bg-[#d4af37] text-black hover:bg-[#c4a030] px-8"
+                              className="bg-[#fedea0] px-8 text-black hover:bg-[#ccab6c]"
                             >
                               I Understand
                             </Button>

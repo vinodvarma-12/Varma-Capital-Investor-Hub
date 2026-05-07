@@ -137,7 +137,7 @@ const NAVForm = ({ nav, products, onSave, onCancel }) => {
 
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" className="bg-yellow-400 text-black hover:bg-yellow-500">
+        <Button type="submit" className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
           Save NAV/Return
         </Button>
       </div>
@@ -214,7 +214,7 @@ const CSVUploadForm = ({ products, onUpload, onCancel }) => {
           accept=".csv" 
           onChange={(e) => setSelectedFile(e.target.files[0])} 
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-[#ccab6c]/90 mt-1">
           Expected columns: date, nav_per_unit, return_percent, investor_email (optional)
         </p>
       </div>
@@ -224,7 +224,7 @@ const CSVUploadForm = ({ products, onUpload, onCancel }) => {
         <Button 
           onClick={handleUpload} 
           disabled={!selectedFile || !productId || uploading}
-          className="bg-yellow-400 text-black hover:bg-yellow-500"
+          className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
         >
           {uploading ? 'Processing...' : 'Upload & Process'}
         </Button>
@@ -370,29 +370,29 @@ export default function AdminNAV() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading NAV management...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">NAV & Returns Management</h1>
-            <p className="text-gray-400">Set NAVs, fabricate returns, and manage investor portfolio values</p>
+            <p className="text-[#ccab6c]/90">Set NAVs, fabricate returns, and manage investor portfolio values</p>
           </div>
           <div className="flex gap-3">
             <Dialog open={showCSVUpload} onOpenChange={setShowCSVUpload}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-yellow-400 text-yellow-400">
+                <Button variant="outline" className="border-[#b38922] text-[#fedea0]">
                   <FileSpreadsheet className="w-4 h-4 mr-2" />
                   Upload CSV
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 border-gray-800">
+              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
                 <DialogHeader>
                   <DialogTitle className="text-white">Upload NAV Data via CSV</DialogTitle>
                 </DialogHeader>
@@ -406,12 +406,12 @@ export default function AdminNAV() {
 
             <Dialog open={showNAVForm} onOpenChange={setShowNAVForm}>
               <DialogTrigger asChild>
-                <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
+                <Button className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                   <Plus className="w-4 h-4 mr-2" />
                   Set NAV/Return
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-white">
                     {editingNAV ? 'Edit NAV/Return' : 'Set New NAV/Return'}
@@ -432,20 +432,20 @@ export default function AdminNAV() {
         </div>
 
         <Tabs defaultValue="fabricated" className="space-y-6">
-          <TabsList className="bg-gray-800 border-gray-700">
-            <TabsTrigger value="fabricated" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+            <TabsTrigger value="fabricated" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Admin-Set Returns
             </TabsTrigger>
-            <TabsTrigger value="official" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="official" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Official NAVs
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="fabricated">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-yellow-400" />
+                  <TrendingUp className="w-5 h-5 text-[#fedea0]" />
                   Admin-Controlled Returns & NAVs
                 </CardTitle>
               </CardHeader>
@@ -453,33 +453,33 @@ export default function AdminNAV() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-gray-800">
-                        <TableHead className="text-gray-400">Date</TableHead>
-                        <TableHead className="text-gray-400">Product</TableHead>
-                        <TableHead className="text-gray-400">Investor</TableHead>
-                        <TableHead className="text-gray-400">NAV/Unit</TableHead>
-                        <TableHead className="text-gray-400">Return %</TableHead>
-                        <TableHead className="text-gray-400">Override</TableHead>
-                        <TableHead className="text-gray-400">Actions</TableHead>
+                      <TableRow className="border-[#ccab6c]/25">
+                        <TableHead className="text-[#ccab6c]/90">Date</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Product</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Investor</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">NAV/Unit</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Return %</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Override</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {fabricatedReturns.map((record) => (
-                        <TableRow key={record.id} className="border-gray-800">
-                          <TableCell className="text-gray-300">
+                        <TableRow key={record.id} className="border-[#ccab6c]/25">
+                          <TableCell className="text-zinc-300">
                             {format(new Date(record.effective_date), 'MMM dd, yyyy')}
                           </TableCell>
                           <TableCell className="text-white font-medium">
                             {getProductName(record.product_id)}
                           </TableCell>
-                          <TableCell className="text-gray-300">
+                          <TableCell className="text-zinc-300">
                             {record.investor_email || (
                               <Badge variant="secondary" className="bg-blue-900 text-blue-300">
                                 All Investors
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-gray-300">
+                          <TableCell className="text-zinc-300">
                             ${record.nav_per_unit?.toFixed(4)}
                           </TableCell>
                           <TableCell className={`font-medium ${
@@ -489,7 +489,7 @@ export default function AdminNAV() {
                           </TableCell>
                           <TableCell>
                             {record.override_calculated ? (
-                              <Badge className="bg-yellow-900 text-yellow-400">
+                              <Badge className="bg-[#b38922]/25 text-[#fedea0]">
                                 <AlertCircle className="w-3 h-3 mr-1" />
                                 Override
                               </Badge>
@@ -523,7 +523,7 @@ export default function AdminNAV() {
           </TabsContent>
 
           <TabsContent value="official">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardHeader>
                 <CardTitle className="text-white">Official NAV Records</CardTitle>
               </CardHeader>
@@ -531,27 +531,27 @@ export default function AdminNAV() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-gray-800">
-                        <TableHead className="text-gray-400">Date</TableHead>
-                        <TableHead className="text-gray-400">Product</TableHead>
-                        <TableHead className="text-gray-400">NAV per Unit</TableHead>
-                        <TableHead className="text-gray-400">Total AUM</TableHead>
-                        <TableHead className="text-gray-400">Type</TableHead>
+                      <TableRow className="border-[#ccab6c]/25">
+                        <TableHead className="text-[#ccab6c]/90">Date</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Product</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">NAV per Unit</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Total AUM</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Type</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {navRecords.map((nav) => (
-                        <TableRow key={nav.id} className="border-gray-800">
-                          <TableCell className="text-gray-300">
+                        <TableRow key={nav.id} className="border-[#ccab6c]/25">
+                          <TableCell className="text-zinc-300">
                             {format(new Date(nav.date), 'MMM dd, yyyy')}
                           </TableCell>
                           <TableCell className="text-white font-medium">
                             {getProductName(nav.product_id)}
                           </TableCell>
-                          <TableCell className="text-gray-300">
+                          <TableCell className="text-zinc-300">
                             ${nav.nav_per_unit?.toFixed(4)}
                           </TableCell>
-                          <TableCell className="text-gray-300">
+                          <TableCell className="text-zinc-300">
                             {nav.total_aum ? `$${nav.total_aum.toLocaleString()}` : '-'}
                           </TableCell>
                           <TableCell>

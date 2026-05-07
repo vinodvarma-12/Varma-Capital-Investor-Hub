@@ -59,7 +59,7 @@ export const EditAmountModal = ({ open, onOpenChange, investment, onSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Edit Investment Amount</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div>
@@ -67,16 +67,16 @@ export const EditAmountModal = ({ open, onOpenChange, investment, onSave }) => {
           </div>
           <div>
             <Label>New Amount ($)</Label>
-            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="bg-gray-800 border-gray-700" />
+            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div>
             <Label>Reason for Change</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !reason} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={saving || !reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
@@ -121,7 +121,7 @@ export const EditUnitsModal = ({ open, onOpenChange, investment, onSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Edit Units</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div>
@@ -129,16 +129,16 @@ export const EditUnitsModal = ({ open, onOpenChange, investment, onSave }) => {
           </div>
           <div>
             <Label>New Units</Label>
-            <Input type="number" step="0.0001" value={units} onChange={e => setUnits(e.target.value)} className="bg-gray-800 border-gray-700" />
+            <Input type="number" step="0.0001" value={units} onChange={e => setUnits(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div>
             <Label>Reason for Change</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !reason} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={saving || !reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
@@ -214,14 +214,14 @@ export const EditLockInModal = ({ open, onOpenChange, investment, onSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Edit Lock-in Period</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Lock-in Period (Months)</Label>
               <Select value={lockInMonths.toString()} onValueChange={val => setLockInMonths(parseInt(val))}>
-                <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {lockInPresets.map(m => <SelectItem key={m} value={m.toString()}>{m} months</SelectItem>)}
                 </SelectContent>
@@ -229,13 +229,13 @@ export const EditLockInModal = ({ open, onOpenChange, investment, onSave }) => {
             </div>
             <div>
               <Label>End Date</Label>
-              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-gray-800 border-gray-700" />
+              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
           </div>
           <div>
             <Label>Early Redemption Penalty</Label>
             <Select value={penaltyType} onValueChange={setPenaltyType}>
-              <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No Penalty</SelectItem>
                 <SelectItem value="fixed">Fixed Amount</SelectItem>
@@ -247,23 +247,23 @@ export const EditLockInModal = ({ open, onOpenChange, investment, onSave }) => {
           {(penaltyType === 'fixed' || penaltyType === 'both') && (
             <div>
               <Label>Fixed Penalty ($)</Label>
-              <Input type="number" value={penaltyAmount} onChange={e => setPenaltyAmount(e.target.value)} className="bg-gray-800 border-gray-700" />
+              <Input type="number" value={penaltyAmount} onChange={e => setPenaltyAmount(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
           )}
           {(penaltyType === 'percentage' || penaltyType === 'both') && (
             <div>
               <Label>Penalty (%)</Label>
-              <Input type="number" step="0.1" value={penaltyPercent} onChange={e => setPenaltyPercent(e.target.value)} className="bg-gray-800 border-gray-700" />
+              <Input type="number" step="0.1" value={penaltyPercent} onChange={e => setPenaltyPercent(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
           )}
           <div>
             <Label>Reason for Change</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !reason} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={saving || !reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {saving ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
@@ -321,22 +321,22 @@ export const EditNAVModal = ({ open, onOpenChange, investment, products, onSave 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Edit NAV - {productName}</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Period (Month)</Label>
-              <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-gray-800 border-gray-700" />
+              <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
             <div>
               <Label>NAV per Unit</Label>
-              <Input type="number" step="0.0001" value={navPerUnit} onChange={e => setNavPerUnit(e.target.value)} className="bg-gray-800 border-gray-700" />
+              <Input type="number" step="0.0001" value={navPerUnit} onChange={e => setNavPerUnit(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
             </div>
           </div>
           <div>
             <Label>Total AUM (Optional)</Label>
-            <Input type="number" value={totalAUM} onChange={e => setTotalAUM(e.target.value)} className="bg-gray-800 border-gray-700" />
+            <Input type="number" value={totalAUM} onChange={e => setTotalAUM(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={isOfficial} onCheckedChange={setIsOfficial} />
@@ -344,12 +344,12 @@ export const EditNAVModal = ({ open, onOpenChange, investment, products, onSave 
           </div>
           <div>
             <Label>Reason</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !reason} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={saving || !reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {saving ? 'Saving...' : 'Save NAV'}
           </Button>
         </DialogFooter>
@@ -408,14 +408,14 @@ export const EditReturnModal = ({ open, onOpenChange, investment, investorEmail,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Edit Return Override</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Period Type</Label>
               <Select value={periodType} onValueChange={setPeriodType}>
-                <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="annual">Annual</SelectItem>
@@ -430,13 +430,13 @@ export const EditReturnModal = ({ open, onOpenChange, investment, investorEmail,
                 onChange={e => setPeriod(periodType === 'annual' ? e.target.value : e.target.value)}
                 min={periodType === 'annual' ? 2020 : undefined}
                 max={periodType === 'annual' ? 2030 : undefined}
-                className="bg-gray-800 border-gray-700" 
+                className="bg-zinc-900 border-[#ccab6c]/20" 
               />
             </div>
           </div>
           <div>
             <Label>Return Percentage (%)</Label>
-            <Input type="number" step="0.01" value={returnPercent} onChange={e => setReturnPercent(e.target.value)} className="bg-gray-800 border-gray-700" />
+            <Input type="number" step="0.01" value={returnPercent} onChange={e => setReturnPercent(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={overrideCalculated} onCheckedChange={setOverrideCalculated} />
@@ -444,12 +444,12 @@ export const EditReturnModal = ({ open, onOpenChange, investment, investorEmail,
           </div>
           <div>
             <Label>Reason</Label>
-            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-gray-800 border-gray-700" />
+            <Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Required" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !reason} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleSave} disabled={saving || !reason} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {saving ? 'Saving...' : 'Save Override'}
           </Button>
         </DialogFooter>
@@ -500,31 +500,31 @@ export const UploadStatementModal = ({ open, onOpenChange, investorEmail, onSave
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Upload Statement PDF</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div>
             <Label>Statement Title</Label>
-            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Q4 2024 Statement" className="bg-gray-800 border-gray-700" />
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Q4 2024 Statement" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div>
             <Label>Period</Label>
-            <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-gray-800 border-gray-700" />
+            <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div>
             <Label>PDF File</Label>
-            <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center">
+            <div className="border-2 border-dashed border-[#ccab6c]/20 rounded-lg p-4 text-center">
               <input type="file" accept=".pdf" onChange={e => setFile(e.target.files[0])} className="hidden" id="statement-upload" />
               <label htmlFor="statement-upload" className="cursor-pointer">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-sm">{file ? file.name : "Click to upload PDF"}</p>
+                <Upload className="w-8 h-8 text-[#ccab6c]/90 mx-auto mb-2" />
+                <p className="text-[#ccab6c]/90 text-sm">{file ? file.name : "Click to upload PDF"}</p>
               </label>
             </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleUpload} disabled={uploading || !file || !title} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleUpload} disabled={uploading || !file || !title} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {uploading ? 'Uploading...' : 'Upload Statement'}
           </Button>
         </DialogFooter>
@@ -575,17 +575,17 @@ export const AddKYCModal = ({ open, onOpenChange, investorEmail, onSave }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-900 border-gray-800 text-white">
+      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
         <DialogHeader><DialogTitle>Add KYC Document</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div>
             <Label>Document Title</Label>
-            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Passport Copy" className="bg-gray-800 border-gray-700" />
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g., Passport Copy" className="bg-zinc-900 border-[#ccab6c]/20" />
           </div>
           <div>
             <Label>Document Type</Label>
             <Select value={docType} onValueChange={setDocType}>
-              <SelectTrigger className="bg-gray-800 border-gray-700"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="identity">Identity Document</SelectItem>
                 <SelectItem value="address">Proof of Address</SelectItem>
@@ -597,18 +597,18 @@ export const AddKYCModal = ({ open, onOpenChange, investorEmail, onSave }) => {
           </div>
           <div>
             <Label>File</Label>
-            <div className="border-2 border-dashed border-gray-700 rounded-lg p-4 text-center">
+            <div className="border-2 border-dashed border-[#ccab6c]/20 rounded-lg p-4 text-center">
               <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={e => setFile(e.target.files[0])} className="hidden" id="kyc-upload" />
               <label htmlFor="kyc-upload" className="cursor-pointer">
-                <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-400 text-sm">{file ? file.name : "Click to upload (PDF, JPG, PNG)"}</p>
+                <FileText className="w-8 h-8 text-[#ccab6c]/90 mx-auto mb-2" />
+                <p className="text-[#ccab6c]/90 text-sm">{file ? file.name : "Click to upload (PDF, JPG, PNG)"}</p>
               </label>
             </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleUpload} disabled={uploading || !file || !title} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={handleUpload} disabled={uploading || !file || !title} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             {uploading ? 'Uploading...' : 'Upload KYC Document'}
           </Button>
         </DialogFooter>

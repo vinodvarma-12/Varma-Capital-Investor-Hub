@@ -46,7 +46,7 @@ import { sendInvitationEmail } from "@/functions/sendInvitationEmail";
 import { format } from "date-fns";
 
 const SettingSection = ({ title, icon, children }) => (
-  <Card className="bg-gray-900 border-gray-800">
+  <Card className="bg-zinc-950 border border-[#ccab6c]/30">
     <CardHeader className="flex flex-row items-center gap-3">
       {icon}
       <CardTitle className="text-white">{title}</CardTitle>
@@ -274,59 +274,59 @@ export default function AdminSettings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading system settings...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white">System Settings</h1>
-            <p className="text-gray-400">Configure system-wide settings and preferences</p>
+            <p className="text-[#ccab6c]/90">Configure system-wide settings and preferences</p>
           </div>
           <div className="flex gap-3">
             <Dialog open={isInviteAdminOpen} onOpenChange={setIsInviteAdminOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black">
+                <Button variant="outline" className="border-[#b38922] text-[#fedea0] hover:bg-[#fedea0] hover:text-black">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Invite Admin
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-gray-900 border-gray-800">
+              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
                 <DialogHeader>
                   <DialogTitle className="text-white">Invite Admin User</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label className="text-gray-300">Full Name</Label>
+                    <Label className="text-zinc-300">Full Name</Label>
                     <Input 
                       value={inviteForm.full_name}
                       onChange={(e) => setInviteForm({...inviteForm, full_name: e.target.value})}
                       placeholder="John Doe"
-                      className="bg-gray-800 border-gray-700"
+                      className="bg-zinc-900 border-[#ccab6c]/20"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-300">Email</Label>
+                    <Label className="text-zinc-300">Email</Label>
                     <Input 
                       type="email"
                       value={inviteForm.email}
                       onChange={(e) => setInviteForm({...inviteForm, email: e.target.value})}
                       placeholder="admin@company.com"
-                      className="bg-gray-800 border-gray-700"
+                      className="bg-zinc-900 border-[#ccab6c]/20"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-300">Role</Label>
+                    <Label className="text-zinc-300">Role</Label>
                     <Select value={inviteForm.role} onValueChange={(val) => setInviteForm({...inviteForm, role: val})}>
-                      <SelectTrigger className="bg-gray-800 border-gray-700">
+                      <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-800 text-white">
+                      <SelectContent className="bg-zinc-900 text-white">
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
                       </SelectContent>
@@ -338,7 +338,7 @@ export default function AdminSettings() {
                   <Button 
                     onClick={handleInviteAdmin}
                     disabled={inviting}
-                    className="bg-yellow-400 text-black hover:bg-yellow-500"
+                    className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
                   >
                     {inviting ? 'Sending...' : 'Send Invitation'}
                   </Button>
@@ -348,7 +348,7 @@ export default function AdminSettings() {
             <Button 
               onClick={saveAllSettings} 
               disabled={saving}
-              className="bg-yellow-400 text-black hover:bg-yellow-500"
+              className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
             >
               <Save className="w-4 h-4 mr-2" />
               {saving ? 'Saving...' : 'Save All Settings'}
@@ -357,67 +357,67 @@ export default function AdminSettings() {
         </div>
 
         <Tabs defaultValue="branding" className="space-y-6">
-          <TabsList className="bg-gray-800 border-gray-700">
-            <TabsTrigger value="branding" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+            <TabsTrigger value="branding" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <Palette className="w-4 h-4 mr-2" />
               Branding
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <Bell className="w-4 h-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="security" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <Shield className="w-4 h-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="sla" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="sla" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <Clock className="w-4 h-4 mr-2" />
               SLA
             </TabsTrigger>
-            <TabsTrigger value="compliance" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="compliance" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <FileText className="w-4 h-4 mr-2" />
               Compliance
             </TabsTrigger>
-            <TabsTrigger value="audit" className="data-[state=active]:bg-yellow-400 data-[state=active]:text-black">
+            <TabsTrigger value="audit" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <History className="w-4 h-4 mr-2" />
               Audit Logs
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="branding" className="space-y-6">
-            <SettingSection title="Brand Identity" icon={<Palette className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="Brand Identity" icon={<Palette className="w-5 h-5 text-[#fedea0]" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Company Name</Label>
+                  <Label className="text-zinc-300">Company Name</Label>
                   <Input 
                     value={settings.company_name} 
                     onChange={(e) => updateSetting('company_name', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-300">Domain</Label>
+                  <Label className="text-zinc-300">Domain</Label>
                   <Input 
                     value={settings.domain} 
                     onChange={(e) => updateSetting('domain', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div>
-                <Label className="text-gray-300">Primary Color (Gold)</Label>
+                <Label className="text-zinc-300">Primary Color (Gold)</Label>
                 <div className="flex gap-3 items-center mt-2">
                   <Input 
                     type="color"
                     value={settings.primary_color} 
                     onChange={(e) => updateSetting('primary_color', e.target.value)}
-                    className="w-20 h-10 bg-gray-800 border-gray-700"
+                    className="w-20 h-10 bg-zinc-900 border-[#ccab6c]/20"
                   />
                   <Input 
                     value={settings.primary_color} 
                     onChange={(e) => updateSetting('primary_color', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                     placeholder="#FFD700"
                   />
                 </div>
@@ -425,13 +425,13 @@ export default function AdminSettings() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Light Mode Logo</Label>
+                  <Label className="text-zinc-300">Light Mode Logo</Label>
                   <div className="mt-2 space-y-2">
                     <Input 
                       type="file" 
                       accept="image/*"
                       onChange={(e) => e.target.files[0] && handleLogoUpload(e.target.files[0], 'light')}
-                      className="bg-gray-800 border-gray-700"
+                      className="bg-zinc-900 border-[#ccab6c]/20"
                       disabled={uploadingLogo}
                     />
                     {settings.logo_light_url && (
@@ -440,17 +440,17 @@ export default function AdminSettings() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-gray-300">Dark Mode Logo</Label>
+                  <Label className="text-zinc-300">Dark Mode Logo</Label>
                   <div className="mt-2 space-y-2">
                     <Input 
                       type="file" 
                       accept="image/*"
                       onChange={(e) => e.target.files[0] && handleLogoUpload(e.target.files[0], 'dark')}
-                      className="bg-gray-800 border-gray-700"
+                      className="bg-zinc-900 border-[#ccab6c]/20"
                       disabled={uploadingLogo}
                     />
                     {settings.logo_dark_url && (
-                      <img src={settings.logo_dark_url} alt="Dark logo" className="h-12 bg-gray-800 p-2 rounded" />
+                      <img src={settings.logo_dark_url} alt="Dark logo" className="h-12 bg-zinc-900 p-2 rounded" />
                     )}
                   </div>
                 </div>
@@ -459,17 +459,17 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
-            <SettingSection title="Notification Settings" icon={<Bell className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="Notification Settings" icon={<Bell className="w-5 h-5 text-[#fedea0]" />}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Email Notifications</Label>
+                  <Label className="text-zinc-300">Email Notifications</Label>
                   <Switch 
                     checked={settings.email_notifications} 
                     onCheckedChange={(val) => updateSetting('email_notifications', val)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">SMS Notifications</Label>
+                  <Label className="text-zinc-300">SMS Notifications</Label>
                   <Switch 
                     checked={settings.sms_notifications} 
                     onCheckedChange={(val) => updateSetting('sms_notifications', val)}
@@ -477,12 +477,12 @@ export default function AdminSettings() {
                 </div>
                 
                 <div>
-                  <Label className="text-gray-300">Email Provider</Label>
+                  <Label className="text-zinc-300">Email Provider</Label>
                   <Select value={settings.email_provider} onValueChange={(val) => updateSetting('email_provider', val)}>
-                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 text-white">
+                    <SelectContent className="bg-zinc-900 text-white">
                       <SelectItem value="ses">Amazon SES</SelectItem>
                       <SelectItem value="smtp">Custom SMTP</SelectItem>
                       <SelectItem value="sendgrid">SendGrid</SelectItem>
@@ -494,30 +494,30 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <SettingSection title="Security Settings" icon={<Shield className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="Security Settings" icon={<Shield className="w-5 h-5 text-[#fedea0]" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Session Timeout (hours)</Label>
+                  <Label className="text-zinc-300">Session Timeout (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.session_timeout} 
                     onChange={(e) => updateSetting('session_timeout', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-300">Max Login Attempts</Label>
+                  <Label className="text-zinc-300">Max Login Attempts</Label>
                   <Input 
                     type="number"
                     value={settings.max_login_attempts} 
                     onChange={(e) => updateSetting('max_login_attempts', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div className="flex items-center justify-between">
-                <Label className="text-gray-300">Require Two-Factor Authentication</Label>
+                <Label className="text-zinc-300">Require Two-Factor Authentication</Label>
                 <Switch 
                   checked={settings.require_2fa} 
                   onCheckedChange={(val) => updateSetting('require_2fa', val)}
@@ -525,12 +525,12 @@ export default function AdminSettings() {
               </div>
               
               <div>
-                <Label className="text-gray-300">Password Policy</Label>
+                <Label className="text-zinc-300">Password Policy</Label>
                 <Select value={settings.password_policy} onValueChange={(val) => updateSetting('password_policy', val)}>
-                  <SelectTrigger className="bg-gray-800 border-gray-700">
+                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 text-white">
+                  <SelectContent className="bg-zinc-900 text-white">
                     <SelectItem value="standard">Standard (8+ chars)</SelectItem>
                     <SelectItem value="strong">Strong (12+ chars, mixed case, numbers, symbols)</SelectItem>
                     <SelectItem value="enterprise">Enterprise (16+ chars, complex requirements)</SelectItem>
@@ -541,40 +541,40 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="sla" className="space-y-6">
-            <SettingSection title="Service Level Agreements" icon={<Clock className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="Service Level Agreements" icon={<Clock className="w-5 h-5 text-[#fedea0]" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Standard Response Time (hours)</Label>
+                  <Label className="text-zinc-300">Standard Response Time (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.response_time_hours} 
                     onChange={(e) => updateSetting('response_time_hours', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-300">Standard Resolution Time (hours)</Label>
+                  <Label className="text-zinc-300">Standard Resolution Time (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.resolution_time_hours} 
                     onChange={(e) => updateSetting('resolution_time_hours', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div>
-                <Label className="text-gray-300">Urgent Priority Response Time (hours)</Label>
+                <Label className="text-zinc-300">Urgent Priority Response Time (hours)</Label>
                 <Input 
                   type="number"
                   value={settings.urgent_response_hours} 
                   onChange={(e) => updateSetting('urgent_response_hours', e.target.value)}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-zinc-900 border-[#ccab6c]/20"
                 />
               </div>
               
               <div className="flex items-center justify-between">
-                <Label className="text-gray-300">Enable Automatic Escalation</Label>
+                <Label className="text-zinc-300">Enable Automatic Escalation</Label>
                 <Switch 
                   checked={settings.escalation_enabled} 
                   onCheckedChange={(val) => updateSetting('escalation_enabled', val)}
@@ -584,57 +584,57 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-6">
-            <SettingSection title="Legal & Compliance" icon={<FileText className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="Legal & Compliance" icon={<FileText className="w-5 h-5 text-[#fedea0]" />}>
               <div>
-                <Label className="text-gray-300">Jurisdiction</Label>
+                <Label className="text-zinc-300">Jurisdiction</Label>
                 <Input 
                   value={settings.jurisdiction} 
                   onChange={(e) => updateSetting('jurisdiction', e.target.value)}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-zinc-900 border-[#ccab6c]/20"
                 />
               </div>
               
               <div>
-                <Label className="text-gray-300">Risk Disclosure Statement</Label>
+                <Label className="text-zinc-300">Risk Disclosure Statement</Label>
                 <Textarea 
                   value={settings.risk_disclosure} 
                   onChange={(e) => updateSetting('risk_disclosure', e.target.value)}
-                  className="bg-gray-800 border-gray-700 h-32"
+                  className="bg-zinc-900 border-[#ccab6c]/20 h-32"
                   placeholder="Enter your standard risk disclosure..."
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Privacy Policy URL</Label>
+                  <Label className="text-zinc-300">Privacy Policy URL</Label>
                   <Input 
                     value={settings.privacy_policy_url} 
                     onChange={(e) => updateSetting('privacy_policy_url', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                     placeholder="https://..."
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-300">Terms of Service URL</Label>
+                  <Label className="text-zinc-300">Terms of Service URL</Label>
                   <Input 
                     value={settings.terms_of_service_url} 
                     onChange={(e) => updateSetting('terms_of_service_url', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                     placeholder="https://..."
                   />
                 </div>
               </div>
             </SettingSection>
 
-            <SettingSection title="NAV & Valuation Settings" icon={<Settings className="w-5 h-5 text-yellow-400" />}>
+            <SettingSection title="NAV & Valuation Settings" icon={<Settings className="w-5 h-5 text-[#fedea0]" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-gray-300">Official NAV Frequency</Label>
+                  <Label className="text-zinc-300">Official NAV Frequency</Label>
                   <Select value={settings.official_nav_frequency} onValueChange={(val) => updateSetting('official_nav_frequency', val)}>
-                    <SelectTrigger className="bg-gray-800 border-gray-700">
+                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 text-white">
+                    <SelectContent className="bg-zinc-900 text-white">
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="monthly">Monthly (Recommended)</SelectItem>
@@ -643,26 +643,26 @@ export default function AdminSettings() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-gray-300">NAV Cutoff Time</Label>
+                  <Label className="text-zinc-300">NAV Cutoff Time</Label>
                   <Input 
                     type="time"
                     value={settings.nav_cutoff_time} 
                     onChange={(e) => updateSetting('nav_cutoff_time', e.target.value)}
-                    className="bg-gray-800 border-gray-700"
+                    className="bg-zinc-900 border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Enable Indicative Daily NAV</Label>
+                  <Label className="text-zinc-300">Enable Indicative Daily NAV</Label>
                   <Switch 
                     checked={settings.indicative_nav_enabled} 
                     onCheckedChange={(val) => updateSetting('indicative_nav_enabled', val)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Auto-Calculate P&L</Label>
+                  <Label className="text-zinc-300">Auto-Calculate P&L</Label>
                   <Switch 
                     checked={settings.auto_calculate_pnl} 
                     onCheckedChange={(val) => updateSetting('auto_calculate_pnl', val)}
@@ -673,10 +673,10 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="audit" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-3">
-                  <History className="w-5 h-5 text-yellow-400" />
+                  <History className="w-5 h-5 text-[#fedea0]" />
                   Audit Trail
                 </CardTitle>
               </CardHeader>
@@ -684,30 +684,30 @@ export default function AdminSettings() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-gray-800">
-                        <TableHead className="text-gray-400">Timestamp</TableHead>
-                        <TableHead className="text-gray-400">User</TableHead>
-                        <TableHead className="text-gray-400">Action</TableHead>
-                        <TableHead className="text-gray-400">Entity</TableHead>
-                        <TableHead className="text-gray-400">Changes</TableHead>
+                      <TableRow className="border-[#ccab6c]/25">
+                        <TableHead className="text-[#ccab6c]/90">Timestamp</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">User</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Action</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Entity</TableHead>
+                        <TableHead className="text-[#ccab6c]/90">Changes</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {auditLogs.map((log) => (
-                        <TableRow key={log.id} className="border-gray-800">
-                          <TableCell className="text-gray-300">
+                        <TableRow key={log.id} className="border-[#ccab6c]/25">
+                          <TableCell className="text-zinc-300">
                             {format(new Date(log.created_date), 'MMM dd, yyyy HH:mm')}
                           </TableCell>
-                          <TableCell className="text-gray-300">{log.user_email}</TableCell>
+                          <TableCell className="text-zinc-300">{log.user_email}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
                               {log.action}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-gray-300">{log.entity_type}</TableCell>
-                          <TableCell className="text-gray-300">
+                          <TableCell className="text-zinc-300">{log.entity_type}</TableCell>
+                          <TableCell className="text-zinc-300">
                             {log.changes ? (
-                              <Button variant="ghost" size="sm" className="text-yellow-400">
+                              <Button variant="ghost" size="sm" className="text-[#fedea0]">
                                 <Eye className="w-3 h-3 mr-1" />
                                 View
                               </Button>

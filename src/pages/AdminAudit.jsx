@@ -126,14 +126,14 @@ export default function AdminAudit() {
   const getActionBadge = (action) => {
     const colors = {
       create: 'bg-green-900 text-green-400 border-green-700',
-      update: 'bg-yellow-900 text-yellow-400 border-yellow-700',
+      update: 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45',
       delete: 'bg-red-900 text-red-400 border-red-700',
       login: 'bg-blue-900 text-blue-400 border-blue-700',
-      logout: 'bg-gray-700 text-gray-300 border-gray-600',
+      logout: 'bg-zinc-800 text-zinc-300 border-zinc-600',
       download: 'bg-purple-900 text-purple-400 border-purple-700',
       upload: 'bg-indigo-900 text-indigo-400 border-indigo-700'
     };
-    return colors[action] || 'bg-gray-700 text-gray-300 border-gray-600';
+    return colors[action] || 'bg-zinc-800 text-zinc-300 border-zinc-600';
   };
 
   const uniqueActions = [...new Set(auditLogs.map(log => log.action))];
@@ -142,31 +142,31 @@ export default function AdminAudit() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-white">Loading audit logs...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <History className="w-8 h-8 text-yellow-400" />
+              <History className="w-8 h-8 text-[#fedea0]" />
               System Audit Logs
             </h1>
-            <p className="text-gray-400">Complete audit trail of all system activities</p>
+            <p className="text-[#ccab6c]/90">Complete audit trail of all system activities</p>
           </div>
-          <Button onClick={exportAuditLog} className="bg-yellow-400 text-black hover:bg-yellow-500">
+          <Button onClick={exportAuditLog} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
         </div>
 
         {/* Filters */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Filter className="w-5 h-5" />
@@ -176,7 +176,7 @@ export default function AdminAudit() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               <div>
-                <Label className="text-gray-300">User</Label>
+                <Label className="text-zinc-300">User</Label>
                 <Select value={filters.user} onValueChange={(val) => updateFilter('user', val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -189,7 +189,7 @@ export default function AdminAudit() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Action</Label>
+                <Label className="text-zinc-300">Action</Label>
                 <Select value={filters.action} onValueChange={(val) => updateFilter('action', val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -202,7 +202,7 @@ export default function AdminAudit() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Entity</Label>
+                <Label className="text-zinc-300">Entity</Label>
                 <Select value={filters.entity} onValueChange={(val) => updateFilter('entity', val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -215,22 +215,22 @@ export default function AdminAudit() {
               </div>
 
               <div>
-                <Label className="text-gray-300">From Date</Label>
+                <Label className="text-zinc-300">From Date</Label>
                 <Input 
                   type="date"
                   value={filters.dateFrom}
                   onChange={(e) => updateFilter('dateFrom', e.target.value)}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-zinc-900 border-[#ccab6c]/20"
                 />
               </div>
 
               <div>
-                <Label className="text-gray-300">To Date</Label>
+                <Label className="text-zinc-300">To Date</Label>
                 <Input 
                   type="date"
                   value={filters.dateTo}
                   onChange={(e) => updateFilter('dateTo', e.target.value)}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-zinc-900 border-[#ccab6c]/20"
                 />
               </div>
 
@@ -248,7 +248,7 @@ export default function AdminAudit() {
         </Card>
 
         {/* Audit Logs Table */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader>
             <CardTitle className="text-white">
               Audit Trail ({filteredLogs.length} records)
@@ -258,20 +258,20 @@ export default function AdminAudit() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-800">
-                    <TableHead className="text-gray-400">Timestamp</TableHead>
-                    <TableHead className="text-gray-400">User</TableHead>
-                    <TableHead className="text-gray-400">Action</TableHead>
-                    <TableHead className="text-gray-400">Entity</TableHead>
-                    <TableHead className="text-gray-400">Entity ID</TableHead>
-                    <TableHead className="text-gray-400">IP Address</TableHead>
-                    <TableHead className="text-gray-400">Changes</TableHead>
+                  <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-[#ccab6c]/90">Timestamp</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">User</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Action</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Entity</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Entity ID</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">IP Address</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Changes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLogs.slice(0, 100).map((log) => (
-                    <TableRow key={log.id} className="border-gray-800">
-                      <TableCell className="text-gray-300">
+                    <TableRow key={log.id} className="border-[#ccab6c]/25">
+                      <TableCell className="text-zinc-300">
                         {format(new Date(log.created_date), 'MMM dd, yyyy HH:mm:ss')}
                       </TableCell>
                       <TableCell className="text-white font-medium">
@@ -282,37 +282,37 @@ export default function AdminAudit() {
                           {log.action}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-300">{log.entity_type}</TableCell>
-                      <TableCell className="text-gray-300 font-mono text-xs">
+                      <TableCell className="text-zinc-300">{log.entity_type}</TableCell>
+                      <TableCell className="text-zinc-300 font-mono text-xs">
                         {log.entity_id ? log.entity_id.substring(0, 8) + '...' : '-'}
                       </TableCell>
-                      <TableCell className="text-gray-300 font-mono text-xs">
+                      <TableCell className="text-zinc-300 font-mono text-xs">
                         {log.ip_address || '-'}
                       </TableCell>
                       <TableCell>
                         {log.changes ? (
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="text-yellow-400">
+                              <Button variant="ghost" size="sm" className="text-[#fedea0]">
                                 <Eye className="w-3 h-3 mr-1" />
                                 View
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="bg-gray-900 border-gray-800 max-w-2xl">
+                            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
                               <DialogHeader>
                                 <DialogTitle className="text-white">Audit Log Changes</DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4">
-                                <div className="bg-gray-800 p-4 rounded-lg">
+                                <div className="bg-zinc-900 p-4 rounded-lg">
                                   <h4 className="font-semibold text-white mb-2">Action Details</h4>
-                                  <p className="text-gray-300">User: {getUserName(log.user_email)}</p>
-                                  <p className="text-gray-300">Action: {log.action}</p>
-                                  <p className="text-gray-300">Entity: {log.entity_type}</p>
-                                  <p className="text-gray-300">Timestamp: {format(new Date(log.created_date), 'PPpp')}</p>
+                                  <p className="text-zinc-300">User: {getUserName(log.user_email)}</p>
+                                  <p className="text-zinc-300">Action: {log.action}</p>
+                                  <p className="text-zinc-300">Entity: {log.entity_type}</p>
+                                  <p className="text-zinc-300">Timestamp: {format(new Date(log.created_date), 'PPpp')}</p>
                                 </div>
-                                <div className="bg-gray-800 p-4 rounded-lg">
+                                <div className="bg-zinc-900 p-4 rounded-lg">
                                   <h4 className="font-semibold text-white mb-2">Changes Made</h4>
-                                  <pre className="text-gray-300 text-sm bg-gray-900 p-3 rounded overflow-auto">
+                                  <pre className="text-zinc-300 text-sm bg-zinc-950 p-3 rounded overflow-auto">
                                     {JSON.stringify(log.changes, null, 2)}
                                   </pre>
                                 </div>
@@ -320,7 +320,7 @@ export default function AdminAudit() {
                             </DialogContent>
                           </Dialog>
                         ) : (
-                          <span className="text-gray-500">-</span>
+                          <span className="text-zinc-500">-</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -329,7 +329,7 @@ export default function AdminAudit() {
               </Table>
             </div>
             {filteredLogs.length > 100 && (
-              <p className="text-center text-gray-400 mt-4">
+              <p className="text-center text-[#ccab6c]/90 mt-4">
                 Showing first 100 of {filteredLogs.length} records. Use filters to narrow results.
               </p>
             )}
