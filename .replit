@@ -47,3 +47,7 @@ deploymentTarget = "static"
 build = ["pnpm", "run", "build"]
 publicDir = "dist"
 run = ["pnpm", "run", "start"]
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
