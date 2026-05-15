@@ -21,7 +21,6 @@ import AdminDocuments from './pages/AdminDocuments';
 import Waitlist from './pages/Waitlist';
 import AdminWaitlist from './pages/AdminWaitlist';
 import InvestorAuth from './pages/InvestorAuth';
-import AdminReturns from './pages/AdminReturns';
 import Legal from './pages/Legal';
 import __Layout from './Layout.jsx';
 
@@ -50,7 +49,6 @@ export const PAGES = {
     "Waitlist": Waitlist,
     "AdminWaitlist": AdminWaitlist,
     "InvestorAuth": InvestorAuth,
-    "AdminReturns": AdminReturns,
     "Legal": Legal,
 }
 

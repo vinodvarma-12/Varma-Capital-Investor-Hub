@@ -18,6 +18,8 @@ export default function WaitlistPage() {
     country: "",
     investor_category: "",
     amount_interested: "",
+    heard_from: "",
+    heard_from_other: "",
     notes: ""
   });
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,21 @@ export default function WaitlistPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Manual validation for Select fields (not covered by native required)
+    if (!formData.investor_category) {
+      alert("Please select an investor category.");
+      return;
+    }
+    if (!formData.heard_from) {
+      alert("Please tell us where you heard about us.");
+      return;
+    }
+    if (formData.heard_from === 'Other' && !formData.heard_from_other.trim()) {
+      alert("Please specify where you heard about us.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -132,33 +149,35 @@ export default function WaitlistPage() {
               </div>
 
               <div>
-                <Label htmlFor="phone" className="text-zinc-300">Phone (optional)</Label>
+                <Label htmlFor="phone" className="text-zinc-300">Phone *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
+                  required
                   className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
 
               <div>
-                <Label htmlFor="country" className="text-zinc-300">Country</Label>
+                <Label htmlFor="country" className="text-zinc-300">Country *</Label>
                 <Input
                   id="country"
                   type="text"
                   value={formData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
+                  required
                   className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="United States"
                 />
               </div>
 
               <div>
-                <Label className="text-zinc-300">Investor Category</Label>
-                <Select 
-                  value={formData.investor_category} 
+                <Label className="text-zinc-300">Investor Category *</Label>
+                <Select
+                  value={formData.investor_category}
                   onValueChange={(value) => handleInputChange('investor_category', value)}
                 >
                   <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1 text-zinc-300">
@@ -174,16 +193,49 @@ export default function WaitlistPage() {
               </div>
 
               <div>
-                <Label htmlFor="amount_interested" className="text-zinc-300">Estimated Investment Amount (optional)</Label>
+                <Label htmlFor="amount_interested" className="text-zinc-300">Estimated Investment Amount *</Label>
                 <Input
                   id="amount_interested"
                   type="number"
                   value={formData.amount_interested}
                   onChange={(e) => handleInputChange('amount_interested', e.target.value)}
+                  required
                   className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
                   placeholder="USD"
                   min="0"
                 />
+              </div>
+
+              <div>
+                <Label className="text-zinc-300">Where did you hear about us? *</Label>
+                <Select
+                  value={formData.heard_from}
+                  onValueChange={(value) => {
+                    handleInputChange('heard_from', value);
+                    if (value !== 'Other') handleInputChange('heard_from_other', '');
+                  }}
+                >
+                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1 text-zinc-300">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
+                    <SelectItem className="text-white" value="LinkedIn">LinkedIn</SelectItem>
+                    <SelectItem className="text-white" value="Twitter / X">Twitter / X</SelectItem>
+                    <SelectItem className="text-white" value="Google Search">Google Search</SelectItem>
+                    <SelectItem className="text-white" value="Friend / Referral">Friend / Referral</SelectItem>
+                    <SelectItem className="text-white" value="Event / Conference">Event / Conference</SelectItem>
+                    <SelectItem className="text-white" value="News / Media">News / Media</SelectItem>
+                    <SelectItem className="text-white" value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formData.heard_from === 'Other' && (
+                  <Input
+                    value={formData.heard_from_other}
+                    onChange={(e) => handleInputChange('heard_from_other', e.target.value)}
+                    placeholder="Please specify..."
+                    className="bg-zinc-900 border-[#ccab6c]/20 mt-2"
+                  />
+                )}
               </div>
 
               <div>

@@ -5,7 +5,6 @@ import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
 import { Transaction } from "@/entities/Transaction";
 import { Document } from "@/entities/Document";
-import { FabricatedReturns } from "@/entities/FabricatedReturns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,7 @@ import {
   GOLD_DEEPER,
   ALLOCATION_COLORS,
 } from "@/lib/varmaTheme";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -37,9 +37,9 @@ export default function Dashboard() {
   const [navData, setNavData] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [documents, setDocuments] = useState([]);
-  const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [chartTimeline, setChartTimeline] = useState('1Y');
 
   useEffect(() => {
     loadDashboardData();
@@ -55,13 +55,12 @@ export default function Dashboard() {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, productsData, navResults, transactionsData, documentsData, fabricatedData] = await Promise.all([
+      const [investmentsData, productsData, navResults, transactionsData, documentsData] = await Promise.all([
         Investment.filter({ investor_email: userData.email }),
         Product.list(),
         NAV.list('-date', 100),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 10),
         Document.filter({ investor_email: userData.email }, '-created_date', 5),
-        FabricatedReturns.list('-effective_date', 100)
       ]);
 
       setInvestments(investmentsData);
@@ -69,7 +68,6 @@ export default function Dashboard() {
       setNavData(navResults);
       setTransactions(transactionsData);
       setDocuments(documentsData);
-      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     } finally {
@@ -77,35 +75,11 @@ export default function Dashboard() {
     }
   };
 
-  // Calculate valuation for a single investment using precedence rules
+  // Calculate valuation for a single investment using NAV
   const calculateInvestmentValue = (investment) => {
     const invested = investment.invested_amount || 0;
     const units = investment.current_units || 0;
-    
-    // 1) Check for active ReturnOverride (investor-specific first, then product-wide)
-    let activeReturn = fabricatedReturns.find(fr => 
-      fr.investor_email === user?.email && 
-      fr.product_id === investment.product_id &&
-      fr.override_calculated
-    );
-    
-    if (!activeReturn) {
-      activeReturn = fabricatedReturns.find(fr => 
-        !fr.investor_email && 
-        fr.product_id === investment.product_id &&
-        fr.override_calculated
-      );
-    }
 
-    if (activeReturn && activeReturn.return_percent !== undefined) {
-      // Use return percentage: currentValue = invested × (1 + return%)
-      const currentValue = invested * (1 + activeReturn.return_percent / 100);
-      const pnl = currentValue - invested;
-      const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
-      return { currentValue, pnl, pnlPercent, source: 'override' };
-    }
-
-    // 2) Use NAVEntry.nav_per_unit
     const latestNav = navData.find(nav => nav.product_id === investment.product_id);
     if (latestNav && units > 0) {
       const currentValue = units * latestNav.nav_per_unit;
@@ -114,7 +88,7 @@ export default function Dashboard() {
       return { currentValue, pnl, pnlPercent, source: 'nav' };
     }
 
-    // 3) Neither exists → Data Pending
+    // No NAV data → Data Pending
     return { currentValue: null, pnl: null, pnlPercent: null, source: 'pending' };
   };
 
@@ -170,14 +144,26 @@ export default function Dashboard() {
   };
 
   const getPortfolioChartData = () => {
-    // Generate sample portfolio growth data
-    const months = [];
     const currentDate = new Date();
-    for (let i = 11; i >= 0; i--) {
+    let monthsBack;
+
+    switch (chartTimeline) {
+      case '6M':  monthsBack = 6;  break;
+      case 'YTD': monthsBack = currentDate.getMonth(); break; // months since Jan 1
+      case '5Y':  monthsBack = 60; break;
+      case '1Y':
+      default:    monthsBack = 12; break;
+    }
+
+    // Ensure at least 1 data point
+    if (monthsBack < 1) monthsBack = 1;
+
+    const months = [];
+    for (let i = monthsBack; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       months.push({
-        month: format(date, 'MMM'),
-        value: Math.random() * 50000 + 100000 // Sample data
+        month: chartTimeline === '5Y' ? format(date, 'MMM yy') : format(date, 'MMM'),
+        value: Math.random() * 50000 + 100000, // Sample data — replace with real NAV later
       });
     }
     return months;
@@ -211,6 +197,13 @@ export default function Dashboard() {
   const chartData = getPortfolioChartData();
   const allocationData = getAllocationData();
 
+  const TIMELINE_OPTIONS = [
+    { key: '6M',  label: '6M' },
+    { key: '1Y',  label: '1Y' },
+    { key: 'YTD', label: 'YTD' },
+    { key: '5Y',  label: '5Y' },
+  ];
+
   const cardSurface = darkMode
     ? "bg-zinc-950 border border-[#ccab6c]/30"
     : "bg-white border border-[#ccab6c]/45 shadow-sm";
@@ -232,11 +225,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-black" : "bg-stone-50"}`}>
-        <div className={darkMode ? "text-[#fedea0]" : "text-stone-900"}>Loading your portfolio...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading your portfolio..." />;
   }
 
   return (
@@ -366,16 +355,25 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className={`flex items-center justify-between ${sectionTitle}`}>
                 Portfolio Growth
-                <Badge
-                  variant="secondary"
-                  className={
-                    darkMode
-                      ? "border border-[#ccab6c]/40 bg-[#b38922]/15 text-[#fedea0]"
-                      : "border border-[#b38922]/35 bg-[#fedea0]/35 text-[#8a6818]"
-                  }
-                >
-                  12M
-                </Badge>
+                <div className="flex items-center gap-1">
+                  {TIMELINE_OPTIONS.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setChartTimeline(key)}
+                      className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                        chartTimeline === key
+                          ? darkMode
+                            ? 'bg-[#b38922]/40 text-[#fedea0] border border-[#ccab6c]/60'
+                            : 'bg-[#fedea0] text-[#8a6818] border border-[#b38922]/50'
+                          : darkMode
+                            ? 'text-[#ccab6c]/60 hover:text-[#fedea0] hover:bg-[#b38922]/20'
+                            : 'text-stone-500 hover:text-[#8a6818] hover:bg-[#fedea0]/40'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { History, Search, Download, Filter, Eye } from "lucide-react";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -141,11 +142,7 @@ export default function AdminAudit() {
   const uniqueUsers = [...new Set(auditLogs.map(log => log.user_email))];
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading audit logs...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading audit logs..." />;
   }
 
   return (

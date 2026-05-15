@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Send, User as UserIcon, Shield, UserCheck, AlertCircle } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { toast } from "sonner";
 
 export default function AdminSupport() {
@@ -158,11 +159,7 @@ export default function AdminSupport() {
   const unassignedCount = isSuperAdmin ? tickets.filter(t => !t.assigned_to).length : 0;
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading support queue...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading support queue..." />;
   }
 
   return (

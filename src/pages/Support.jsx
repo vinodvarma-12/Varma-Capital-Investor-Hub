@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Send, Paperclip } from "lucide-react";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -140,11 +141,7 @@ export default function Support() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading support center...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading support center..." />;
   }
 
   return (

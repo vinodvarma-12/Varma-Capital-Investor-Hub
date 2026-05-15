@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Lock, Unlock, Edit, Clock, AlertTriangle } from "lucide-react";
 import { format, addMonths, differenceInDays, isAfter } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -264,11 +265,7 @@ export default function AdminLockIns() {
   });
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading lock-in management...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading lock-in management..." />;
   }
 
   return (

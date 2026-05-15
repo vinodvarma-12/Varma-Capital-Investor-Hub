@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Clock, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const TickerCard = ({ ticker, isLive = false }) => {
   const isPositive = ticker.change_percent >= 0;

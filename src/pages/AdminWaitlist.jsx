@@ -36,6 +36,7 @@ import {
   UserPlus
 } from "lucide-react";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
   const [editData, setEditData] = useState(entry || {});
@@ -157,6 +158,27 @@ const WaitlistDetailDialog = ({ entry, onSave, onClose }) => {
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-zinc-300">Heard From</Label>
+              <Input
+                value={editData.heard_from || ''}
+                readOnly
+                className="bg-zinc-900 border-[#ccab6c]/20 text-zinc-400 cursor-default"
+              />
+            </div>
+            {editData.heard_from === 'Other' && (
+              <div>
+                <Label className="text-zinc-300">Specified (Other)</Label>
+                <Input
+                  value={editData.heard_from_other || ''}
+                  readOnly
+                  className="bg-zinc-900 border-[#ccab6c]/20 text-zinc-400 cursor-default"
+                />
+              </div>
+            )}
+          </div>
+
           <div>
             <Label className="text-zinc-300">Notes</Label>
             <Textarea
@@ -225,7 +247,7 @@ export default function AdminWaitlist() {
 
   const exportToCsv = () => {
     const csvContent = [
-      ['Created At', 'Full Name', 'Email', 'Phone', 'Country', 'Category', 'Amount Interested', 'Status', 'Notes'].join(','),
+      ['Created At', 'Full Name', 'Email', 'Phone', 'Country', 'Category', 'Heard From', 'Amount Interested', 'Status', 'Notes'].join(','),
       ...filteredEntries.map(entry => [
         format(new Date(entry.created_date), 'yyyy-MM-dd HH:mm:ss'),
         entry.full_name,
@@ -233,6 +255,7 @@ export default function AdminWaitlist() {
         entry.phone || '',
         entry.country || '',
         entry.investor_category || '',
+        entry.heard_from === 'Other' ? (entry.heard_from_other || 'Other') : (entry.heard_from || ''),
         entry.amount_interested || '',
         entry.status,
         (entry.notes || '').replace(/,/g, ';')
@@ -270,11 +293,7 @@ export default function AdminWaitlist() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading waitlist...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading waitlist..." />;
   }
 
   return (
@@ -341,6 +360,7 @@ export default function AdminWaitlist() {
                     <TableHead className="text-[#ccab6c]/90">Name</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Contact</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Category</TableHead>
+                    <TableHead className="text-[#ccab6c]/90">Heard From</TableHead>
                     <TableHead className="text-[#ccab6c]/90 text-right">Amount</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Status</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
@@ -361,6 +381,11 @@ export default function AdminWaitlist() {
                         <div className="text-sm text-[#ccab6c]/90">{entry.phone}</div>
                       </TableCell>
                       <TableCell className="text-zinc-300">{entry.investor_category || '-'}</TableCell>
+                      <TableCell className="text-zinc-300">
+                        {entry.heard_from === 'Other'
+                          ? entry.heard_from_other || 'Other'
+                          : entry.heard_from || '-'}
+                      </TableCell>
                       <TableCell className="text-right text-white font-medium">
                         {entry.amount_interested ? `$${entry.amount_interested.toLocaleString()}` : '-'}
                       </TableCell>

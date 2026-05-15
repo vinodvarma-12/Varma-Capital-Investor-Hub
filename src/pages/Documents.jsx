@@ -25,6 +25,7 @@ import {
 import { Download, FileText, Search, Filter, Eye, Calendar, Plus, Upload } from "lucide-react";
 import { UploadFile } from "@/integrations/Core";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Documents() {
   const [user, setUser] = useState(null);
@@ -173,11 +174,7 @@ export default function Documents() {
   const documentTypes = [...new Set(documents.map(doc => doc.type))];
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading your documents...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading your documents..." />;
   }
 
   return (

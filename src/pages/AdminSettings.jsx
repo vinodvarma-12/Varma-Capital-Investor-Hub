@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import { sendInvitationEmail } from "@/functions/sendInvitationEmail";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const SettingSection = ({ title, icon, children }) => (
   <Card className="bg-zinc-950 border border-[#ccab6c]/30">
@@ -273,11 +274,7 @@ export default function AdminSettings() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading system settings...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading system settings..." />;
   }
 
   return (

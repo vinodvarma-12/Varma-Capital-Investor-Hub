@@ -32,6 +32,7 @@ import {
   Users
 } from "lucide-react";
 import { format } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -398,11 +399,7 @@ export default function AdminDocuments() {
   const documentInvestors = [...new Set(documents.map(doc => doc.investor_email).filter(Boolean))];
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading documents...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading documents..." />;
   }
 
   return (

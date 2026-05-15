@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Package, DollarSign, Lock, Shield, TrendingUp, Clock } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Products() {
   const [user, setUser] = useState(null);
@@ -77,11 +78,7 @@ export default function Products() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading products...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading products..." />;
   }
 
   return (

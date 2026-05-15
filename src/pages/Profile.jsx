@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UserCircle, Mail, Phone, Home, Banknote, Bell, ShieldCheck, KeyRound, Edit, Save, X, Shield, CreditCard, Wallet } from "lucide-react";
 import TwoFactorSetup from "@/components/security/TwoFactorSetup";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ProfileSection = ({ title, icon, children }) => (
   <Card className="bg-zinc-950 border border-[#ccab6c]/30">
@@ -134,11 +135,7 @@ export default function Profile() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading your profile...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading your profile..." />;
   }
 
   return (

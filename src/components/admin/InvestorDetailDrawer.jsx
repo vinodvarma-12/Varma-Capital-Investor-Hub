@@ -3,7 +3,6 @@ import { User } from "@/entities/User";
 import { Investment } from "@/entities/Investment";
 import { LockInOverrides } from "@/entities/LockInOverrides";
 import { AuditLog } from "@/entities/AuditLog";
-import { FabricatedReturns } from "@/entities/FabricatedReturns";
 import { Transaction } from "@/entities/Transaction";
 import { Document } from "@/entities/Document";
 import { SupportTicket } from "@/entities/SupportTicket";
@@ -63,7 +62,6 @@ import {
   EditUnitsModal,
   EditLockInModal,
   EditNAVModal,
-  EditReturnModal,
   UploadStatementModal,
   AddKYCModal
 } from "./InvestorEditModals";
@@ -226,20 +224,6 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
             });
           }
         }
-      }
-
-      if (investments.length > 0) {
-        const productId = investments[0].product_id;
-        await FabricatedReturns.create({
-          investor_email: investor.email,
-          product_id: productId,
-          period: format(new Date(), 'yyyy-MM'),
-          return_percent: parseFloat(formData.pnlPercent),
-          nav_per_unit: formData.currentValue / investments.reduce((sum, i) => sum + (i.current_units || 1), 0),
-          override_calculated: true,
-          admin_notes: reason,
-          effective_date: format(new Date(), 'yyyy-MM-dd')
-        });
       }
 
       await AuditLog.create({
@@ -426,7 +410,6 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
   const [unitsModalOpen, setUnitsModalOpen] = useState(false);
   const [lockInModalOpen, setLockInModalOpen] = useState(false);
   const [navModalOpen, setNavModalOpen] = useState(false);
-  const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [statementModalOpen, setStatementModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const [addHoldingOpen, setAddHoldingOpen] = useState(false);
@@ -614,7 +597,6 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
       <EditUnitsModal open={unitsModalOpen} onOpenChange={setUnitsModalOpen} investment={selectedInvestment} onSave={handleSave} />
       <EditLockInModal open={lockInModalOpen} onOpenChange={setLockInModalOpen} investment={selectedInvestment} onSave={handleSave} />
       <EditNAVModal open={navModalOpen} onOpenChange={setNavModalOpen} investment={selectedInvestment} products={products} onSave={handleSave} />
-      <EditReturnModal open={returnModalOpen} onOpenChange={setReturnModalOpen} investment={selectedInvestment} investorEmail={investorEmail} onSave={handleSave} />
       <UploadStatementModal open={statementModalOpen} onOpenChange={setStatementModalOpen} investorEmail={investorEmail} onSave={handleSave} />
       <AddKYCModal open={kycModalOpen} onOpenChange={setKycModalOpen} investorEmail={investorEmail} onSave={handleSave} />
     </TabCard>
@@ -744,35 +726,12 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
 };
 
 const PerformanceTab = ({ investor, investments, products, navs }) => {
-  const [returns, setReturns] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const totalInvested = investments.reduce((sum, i) => sum + (i.invested_amount || 0), 0);
   const currentValue = investments.reduce((sum, i) => {
     const latestNav = navs?.find(n => n.product_id === i.product_id);
     return sum + ((i.current_units || 0) * (latestNav?.nav_per_unit || 1));
   }, 0);
   const pnlPercent = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested) * 100 : 0;
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const allReturns = await FabricatedReturns.list('-effective_date', 200);
-        const productIds = investments.map(i => i.product_id);
-        const filtered = allReturns.filter(fr =>
-          fr.investor_email === investor.email ||
-          (!fr.investor_email && productIds.includes(fr.product_id))
-        );
-        setReturns(filtered);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [investor.email, investments]);
 
   return (
     <TabCard title="Performance" icon={BarChart3}>
@@ -792,49 +751,38 @@ const PerformanceTab = ({ investor, investments, products, navs }) => {
           <p className="text-xl font-bold text-white">{formatCurrency(currentValue)}</p>
         </div>
       </div>
-
-      {loading ? (
-        <p className="text-zinc-400">Loading performance data...</p>
-      ) : returns.length === 0 ? (
-        <EmptyState title="No return overrides" description="NAV and return overrides for this investor will appear here." />
+      {investments.length === 0 ? (
+        <EmptyState title="No holdings" description="This investor has no active investments to show performance for." />
       ) : (
         <TableShell>
           <Table>
             <TableHeader>
               <TableRow className={TABLE_ROW_CLASS}>
                 <TableHead className={TABLE_HEAD_CLASS}>Product</TableHead>
-                <TableHead className={TABLE_HEAD_CLASS}>Period</TableHead>
+                <TableHead className={TABLE_HEAD_CLASS}>Invested</TableHead>
+                <TableHead className={TABLE_HEAD_CLASS}>Current Value</TableHead>
+                <TableHead className={TABLE_HEAD_CLASS}>P&L</TableHead>
                 <TableHead className={TABLE_HEAD_CLASS}>Return %</TableHead>
-                <TableHead className={TABLE_HEAD_CLASS}>NAV / Unit</TableHead>
-                <TableHead className={TABLE_HEAD_CLASS}>Effective Date</TableHead>
-                <TableHead className={TABLE_HEAD_CLASS}>Scope</TableHead>
-                <TableHead className={TABLE_HEAD_CLASS}>Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {returns.map(fr => (
-                <TableRow key={fr.id} className={TABLE_ROW_CLASS}>
-                  <TableCell className="text-white">{getProductName(products, fr.product_id)}</TableCell>
-                  <TableCell className="text-zinc-300">{fr.period || '—'}</TableCell>
-                  <TableCell className={fr.return_percent >= 0 ? 'text-green-400' : 'text-red-400'}>
-                    {fr.return_percent != null ? formatPercent(fr.return_percent) : '—'}
-                  </TableCell>
-                  <TableCell className="text-zinc-300">
-                    {fr.nav_per_unit != null ? formatCurrency(fr.nav_per_unit) : '—'}
-                  </TableCell>
-                  <TableCell className="text-zinc-300">
-                    {fr.effective_date ? format(new Date(fr.effective_date), 'MMM dd, yyyy') : '—'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={fr.investor_email ? 'border-[#ccab6c]/45 text-[#fedea0]' : 'border-zinc-600 text-zinc-400'}>
-                      {fr.investor_email ? 'Investor' : 'Product'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-zinc-400 text-sm max-w-xs whitespace-pre-wrap break-words">
-                    {fr.admin_notes || '—'}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {investments.map(inv => {
+                const latestNav = navs?.find(n => n.product_id === inv.product_id);
+                const val = latestNav && inv.current_units
+                  ? inv.current_units * latestNav.nav_per_unit
+                  : inv.invested_amount || 0;
+                const pnl = val - (inv.invested_amount || 0);
+                const pct = inv.invested_amount > 0 ? (pnl / inv.invested_amount) * 100 : 0;
+                return (
+                  <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
+                    <TableCell className="text-white">{getProductName(products, inv.product_id)}</TableCell>
+                    <TableCell className="text-zinc-300">{formatCurrency(inv.invested_amount)}</TableCell>
+                    <TableCell className="text-zinc-300">{formatCurrency(val)}</TableCell>
+                    <TableCell className={pnl >= 0 ? 'text-green-400' : 'text-red-400'}>{formatCurrency(pnl)}</TableCell>
+                    <TableCell className={pct >= 0 ? 'text-green-400' : 'text-red-400'}>{formatPercent(pct)}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableShell>

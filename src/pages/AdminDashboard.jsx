@@ -29,6 +29,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -180,11 +181,7 @@ export default function AdminDashboard() {
   ];
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading admin dashboard...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading admin dashboard..." />;
   }
 
   return (

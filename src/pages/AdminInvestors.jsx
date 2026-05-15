@@ -39,6 +39,7 @@ import {
 import InvestorDetailDrawer from "@/components/admin/InvestorDetailDrawer";
 import OTPManagement from "@/components/admin/OTPManagement"; // Added OTPManagement import
 import { sendInvitationEmail } from "@/functions/sendInvitationEmail";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const InviteInvestorForm = ({ onInvite, onDone }) => {
     const [email, setEmail] = useState('');
@@ -181,11 +182,7 @@ export default function AdminInvestors() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading Investor CRM...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading Investor CRM..." />;
   }
 
   return (

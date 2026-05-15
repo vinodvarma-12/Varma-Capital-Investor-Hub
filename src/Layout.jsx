@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -218,7 +219,6 @@ export default function Layout({ children, currentPageName }) {
     { title: "Manage Investors", url: createPageUrl("AdminInvestors"), icon: Users },
     { title: "Product Management", url: createPageUrl("AdminProducts"), icon: Package },
     { title: "NAV Editor", url: createPageUrl("AdminNAV"), icon: TrendingUp },
-    { title: "Return Overrides", url: createPageUrl("AdminReturns"), icon: TrendingUp },
     { title: "Document Upload", url: createPageUrl("AdminDocuments"), icon: FileText },
     { title: "Support Queue", url: createPageUrl("AdminSupport"), icon: MessageSquare },
     { title: "Waitlist Management", url: createPageUrl("AdminWaitlist"), icon: UserPlus },
@@ -269,33 +269,11 @@ export default function Layout({ children, currentPageName }) {
 
   // Show loading while checking auth for protected pages
   if (!authChecked && !isPublicPage) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="space-y-4 text-center">
-          <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
-            alt="Varma Capital" 
-            className="mx-auto h-24 w-24"
-          />
-          <div className="text-muted-foreground">Loading...</div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading..." />;
   }
 
   if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="space-y-4 text-center">
-          <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
-            alt="Varma Capital" 
-            className="mx-auto h-24 w-24"
-          />
-          <div className="text-muted-foreground">Loading Varma Capital Portal...</div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading Varma Capital Portal..." />;
   }
 
   return (

@@ -4,7 +4,6 @@ import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
 import { Transaction } from "@/entities/Transaction";
-import { FabricatedReturns } from "@/entities/FabricatedReturns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { TrendingUp, TrendingDown, Download, Lock, Unlock } from "lucide-react";
 import { format, isAfter } from "date-fns";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function Portfolio() {
   const [user, setUser] = useState(null);
@@ -26,7 +26,6 @@ export default function Portfolio() {
   const [products, setProducts] = useState([]);
   const [navData, setNavData] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,19 +37,17 @@ export default function Portfolio() {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, productsData, navResults, transactionsData, fabricatedData] = await Promise.all([
+      const [investmentsData, productsData, navResults, transactionsData] = await Promise.all([
         Investment.filter({ investor_email: userData.email }),
         Product.list(),
         NAV.list('-date', 200),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 50),
-        FabricatedReturns.list('-effective_date', 100)
       ]);
 
       setInvestments(investmentsData);
       setProducts(productsData);
       setNavData(navResults);
       setTransactions(transactionsData);
-      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading portfolio data:", error);
     } finally {
@@ -64,68 +61,19 @@ export default function Portfolio() {
   };
 
   const getCurrentValue = (investment) => {
-    const invested = investment.invested_amount || 0;
-    
-    // Check for investor-specific fabricated return first
-    let fabReturn = fabricatedReturns.find(fr => 
-      fr.investor_email === user?.email && 
-      fr.product_id === investment.product_id &&
-      fr.override_calculated
-    );
-    
-    // Fall back to product-wide fabricated return
-    if (!fabReturn) {
-      fabReturn = fabricatedReturns.find(fr => 
-        !fr.investor_email && 
-        fr.product_id === investment.product_id &&
-        fr.override_calculated
-      );
+    const latestNav = navData.find(nav => nav.product_id === investment.product_id);
+    if (latestNav && investment.current_units) {
+      return investment.current_units * latestNav.nav_per_unit;
     }
-
-    if (fabReturn && fabReturn.return_percent !== undefined) {
-      // Use admin-set return percentage
-      return invested + (invested * (fabReturn.return_percent / 100));
-    } else if (fabReturn && fabReturn.nav_per_unit && investment.current_units) {
-      // Use admin-set NAV
-      return investment.current_units * fabReturn.nav_per_unit;
-    } else {
-      // Fall back to NAV entity
-      const latestNav = navData.find(nav => nav.product_id === investment.product_id);
-      if (latestNav && investment.current_units) {
-        return investment.current_units * latestNav.nav_per_unit;
-      }
-    }
-    return invested;
+    return investment.invested_amount || 0;
   };
 
   const getPnL = (investment) => {
     const currentValue = getCurrentValue(investment);
     const investedAmount = investment.invested_amount || 0;
-    
-    // Check for admin-set return percentage
-    let fabReturn = fabricatedReturns.find(fr => 
-      fr.investor_email === user?.email && 
-      fr.product_id === investment.product_id &&
-      fr.override_calculated
-    );
-    if (!fabReturn) {
-      fabReturn = fabricatedReturns.find(fr => 
-        !fr.investor_email && 
-        fr.product_id === investment.product_id &&
-        fr.override_calculated
-      );
-    }
-
-    if (fabReturn && fabReturn.return_percent !== undefined) {
-      return {
-        amount: investedAmount * (fabReturn.return_percent / 100),
-        percent: fabReturn.return_percent
-      };
-    }
-
     return {
       amount: currentValue - investedAmount,
-      percent: investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount) * 100 : 0
+      percent: investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount) * 100 : 0,
     };
   };
 
@@ -143,11 +91,7 @@ export default function Portfolio() {
   }));
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading your portfolio...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading your portfolio..." />;
   }
 
   return (
