@@ -283,23 +283,16 @@ export default function AdminInvestors() {
 
         {/* Investor Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="bg-black border-[#ccab6c]/25 text-white max-w-6xl h-[90vh] overflow-hidden">
-            <DialogHeader>
-              <DialogTitle className="text-xl">Investor Details</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="bg-black border-[#ccab6c]/25 text-white w-[min(98vw,90rem)] max-w-none sm:max-w-none h-[92vh] flex flex-col min-h-0 p-0 gap-0 overflow-hidden">
             {selectedInvestor && (
-              <div className="flex-1 overflow-hidden">
+              <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
                 <InvestorDetailDrawer
                   investor={selectedInvestor}
-                  investments={investments.filter(i => i.investor_email === selectedInvestor.email)} // Preserving the filter
+                  investments={investments.filter(i => i.investor_email === selectedInvestor.email)}
                   products={products}
-                  navs={navs} // Added navs prop
+                  navs={navs}
                   onDataChange={loadCrmData}
-                  onClose={() => { // Added onClose prop
-                    setSelectedInvestor(null);
-                    setIsDetailDialogOpen(false);
-                  }}
-                  additionalTabs={[ // Added additionalTabs prop
+                  additionalTabs={[
                     {
                       id: "otp",
                       label: "OTP Management",

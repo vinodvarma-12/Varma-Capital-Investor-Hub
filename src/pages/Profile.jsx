@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { UserCircle, Mail, Phone, Home, Banknote, Bell, ShieldCheck, KeyRound, Edit, Save, X, Shield } from "lucide-react";
+import { UserCircle, Mail, Phone, Home, Banknote, Bell, ShieldCheck, KeyRound, Edit, Save, X, Shield, CreditCard, Wallet } from "lucide-react";
 import TwoFactorSetup from "@/components/security/TwoFactorSetup";
 
 const ProfileSection = ({ title, icon, children }) => (
@@ -92,17 +92,34 @@ export default function Profile() {
     });
   };
 
+  const isProfileComplete = (data) => {
+    return !!(
+      data.full_name?.trim() &&
+      data.phone?.trim() &&
+      data.national_id?.trim() &&
+      data.address?.street?.trim() &&
+      data.address?.city?.trim() &&
+      data.address?.country?.trim()
+    );
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
-      // We only want to update the fields that are editable
-      const { full_name, phone, address, bank_details } = editableUser;
-      await User.updateMyUserData({ full_name, phone, address, bank_details });
+      const { full_name, phone, address, bank_details, national_id } = editableUser;
+      const updatePayload = { full_name, phone, address, bank_details, national_id };
+
+      // Auto-verify KYC if all required fields are filled
+      if (isProfileComplete(editableUser)) {
+        updatePayload.kyc_status = 'verified';
+      }
+
+      await User.updateMyUserData(updatePayload);
       setIsEditing(false);
     } catch(error) {
       console.error("Error saving user data:", error);
     } finally {
-      loadUserData(); // Reload all data to ensure consistency
+      loadUserData();
     }
   };
 
@@ -167,6 +184,7 @@ export default function Profile() {
                 <EditRow label="Full Name" name="full_name" value={editableUser.full_name} onChange={handleInputChange} icon={<UserCircle className="w-4 h-4"/>}/>
                 <InfoRow label="Email" value={user.email} icon={<Mail className="w-4 h-4"/>}/>
                 <EditRow label="Phone" name="phone" value={editableUser.phone} onChange={handleInputChange} icon={<Phone className="w-4 h-4"/>}/>
+                <EditRow label="Passport No. / National ID" name="national_id" value={editableUser.national_id} onChange={handleInputChange} icon={<CreditCard className="w-4 h-4"/>}/>
                 <EditRow label="Street" name="address.street" value={editableUser.address?.street} onChange={handleInputChange} icon={<Home className="w-4 h-4"/>}/>
                 <EditRow label="City" name="address.city" value={editableUser.address?.city} onChange={handleInputChange} icon={<Home className="w-4 h-4 opacity-0"/>}/>
                 <EditRow label="Country" name="address.country" value={editableUser.address?.country} onChange={handleInputChange} icon={<Home className="w-4 h-4 opacity-0"/>}/>
@@ -176,7 +194,8 @@ export default function Profile() {
                 <InfoRow label="Full Name" value={user.full_name} icon={<UserCircle className="w-4 h-4"/>}/>
                 <InfoRow label="Email" value={user.email} icon={<Mail className="w-4 h-4"/>}/>
                 <InfoRow label="Phone" value={user.phone} icon={<Phone className="w-4 h-4"/>}/>
-                <InfoRow label="Address" 
+                <InfoRow label="Passport No. / National ID" value={user.national_id} icon={<CreditCard className="w-4 h-4"/>}/>
+                <InfoRow label="Address"
                   value={`${user.address?.street || ''}${user.address?.street ? ', ' : ''}${user.address?.city || ''}${user.address?.city ? ', ' : ''}${user.address?.country || ''}`}
                   icon={<Home className="w-4 h-4"/>}
                 />
@@ -184,16 +203,20 @@ export default function Profile() {
             )}
           </ProfileSection>
 
-          <ProfileSection title="Bank Details" icon={<Banknote className="w-5 h-5 text-[#fedea0]"/>}>
+          <ProfileSection title="Bank & Wallet Details" icon={<Banknote className="w-5 h-5 text-[#fedea0]"/>}>
             {isEditing ? (
               <>
                 <EditRow label="Bank Name" name="bank_details.bank_name" value={editableUser.bank_details?.bank_name} onChange={handleInputChange} icon={<Banknote className="w-4 h-4"/>}/>
                 <EditRow label="Account Number" name="bank_details.account_number" value={editableUser.bank_details?.account_number} onChange={handleInputChange} icon={<UserCircle className="w-4 h-4"/>}/>
+                <EditRow label="Wallet Chain" name="bank_details.wallet_chain" value={editableUser.bank_details?.wallet_chain} onChange={handleInputChange} icon={<CreditCard className="w-4 h-4"/>}/>
+                <EditRow label="Wallet Address" name="bank_details.wallet_address" value={editableUser.bank_details?.wallet_address} onChange={handleInputChange} icon={<Wallet className="w-4 h-4"/>}/>
               </>
             ) : (
               <>
                 <InfoRow label="Bank Name" value={user.bank_details?.bank_name} icon={<Banknote className="w-4 h-4"/>}/>
                 <InfoRow label="Account Number" value={user.bank_details?.account_number ? `**** **** **** ${user.bank_details.account_number.slice(-4)}` : '-'} icon={<UserCircle className="w-4 h-4"/>}/>
+                <InfoRow label="Wallet Chain" value={user.bank_details?.wallet_chain} icon={<CreditCard className="w-4 h-4"/>}/>
+                <InfoRow label="Wallet Address" value={user.bank_details?.wallet_address} icon={<Wallet className="w-4 h-4"/>}/>
               </>
             )}
           </ProfileSection>

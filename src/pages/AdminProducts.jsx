@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { User } from "@/entities/User";
 import { Product } from "@/entities/Product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Globe, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const ProductForm = ({ product, onSave }) => {
   const [formData, setFormData] = useState(product || {
@@ -38,11 +40,12 @@ const ProductForm = ({ product, onSave }) => {
     risk_band: 'medium',
     status: 'active',
     high_water_mark: false,
-    hurdle_rate: 0
+    hurdle_rate: 0,
+    is_public: false,
   });
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({...prev, [field]: value}));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -54,7 +57,16 @@ const ProductForm = ({ product, onSave }) => {
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto p-2">
       <div className="grid grid-cols-2 gap-4">
         <div><Label>Name</Label><Input value={formData.name} onChange={e => handleChange('name', e.target.value)} required /></div>
-        <div><Label>Status</Label><Select value={formData.status} onValueChange={val => handleChange('status', val)}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="suspended">Suspended</SelectItem><SelectItem value="closed">Closed</SelectItem></SelectContent></Select></div>
+        <div><Label>Status</Label>
+          <Select value={formData.status} onValueChange={val => handleChange('status', val)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="closed">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div><Label>Description</Label><Textarea value={formData.description} onChange={e => handleChange('description', e.target.value)} /></div>
       <div className="grid grid-cols-2 gap-4">
@@ -63,32 +75,50 @@ const ProductForm = ({ product, onSave }) => {
         <div><Label>Management Fee (%)</Label><Input type="number" step="0.1" value={formData.management_fee_percent} onChange={e => handleChange('management_fee_percent', parseFloat(e.target.value))} /></div>
         <div><Label>Performance Fee (%)</Label><Input type="number" step="0.1" value={formData.performance_fee_percent} onChange={e => handleChange('performance_fee_percent', parseFloat(e.target.value))} /></div>
         <div><Label>Hurdle Rate (%)</Label><Input type="number" step="0.1" value={formData.hurdle_rate} onChange={e => handleChange('hurdle_rate', parseFloat(e.target.value))} /></div>
-        <div><Label>Risk Band</Label><Select value={formData.risk_band} onValueChange={val => handleChange('risk_band', val)}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="very_high">Very High</SelectItem></SelectContent></Select></div>
+        <div><Label>Risk Band</Label>
+          <Select value={formData.risk_band} onValueChange={val => handleChange('risk_band', val)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="very_high">Very High</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div><Label>Redemption Penalty (%)</Label><Input type="number" step="0.1" value={formData.redemption_penalty_percent} onChange={e => handleChange('redemption_penalty_percent', parseFloat(e.target.value))} /></div>
         <div><Label>Redemption Penalty ($)</Label><Input type="number" value={formData.redemption_penalty_amount} onChange={e => handleChange('redemption_penalty_amount', parseFloat(e.target.value))} /></div>
       </div>
-      <div className="flex items-center space-x-2"><Switch id="hwm" checked={formData.high_water_mark} onCheckedChange={val => handleChange('high_water_mark', val)} /><Label htmlFor="hwm">High Water Mark</Label></div>
+      <div className="flex items-center space-x-2">
+        <Switch id="hwm" checked={formData.high_water_mark} onCheckedChange={val => handleChange('high_water_mark', val)} />
+        <Label htmlFor="hwm">High Water Mark</Label>
+      </div>
       <Button type="submit" className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]">Save Product</Button>
     </form>
   );
 };
-
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
-    loadProducts();
+    loadData();
   }, []);
 
-  const loadProducts = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const productsData = await Product.list('-created_date');
+      const [productsData, userData] = await Promise.all([
+        Product.list('-created_date'),
+        User.me(),
+      ]);
       setProducts(productsData);
+      setCurrentUser(userData);
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -98,16 +128,34 @@ export default function AdminProducts() {
 
   const handleSaveProduct = async (productData) => {
     try {
-      if(productData.id) {
+      if (productData.id) {
         await Product.update(productData.id, productData);
       } else {
         await Product.create(productData);
       }
       setIsFormOpen(false);
       setEditingProduct(null);
-      loadProducts();
-    } catch(error) {
+      loadData();
+      toast.success(productData.id ? 'Product updated.' : 'Product created.');
+    } catch (error) {
       console.error("Failed to save product:", error);
+      toast.error('Failed to save product.');
+    }
+  };
+
+  const handleToggleVisibility = async (product) => {
+    setTogglingId(product.id);
+    try {
+      await Product.update(product.id, { is_public: !product.is_public });
+      setProducts(prev =>
+        prev.map(p => p.id === product.id ? { ...p, is_public: !p.is_public } : p)
+      );
+      toast.success(`"${product.name}" is now ${!product.is_public ? 'public' : 'private'}.`);
+    } catch (error) {
+      console.error("Failed to toggle visibility:", error);
+      toast.error('Failed to update visibility.');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -115,7 +163,7 @@ export default function AdminProducts() {
     setEditingProduct(product);
     setIsFormOpen(true);
   };
-  
+
   const openFormForNew = () => {
     setEditingProduct(null);
     setIsFormOpen(true);
@@ -125,13 +173,16 @@ export default function AdminProducts() {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         await Product.delete(productId);
-        loadProducts();
+        loadData();
+        toast.success('Product deleted.');
       } catch (error) {
         console.error("Error deleting product:", error);
-        alert("Error deleting product");
+        toast.error('Error deleting product.');
       }
     }
   };
+
+  const isSuperAdmin = currentUser?.role === 'super_admin';
 
   return (
     <div className="min-h-screen bg-black p-6">
@@ -156,7 +207,7 @@ export default function AdminProducts() {
             </DialogContent>
           </Dialog>
         </div>
-        
+
         <Card className="bg-zinc-950 border border-[#ccab6c]/30">
           <CardHeader><CardTitle className="text-white">All Products</CardTitle></CardHeader>
           <CardContent>
@@ -171,6 +222,9 @@ export default function AdminProducts() {
                     <TableHead className="text-[#ccab6c]/90">Mgt. Fee</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Perf. Fee</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                    {isSuperAdmin && (
+                      <TableHead className="text-[#ccab6c]/90">Visibility</TableHead>
+                    )}
                     <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -183,11 +237,37 @@ export default function AdminProducts() {
                       <TableCell className="text-zinc-300">{product.lock_in_months} months</TableCell>
                       <TableCell className="text-zinc-300">{product.management_fee_percent}%</TableCell>
                       <TableCell className="text-zinc-300">{product.performance_fee_percent || 0}%</TableCell>
-                      <TableCell><Badge variant={product.status === 'active' ? 'default' : 'secondary'}>{product.status}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                          {product.status}
+                        </Badge>
+                      </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell>
+                          <button
+                            onClick={() => handleToggleVisibility(product)}
+                            disabled={togglingId === product.id}
+                            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
+                              product.is_public
+                                ? 'bg-green-900/50 border-green-700 text-green-400 hover:bg-green-900'
+                                : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:bg-zinc-700'
+                            }`}
+                          >
+                            {product.is_public
+                              ? <><Globe className="w-3 h-3" /> Public</>
+                              : <><Lock className="w-3 h-3" /> Private</>
+                            }
+                          </button>
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openFormForEdit(product)}><Edit className="w-3 h-3 mr-1"/> Edit</Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="text-red-400 hover:text-red-300"><Trash2 className="w-3 h-3"/></Button>
+                          <Button variant="outline" size="sm" onClick={() => openFormForEdit(product)}>
+                            <Edit className="w-3 h-3 mr-1" /> Edit
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="text-red-400 hover:text-red-300">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -4,6 +4,9 @@ import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { AllocationRequest } from "@/entities/AllocationRequest";
 import { SupportTicket } from "@/entities/SupportTicket";
+import { Transaction } from "@/entities/Transaction";
+import { NAV } from "@/entities/NAV";
+import { AuditLog } from "@/entities/AuditLog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,19 +44,21 @@ export default function AdminDashboard() {
 
   const loadAdminData = async () => {
     try {
-      const [usersData, investmentsData, productsData, requestsData, ticketsData] = await Promise.all([
+      const [usersData, investmentsData, productsData, requestsData, allOpenTickets, currentUser] = await Promise.all([
         User.list(),
         Investment.list('-created_date', 100),
         Product.list(),
         AllocationRequest.filter({ status: 'pending' }),
-        SupportTicket.filter({ status: 'open' })
+        SupportTicket.filter({ status: 'open' }),
+        User.me(),
       ]);
 
       setUsers(usersData);
       setInvestments(investmentsData);
       setProducts(productsData);
       setAllocationRequests(requestsData);
-      setSupportTickets(ticketsData);
+      // Only surface tickets assigned to this admin
+      setSupportTickets(allOpenTickets.filter(t => t.assigned_to === currentUser.email));
     } catch (error) {
       console.error("Error loading admin data:", error);
     } finally {
@@ -63,15 +68,94 @@ export default function AdminDashboard() {
 
   const handleAllocationRequest = async (requestId, status, notes = '') => {
     try {
+      const currentUser = await User.me();
+      const today = new Date().toISOString().split('T')[0];
+
+      // Update the allocation request status
       await AllocationRequest.update(requestId, {
         status,
         admin_notes: notes,
-        reviewed_by: (await User.me()).email,
-        reviewed_date: new Date().toISOString().split('T')[0]
+        reviewed_by: currentUser.email,
+        reviewed_date: today,
       });
+
+      // If approved — auto-create investment + subscription transaction
+      if (status === 'approved') {
+        const request = allocationRequests.find(r => r.id === requestId);
+        if (request) {
+          const product = products.find(p => p.id === request.product_id);
+
+          // Get latest NAV for this product to calculate units
+          let navPerUnit = null;
+          let currentUnits = null;
+          try {
+            const navRecords = await NAV.filter({ product_id: request.product_id }, '-date', 1);
+            if (navRecords.length > 0) {
+              navPerUnit = navRecords[0].nav_per_unit;
+              currentUnits = navPerUnit > 0
+                ? parseFloat((request.requested_amount / navPerUnit).toFixed(4))
+                : null;
+            }
+          } catch (e) {
+            console.warn('No NAV found for product, units will be null');
+          }
+
+          // Calculate lock-in end date from product
+          let lockInEndDate = null;
+          if (product?.lock_in_months) {
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + product.lock_in_months);
+            lockInEndDate = endDate.toISOString().split('T')[0];
+          }
+
+          // Create investment (holding)
+          await Investment.create({
+            investor_email: request.investor_email,
+            product_id: request.product_id,
+            invested_amount: request.requested_amount,
+            current_units: currentUnits,
+            cost_basis: request.requested_amount,
+            purchase_date: today,
+            lock_in_months: product?.lock_in_months || null,
+            lock_in_end_date: lockInEndDate,
+            status: 'active',
+          });
+
+          // Create subscription transaction
+          await Transaction.create({
+            investor_email: request.investor_email,
+            product_id: request.product_id,
+            type: 'subscription',
+            amount: request.requested_amount,
+            units: currentUnits,
+            nav_per_unit: navPerUnit,
+            transaction_date: today,
+            status: 'completed',
+            notes: `Auto-created on allocation approval by ${currentUser.email}`,
+          });
+
+          // Audit log
+          await AuditLog.create({
+            user_email: currentUser.email,
+            action: 'create',
+            entity_type: 'Investment',
+            entity_id: request.investor_email,
+            changes: {
+              investor_email: request.investor_email,
+              product_id: request.product_id,
+              invested_amount: request.requested_amount,
+              units: currentUnits,
+              nav_per_unit: navPerUnit,
+              source: 'allocation_request_approval',
+            },
+          });
+        }
+      }
+
       loadAdminData();
     } catch (error) {
       console.error("Error updating allocation request:", error);
+      alert('Failed to process request: ' + error.message);
     }
   };
 

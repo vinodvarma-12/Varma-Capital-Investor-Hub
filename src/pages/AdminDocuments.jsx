@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Document } from "@/entities/Document";
 import { User } from "@/entities/User";
 import { UploadFile } from "@/integrations/Core";
+import imageCompression from "browser-image-compression";
+import { PDFDocument } from "pdf-lib";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,128 +41,233 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+const GLOBAL_SENTINEL = '__global__';
+
 const DocumentForm = ({ document, investors, onSave, onCancel }) => {
-  const [formData, setFormData] = useState(document || {
-    title: '',
-    type: 'statement',
-    investor_email: '',
-    period: '',
-    file_url: '',
-    is_watermarked: false
+  const [formData, setFormData] = useState(() => {
+    if (document) return { ...document };
+    return {
+      title: '',
+      type: 'statement',
+      investor_email: '',
+      period: '',
+      file_url: '',
+      is_watermarked: false,
+    };
   });
   const [isUploading, setIsUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const fileInputRef = React.useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    // Convert sentinel back to empty string for storage
+    const payload = {
+      ...formData,
+      investor_email: formData.investor_email === GLOBAL_SENTINEL ? '' : formData.investor_email,
+    };
+    onSave(payload);
+  };
+
+  const compressPdf = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const compressedBytes = await pdfDoc.save({ useObjectStreams: true });
+    return new File([compressedBytes], file.name, { type: 'application/pdf' });
   };
 
   const handleFileUpload = async (file) => {
     if (!file) return;
     setIsUploading(true);
+    setUploadedFileName(file.name);
     try {
-      const { file_url } = await UploadFile({ file });
+      let fileToUpload = file;
+      if (file.type.startsWith('image/')) {
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 2048,
+          useWebWorker: true,
+        });
+        fileToUpload = new File([compressed], file.name, { type: compressed.type });
+      } else if (file.type === 'application/pdf') {
+        fileToUpload = await compressPdf(file);
+      }
+      const { file_url } = await UploadFile({ file: fileToUpload });
       setFormData(prev => ({ ...prev, file_url }));
     } catch (error) {
       console.error("File upload failed:", error);
       alert("File upload failed. Please try again.");
+      setUploadedFileName('');
     } finally {
       setIsUploading(false);
     }
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  };
+
+  const investorSelectValue = formData.investor_email === '' ? GLOBAL_SENTINEL : (formData.investor_email || GLOBAL_SENTINEL);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5 py-1">
+
+      {/* Title — full width */}
+      <div className="space-y-1.5">
+        <Label className="text-zinc-300 text-sm">Document Title <span className="text-red-400">*</span></Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          required
+          placeholder="e.g., Q1 2024 Statement"
+          className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-[#ccab6c]/60"
+        />
+      </div>
+
+      {/* Type + Period — side by side */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Document Title</Label>
-          <Input 
-            value={formData.title} 
-            onChange={(e) => setFormData(prev => ({...prev, title: e.target.value}))}
-            required 
-            className="bg-zinc-900 border-[#ccab6c]/20"
-          />
-        </div>
-        <div>
-          <Label>Document Type</Label>
-          <Select value={formData.type} onValueChange={(val) => setFormData(prev => ({...prev, type: val}))}>
-            <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+        <div className="space-y-1.5">
+          <Label className="text-zinc-300 text-sm">Document Type <span className="text-red-400">*</span></Label>
+          <Select value={formData.type} onValueChange={(val) => setFormData(prev => ({ ...prev, type: val }))}>
+            <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white focus:border-[#ccab6c]/60">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
+            <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
               <SelectItem value="statement">Statement</SelectItem>
               <SelectItem value="tax_document">Tax Document</SelectItem>
               <SelectItem value="agreement">Agreement</SelectItem>
               <SelectItem value="compliance">Compliance</SelectItem>
               <SelectItem value="notice">Notice</SelectItem>
+              <SelectItem value="image">Image</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-zinc-300 text-sm">Period</Label>
+          <Input
+            value={formData.period}
+            onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
+            placeholder="e.g., 2024-Q1"
+            className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-[#ccab6c]/60"
+          />
+          <p className="text-xs text-zinc-500">Optional — helps with sorting</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Investor (Leave empty for global document)</Label>
-          <Select value={formData.investor_email} onValueChange={(val) => setFormData(prev => ({...prev, investor_email: val}))}>
-            <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
-              <SelectValue placeholder="Select investor or leave blank" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
-              <SelectItem value={null}>Global Document (All Investors)</SelectItem>
-              {investors.map(investor => (
-                <SelectItem key={investor.id} value={investor.email}>
-                  {investor.full_name} ({investor.email})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Period (Optional)</Label>
-          <Input 
-            value={formData.period} 
-            onChange={(e) => setFormData(prev => ({...prev, period: e.target.value}))}
-            placeholder="e.g., 2024-Q1, 2024-12"
-            className="bg-zinc-900 border-[#ccab6c]/20"
+      {/* Recipient — full width */}
+      <div className="space-y-1.5">
+        <Label className="text-zinc-300 text-sm">Recipient</Label>
+        <Select
+          value={investorSelectValue}
+          onValueChange={(val) =>
+            setFormData(prev => ({ ...prev, investor_email: val === GLOBAL_SENTINEL ? '' : val }))
+          }
+        >
+          <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white focus:border-[#ccab6c]/60">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-zinc-900 border-zinc-700 text-white max-h-48">
+            <SelectItem value={GLOBAL_SENTINEL}>
+              <span className="flex items-center gap-2">
+                <Users className="w-3.5 h-3.5 text-[#fedea0]" />
+                All Investors (Global)
+              </span>
+            </SelectItem>
+            {investors.map(investor => (
+              <SelectItem key={investor.id} value={investor.email}>
+                {investor.full_name || investor.email}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-zinc-500">Select a specific investor, or leave as Global to share with everyone</p>
+      </div>
+
+      {/* Drag-and-drop file upload */}
+      <div className="space-y-1.5">
+        <Label className="text-zinc-300 text-sm">File <span className="text-red-400">*</span></Label>
+        <div
+          onClick={() => !isUploading && fileInputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          className={`relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-8 cursor-pointer transition-colors ${
+            dragOver
+              ? 'border-[#ccab6c] bg-[#ccab6c]/5'
+              : formData.file_url
+              ? 'border-green-600/60 bg-green-900/10'
+              : 'border-zinc-700 bg-zinc-900 hover:border-[#ccab6c]/40 hover:bg-zinc-800/60'
+          }`}
+        >
+          {isUploading ? (
+            <>
+              <div className="w-8 h-8 rounded-full border-2 border-[#fedea0] border-t-transparent animate-spin" />
+              <p className="text-sm text-zinc-400">Uploading <span className="text-white">{uploadedFileName}</span>…</p>
+            </>
+          ) : formData.file_url ? (
+            <>
+              <div className="w-10 h-10 rounded-full bg-green-900/40 border border-green-600/50 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-green-400" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-green-400">File uploaded successfully</p>
+                <p className="text-xs text-zinc-500 mt-0.5">{uploadedFileName || 'Click to replace'}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-[#ccab6c]/70" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-white">Drop file here or <span className="text-[#fedea0]">browse</span></p>
+                <p className="text-xs text-zinc-500 mt-0.5">PDF, Word, Excel, PNG, JPG — max 50 MB</p>
+              </div>
+            </>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp"
+            onChange={(e) => handleFileUpload(e.target.files[0])}
+            disabled={isUploading}
           />
         </div>
       </div>
 
-      <div>
-        <Label>Upload Document</Label>
-        <Input 
-          type="file" 
-          onChange={(e) => handleFileUpload(e.target.files[0])}
-          disabled={isUploading}
-          className="bg-zinc-900 border-[#ccab6c]/20"
-          accept=".pdf,.doc,.docx,.xls,.xlsx"
-        />
-        {formData.file_url && (
-          <p className="text-xs text-green-400 mt-2">✓ File uploaded successfully</p>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch 
-          id="watermarked" 
+      {/* Watermark toggle */}
+      <div className="flex items-start gap-3 rounded-lg bg-zinc-900 border border-zinc-700 px-4 py-3">
+        <Switch
+          id="watermarked"
           checked={formData.is_watermarked}
-          onCheckedChange={(val) => setFormData(prev => ({...prev, is_watermarked: val}))}
+          onCheckedChange={(val) => setFormData(prev => ({ ...prev, is_watermarked: val }))}
+          className="mt-0.5"
         />
-        <Label htmlFor="watermarked" className="text-zinc-300">
-          Document is watermarked with investor details
-        </Label>
+        <div>
+          <Label htmlFor="watermarked" className="text-zinc-200 text-sm font-medium cursor-pointer">
+            Apply investor watermark
+          </Label>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Stamps the document with the investor's name and email when downloaded
+          </p>
+        </div>
       </div>
 
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <DialogFooter className="pt-2">
+        <Button type="button" variant="outline" onClick={onCancel} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
           Cancel
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isUploading || !formData.title || !formData.file_url}
-          className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+          className="bg-[#fedea0] text-black hover:bg-[#ccab6c] font-semibold"
         >
-          {isUploading ? 'Uploading...' : document ? 'Update Document' : 'Create Document'}
+          {isUploading ? 'Uploading…' : document ? 'Update Document' : 'Upload Document'}
         </Button>
       </DialogFooter>
     </form>
@@ -177,6 +284,7 @@ export default function AdminDocuments() {
   const [investorFilter, setInvestorFilter] = useState("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -189,12 +297,14 @@ export default function AdminDocuments() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [allDocuments, allUsers] = await Promise.all([
+      const [allDocuments, allUsers, me] = await Promise.all([
         Document.list('-created_date'),
-        User.list()
+        User.list(),
+        User.me(),
       ]);
       setDocuments(allDocuments);
       setInvestors(allUsers.filter(u => u.role === 'investor'));
+      setCurrentUser(me);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -278,7 +388,8 @@ export default function AdminDocuments() {
       tax_document: "bg-green-900 text-green-400 border-green-700",
       agreement: "bg-purple-900 text-purple-400 border-purple-700",
       compliance: "bg-red-900 text-red-400 border-red-700",
-      notice: "bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45"
+      notice: "bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45",
+      image: "bg-cyan-900 text-cyan-400 border-cyan-700",
     };
     return colors[type] || "bg-zinc-800 text-zinc-300 border-zinc-600";
   };
@@ -310,7 +421,7 @@ export default function AdminDocuments() {
                 Upload Document
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
+            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="text-white">
                   {editingDocument ? 'Edit Document' : 'Upload New Document'}
@@ -476,6 +587,7 @@ export default function AdminDocuments() {
                               <Edit className="w-3 h-3 mr-1" />
                               Edit
                             </Button>
+                            {currentUser?.role === 'super_admin' && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -485,6 +597,7 @@ export default function AdminDocuments() {
                               <Trash2 className="w-3 h-3 mr-1" />
                               Delete
                             </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

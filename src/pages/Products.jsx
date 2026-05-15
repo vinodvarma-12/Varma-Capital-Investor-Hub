@@ -97,14 +97,16 @@ export default function Products() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
             <Card key={product.id} className="bg-zinc-950 border border-[#ccab6c]/30 relative overflow-hidden">
-              {/* Locked Overlay */}
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-[#b38922]/50 flex items-center justify-center mb-4">
-                  <Lock className="w-8 h-8 text-[#fedea0]" />
+              {/* Locked Overlay — only shown for private products */}
+              {!product.is_public && (
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-zinc-900 border-2 border-[#b38922]/50 flex items-center justify-center mb-4">
+                    <Lock className="w-8 h-8 text-[#fedea0]" />
+                  </div>
+                  <p className="text-white font-semibold text-lg">Coming Soon</p>
+                  <p className="text-[#ccab6c]/90 text-sm mt-1">Contact admin to unlock</p>
                 </div>
-                <p className="text-white font-semibold text-lg">Coming Soon</p>
-                <p className="text-[#ccab6c]/90 text-sm mt-1">Contact admin to unlock</p>
-              </div>
+              )}
 
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
