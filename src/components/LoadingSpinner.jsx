@@ -2,10 +2,10 @@ import { RefreshCw } from "lucide-react";
 
 export default function LoadingSpinner({ message = "Loading..." }) {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="flex h-full min-h-64 w-full items-center justify-center py-24">
       <div className="text-center space-y-4">
         <RefreshCw className="w-8 h-8 text-[#fedea0] animate-spin mx-auto" />
-        <div className="text-white">{message}</div>
+        <div className="text-white text-sm">{message}</div>
       </div>
     </div>
   );

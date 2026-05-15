@@ -3,13 +3,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User } from "@/entities/User";
 import { createPageUrl } from "@/utils";
 import { useAuth } from "@/lib/AuthContext";
-import { 
-  LayoutDashboard, 
-  PieChart, 
-  Package, 
-  Newspaper, 
-  MessageSquare, 
-  UserCircle, 
+import {
+  LayoutDashboard,
+  PieChart,
+  Package,
+  Newspaper,
+  MessageSquare,
+  UserCircle,
   Settings,
   Users,
   FileText,
@@ -18,10 +18,11 @@ import {
   Sun,
   Moon,
   Lock,
-  Shield, // Used for Super Admin Dashboard
+  Shield,
   History,
-  Lightbulb, // Used for Insights & Content
-  UserPlus // New import for Waitlist Management
+  Lightbulb,
+  UserPlus,
+  RefreshCw
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,7 +39,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -142,7 +142,8 @@ export default function Layout({ children, currentPageName }) {
     let cancelled = false;
 
     (async () => {
-      setAuthChecked(false);
+      // Only block the UI on first load when we have no user yet
+      if (!user) setAuthChecked(false);
       try {
         const userData = await User.me();
         if (cancelled) return;
@@ -267,13 +268,16 @@ export default function Layout({ children, currentPageName }) {
     return children;
   }
 
-  // Show loading while checking auth for protected pages
-  if (!authChecked && !isPublicPage) {
-    return <LoadingSpinner message="Loading..." />;
-  }
-
-  if (!user) {
-    return <LoadingSpinner message="Loading Varma Capital Portal..." />;
+  // Full-page loader only on genuine first load — when there is no user yet
+  if (!user && !isPublicPage && (!authChecked || authSessionLoading)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="text-center space-y-4">
+          <RefreshCw className="w-8 h-8 text-[#fedea0] animate-spin mx-auto" />
+          <div className="text-white text-sm">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   return (

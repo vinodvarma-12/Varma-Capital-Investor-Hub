@@ -93,6 +93,10 @@ const ProductForm = ({ product, onSave }) => {
         <Switch id="hwm" checked={formData.high_water_mark} onCheckedChange={val => handleChange('high_water_mark', val)} />
         <Label htmlFor="hwm">High Water Mark</Label>
       </div>
+      <div className="flex items-center space-x-2">
+        <Switch id="is_public" checked={formData.is_public} onCheckedChange={val => handleChange('is_public', val)} />
+        <Label htmlFor="is_public">Public</Label>
+      </div>
       <Button type="submit" className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]">Save Product</Button>
     </form>
   );
@@ -104,7 +108,6 @@ export default function AdminProducts() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -143,21 +146,6 @@ export default function AdminProducts() {
     }
   };
 
-  const handleToggleVisibility = async (product) => {
-    setTogglingId(product.id);
-    try {
-      await Product.update(product.id, { is_public: !product.is_public });
-      setProducts(prev =>
-        prev.map(p => p.id === product.id ? { ...p, is_public: !p.is_public } : p)
-      );
-      toast.success(`"${product.name}" is now ${!product.is_public ? 'public' : 'private'}.`);
-    } catch (error) {
-      console.error("Failed to toggle visibility:", error);
-      toast.error('Failed to update visibility.');
-    } finally {
-      setTogglingId(null);
-    }
-  };
 
   const openFormForEdit = (product) => {
     setEditingProduct(product);
@@ -183,6 +171,7 @@ export default function AdminProducts() {
   };
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
+  const visibleProducts = isSuperAdmin ? products : products.filter(p => p.is_public);
 
   return (
     <div className="min-h-screen bg-black p-6">
@@ -192,20 +181,22 @@ export default function AdminProducts() {
             <h1 className="text-3xl font-bold text-white">Product Management</h1>
             <p className="text-[#ccab6c]/90">Add, edit, and manage investment products</p>
           </div>
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openFormForNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
-                <PlusCircle className="w-4 h-4 mr-2" />
-                New Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
-              <DialogHeader>
-                <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
-              </DialogHeader>
-              <ProductForm product={editingProduct} onSave={handleSaveProduct} />
-            </DialogContent>
-          </Dialog>
+          {isSuperAdmin && (
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openFormForNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  New Product
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
+                <DialogHeader>
+                  <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
+                </DialogHeader>
+                <ProductForm product={editingProduct} onSave={handleSaveProduct} />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <Card className="bg-zinc-950 border border-[#ccab6c]/30">
@@ -222,14 +213,11 @@ export default function AdminProducts() {
                     <TableHead className="text-[#ccab6c]/90">Mgt. Fee</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Perf. Fee</TableHead>
                     <TableHead className="text-[#ccab6c]/90">Status</TableHead>
-                    {isSuperAdmin && (
-                      <TableHead className="text-[#ccab6c]/90">Visibility</TableHead>
-                    )}
-                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
+                    {isSuperAdmin && <TableHead className="text-[#ccab6c]/90">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map(product => (
+                  {visibleProducts.map(product => (
                     <TableRow key={product.id} className="border-[#ccab6c]/25">
                       <TableCell className="font-medium text-white">{product.name}</TableCell>
                       <TableCell className="capitalize text-zinc-300">{product.risk_band}</TableCell>
@@ -238,38 +226,29 @@ export default function AdminProducts() {
                       <TableCell className="text-zinc-300">{product.management_fee_percent}%</TableCell>
                       <TableCell className="text-zinc-300">{product.performance_fee_percent || 0}%</TableCell>
                       <TableCell>
-                        <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
-                          {product.status}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                            {product.status}
+                          </Badge>
+                          {isSuperAdmin && (
+                            <span className={`inline-flex items-center gap-1 text-xs ${product.is_public ? 'text-green-400' : 'text-zinc-500'}`}>
+                              {product.is_public ? <><Globe className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Private</>}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       {isSuperAdmin && (
                         <TableCell>
-                          <button
-                            onClick={() => handleToggleVisibility(product)}
-                            disabled={togglingId === product.id}
-                            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
-                              product.is_public
-                                ? 'bg-green-900/50 border-green-700 text-green-400 hover:bg-green-900'
-                                : 'bg-zinc-800 border-zinc-600 text-zinc-400 hover:bg-zinc-700'
-                            }`}
-                          >
-                            {product.is_public
-                              ? <><Globe className="w-3 h-3" /> Public</>
-                              : <><Lock className="w-3 h-3" /> Private</>
-                            }
-                          </button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openFormForEdit(product)}>
+                              <Edit className="w-3 h-3 mr-1" /> Edit
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="text-red-400 hover:text-red-300">
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                       )}
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openFormForEdit(product)}>
-                            <Edit className="w-3 h-3 mr-1" /> Edit
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDeleteProduct(product.id)} className="text-red-400 hover:text-red-300">
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

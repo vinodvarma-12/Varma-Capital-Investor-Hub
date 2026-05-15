@@ -187,12 +187,11 @@ export default function Documents() {
             <p className="text-[#ccab6c]/90">Access all your investment documents and agreements</p>
           </div>
           
-          {isAdmin && (
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Document
+                  Upload Document
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
@@ -278,7 +277,6 @@ export default function Documents() {
                 </div>
               </DialogContent>
             </Dialog>
-          )}
         </div>
 
         {/* Filters */}
