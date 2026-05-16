@@ -121,76 +121,76 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Shield className="w-8 h-8 text-[#fedea0]" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <Shield className="w-8 h-8 text-gold-bright" />
             Super Admin Dashboard
           </h1>
-          <p className="text-[#ccab6c]/90">Complete system overview and administrative controls</p>
+          <p className="text-gold/90">Complete system overview and administrative controls</p>
         </div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Total Users
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{users.length}</div>
-              <div className="text-sm text-[#ccab6c]/90 mt-1">
+              <div className="text-2xl font-bold text-foreground">{users.length}</div>
+              <div className="text-sm text-gold/90 mt-1">
                 {metrics.totalInvestors} Investors • {metrics.totalAdmins} Admins • {metrics.totalSuperAdmins} Super Admins
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Total AUM
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 ${metrics.totalAUM.toLocaleString()}
               </div>
-              <div className="text-sm text-[#ccab6c]/90 mt-1">
+              <div className="text-sm text-gold/90 mt-1">
                 Across {metrics.activeProducts} active products
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Pending Actions
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#fedea0]">{metrics.pendingRequests}</div>
-              <div className="text-sm text-[#ccab6c]/90 mt-1">
+              <div className="text-2xl font-bold text-gold-bright">{metrics.pendingRequests}</div>
+              <div className="text-sm text-gold/90 mt-1">
                 Allocation requests awaiting review
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 Support Issues
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-400">{metrics.openTickets}</div>
-              <div className="text-sm text-[#ccab6c]/90 mt-1">
+              <div className="text-sm text-gold/90 mt-1">
                 Open support tickets
               </div>
             </CardContent>
@@ -200,9 +200,9 @@ export default function SuperAdminDashboard() {
         {/* Charts Row */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Growth Chart */}
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <TrendingUp className="w-5 h-5" />
                 Platform Growth
               </CardTitle>
@@ -243,35 +243,35 @@ export default function SuperAdminDashboard() {
           </Card>
 
           {/* User Roles Breakdown */}
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <UserCheck className="w-5 h-5" />
                 User Access Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-red-400" />
-                    <span className="text-white font-medium">Super Admins</span>
+                    <span className="text-foreground font-medium">Super Admins</span>
                   </div>
-                  <Badge className="bg-red-600 text-white">{metrics.totalSuperAdmins}</Badge>
+                  <Badge className="bg-red-600 text-foreground">{metrics.totalSuperAdmins}</Badge>
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-blue-400" />
-                    <span className="text-white font-medium">Admins</span>
+                    <span className="text-foreground font-medium">Admins</span>
                   </div>
-                  <Badge className="bg-blue-600 text-white">{metrics.totalAdmins}</Badge>
+                  <Badge className="bg-blue-600 text-foreground">{metrics.totalAdmins}</Badge>
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-zinc-900">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-green-400" />
-                    <span className="text-white font-medium">Investors</span>
+                    <span className="text-foreground font-medium">Investors</span>
                   </div>
-                  <Badge className="bg-green-600 text-white">{metrics.totalInvestors}</Badge>
+                  <Badge className="bg-green-600 text-foreground">{metrics.totalInvestors}</Badge>
                 </div>
               </div>
             </CardContent>
@@ -281,11 +281,11 @@ export default function SuperAdminDashboard() {
         {/* Actions Required & Recent Activity */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Pending Allocation Requests */}
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
+              <CardTitle className="text-foreground flex items-center justify-between">
                 Pending Allocation Requests
-                <Badge variant="outline" className="bg-[#b38922]/25 text-[#fedea0]">
+                <Badge variant="outline" className="bg-[#b38922]/25 text-gold-bright">
                   {allocationRequests.length}
                 </Badge>
               </CardTitle>
@@ -297,11 +297,11 @@ export default function SuperAdminDashboard() {
                     <div key={request.id} className="border border-[#ccab6c]/25 rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-medium text-white">{request.investor_email}</p>
-                          <p className="text-sm text-[#ccab6c]/90">
+                          <p className="font-medium text-foreground">{request.investor_email}</p>
+                          <p className="text-sm text-gold/90">
                             Product: {products.find(p => p.id === request.product_id)?.name}
                           </p>
-                          <p className="text-sm text-[#ccab6c]/90">
+                          <p className="text-sm text-gold/90">
                             Amount: ${request.requested_amount?.toLocaleString()}
                           </p>
                         </div>
@@ -329,15 +329,15 @@ export default function SuperAdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[#ccab6c]/90 text-center py-8">No pending requests</p>
+                <p className="text-gold/90 text-center py-8">No pending requests</p>
               )}
             </CardContent>
           </Card>
 
           {/* Recent System Activity */}
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <Activity className="w-5 h-5" />
                 Recent System Activity
               </CardTitle>
@@ -347,14 +347,14 @@ export default function SuperAdminDashboard() {
                 {auditLogs.slice(0, 8).map((log) => (
                   <div key={log.id} className="flex items-center justify-between py-2 border-b border-[#ccab6c]/25 last:border-b-0">
                     <div className="flex-1">
-                      <p className="text-white text-sm">
+                      <p className="text-foreground text-sm">
                         <span className="font-medium">{log.user_email}</span>
-                        <span className="text-[#ccab6c]/90 mx-2">•</span>
+                        <span className="text-gold/90 mx-2">•</span>
                         <span className="capitalize">{log.action}</span>
-                        <span className="text-[#ccab6c]/90 mx-2">•</span>
-                        <span className="text-[#ccab6c]/90">{log.entity_type}</span>
+                        <span className="text-gold/90 mx-2">•</span>
+                        <span className="text-gold/90">{log.entity_type}</span>
                       </p>
-                      <p className="text-zinc-500 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {format(new Date(log.created_date), 'MMM dd, HH:mm')}
                       </p>
                     </div>

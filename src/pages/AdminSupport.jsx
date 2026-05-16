@@ -134,8 +134,8 @@ export default function AdminSupport() {
     switch (priority) {
       case 'urgent': return 'bg-red-900 text-red-400 border-red-700';
       case 'high': return 'bg-orange-900 text-orange-400 border-orange-700';
-      case 'medium': return 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45';
-      default: return 'bg-zinc-800 text-zinc-300 border-zinc-600';
+      case 'medium': return 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45';
+      default: return 'bg-secondary text-foreground/80 border-border';
     }
   };
 
@@ -144,7 +144,7 @@ export default function AdminSupport() {
       case 'open': return 'bg-blue-900 text-blue-400 border-blue-700';
       case 'in_progress': return 'bg-purple-900 text-purple-400 border-purple-700';
       case 'resolved': return 'bg-green-900 text-green-400 border-green-700';
-      default: return 'bg-zinc-900 text-[#ccab6c]/90 border-[#ccab6c]/20';
+      default: return 'bg-muted text-gold/90 border-[#ccab6c]/20';
     }
   };
 
@@ -163,12 +163,12 @@ export default function AdminSupport() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-white">Support Queue</h1>
-            <p className="text-[#ccab6c]/90">
+            <h1 className="text-3xl font-bold text-foreground">Support Queue</h1>
+            <p className="text-gold/90">
               {isSuperAdmin
                 ? "Review and assign tickets to admins"
                 : "Your assigned support tickets"}
@@ -186,16 +186,16 @@ export default function AdminSupport() {
 
         <div className="grid lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
           {/* Ticket List */}
-          <Card className="lg:col-span-1 bg-zinc-950 border border-[#ccab6c]/30 flex flex-col">
+          <Card className="lg:col-span-1 bg-card border border-[#ccab6c]/30 flex flex-col">
             <CardHeader>
-              <CardTitle className="text-white">
+              <CardTitle className="text-foreground">
                 Ticket Queue
-                <span className="ml-2 text-sm font-normal text-zinc-400">({filteredTickets.length})</span>
+                <span className="ml-2 text-sm font-normal text-muted-foreground">({filteredTickets.length})</span>
               </CardTitle>
               <div className="flex gap-2 mt-4">
                 <Select value={filters.status} onValueChange={(val) => setFilters(f => ({ ...f, status: val }))}>
-                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-zinc-900 text-white">
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 text-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-muted text-foreground">
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="open">Open</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
@@ -204,8 +204,8 @@ export default function AdminSupport() {
                   </SelectContent>
                 </Select>
                 <Select value={filters.priority} onValueChange={(val) => setFilters(f => ({ ...f, priority: val }))}>
-                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-zinc-900 text-white">
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 text-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-muted text-foreground">
                     <SelectItem value="all">All Priorities</SelectItem>
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
@@ -223,17 +223,17 @@ export default function AdminSupport() {
                     onClick={() => setSelectedTicket(ticket)}
                     className={`p-3 rounded-lg cursor-pointer transition-colors border ${
                       selectedTicket?.id === ticket.id
-                        ? 'bg-zinc-800 border-[#ccab6c]/40'
-                        : 'border-transparent hover:bg-zinc-900/50'
+                        ? 'bg-secondary border-[#ccab6c]/40'
+                        : 'border-transparent hover:bg-muted/50'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <p className="font-medium text-white truncate pr-2">{ticket.subject}</p>
+                      <p className="font-medium text-foreground truncate pr-2">{ticket.subject}</p>
                       <Badge variant="outline" className={`capitalize text-xs shrink-0 ${getPriorityBadge(ticket.priority)}`}>
                         {ticket.priority}
                       </Badge>
                     </div>
-                    <p className="text-sm text-[#ccab6c]/90 truncate">{getUserName(ticket.investor_email)}</p>
+                    <p className="text-sm text-gold/90 truncate">{getUserName(ticket.investor_email)}</p>
 
                     {/* Assignment badge — super admin only */}
                     {isSuperAdmin && (
@@ -256,35 +256,35 @@ export default function AdminSupport() {
                       <Badge variant="outline" className={`capitalize text-xs ${getStatusBadge(ticket.status)}`}>
                         {ticket.status.replace('_', ' ')}
                       </Badge>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(ticket.updated_date), { addSuffix: true })}
                       </p>
                     </div>
                   </div>
                 ))}
                 {filteredTickets.length === 0 && (
-                  <p className="text-center text-zinc-500 py-8">No tickets match filters.</p>
+                  <p className="text-center text-muted-foreground py-8">No tickets match filters.</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* Ticket Details */}
-          <Card className="lg:col-span-2 bg-zinc-950 border border-[#ccab6c]/30 flex flex-col">
+          <Card className="lg:col-span-2 bg-card border border-[#ccab6c]/30 flex flex-col">
             {selectedTicket ? (
               <>
                 <CardHeader className="border-b border-[#ccab6c]/25">
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
-                      <CardTitle className="text-white truncate">{selectedTicket.subject}</CardTitle>
-                      <p className="text-sm text-[#ccab6c]/90 mt-1">
+                      <CardTitle className="text-foreground truncate">{selectedTicket.subject}</CardTitle>
+                      <p className="text-sm text-gold/90 mt-1">
                         From: {getUserName(selectedTicket.investor_email)}
                       </p>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Select value={selectedTicket.status} onValueChange={(val) => handleUpdateTicket(selectedTicket.id, 'status', val)}>
-                        <SelectTrigger className="w-[140px] bg-zinc-900 border-[#ccab6c]/20 text-white"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-zinc-900 text-white">
+                        <SelectTrigger className="w-[140px] bg-muted border-[#ccab6c]/20 text-foreground"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-muted text-foreground">
                           <SelectItem value="open">Open</SelectItem>
                           <SelectItem value="in_progress">In Progress</SelectItem>
                           <SelectItem value="resolved">Resolved</SelectItem>
@@ -292,8 +292,8 @@ export default function AdminSupport() {
                         </SelectContent>
                       </Select>
                       <Select value={selectedTicket.priority} onValueChange={(val) => handleUpdateTicket(selectedTicket.id, 'priority', val)}>
-                        <SelectTrigger className="w-[120px] bg-zinc-900 border-[#ccab6c]/20 text-white"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-zinc-900 text-white">
+                        <SelectTrigger className="w-[120px] bg-muted border-[#ccab6c]/20 text-foreground"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-muted text-foreground">
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
                           <SelectItem value="high">High</SelectItem>
@@ -305,20 +305,20 @@ export default function AdminSupport() {
 
                   {/* Assignment row — super admin only */}
                   {isSuperAdmin && (
-                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-zinc-800">
-                      <UserCheck className="w-4 h-4 text-[#ccab6c]/70 shrink-0" />
-                      <span className="text-sm text-zinc-400 shrink-0">Assigned to:</span>
+                    <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+                      <UserCheck className="w-4 h-4 text-gold/70 shrink-0" />
+                      <span className="text-sm text-muted-foreground shrink-0">Assigned to:</span>
                       <Select
                         value={selectedTicket.assigned_to || '__unassigned__'}
                         onValueChange={(val) => handleAssign(selectedTicket.id, val)}
                         disabled={assigning}
                       >
-                        <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white h-8 text-sm">
+                        <SelectTrigger className="bg-muted border-border text-foreground h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                        <SelectContent className="bg-muted border-border text-foreground">
                           <SelectItem value="__unassigned__">
-                            <span className="text-zinc-400">— Unassigned —</span>
+                            <span className="text-muted-foreground">— Unassigned —</span>
                           </SelectItem>
                           {admins.map(admin => (
                             <SelectItem key={admin.id} value={admin.email}>
@@ -328,7 +328,7 @@ export default function AdminSupport() {
                         </SelectContent>
                       </Select>
                       {selectedTicket.assigned_date && (
-                        <span className="text-xs text-zinc-500 shrink-0">
+                        <span className="text-xs text-muted-foreground shrink-0">
                           since {format(new Date(selectedTicket.assigned_date), 'MMM dd, yyyy')}
                         </span>
                       )}
@@ -337,13 +337,13 @@ export default function AdminSupport() {
                 </CardHeader>
 
                 <CardContent className="flex-1 space-y-4 overflow-y-auto p-4">
-                  <div className="bg-zinc-900/50 p-4 rounded-lg">
-                    <p className="text-sm font-semibold text-zinc-300 mb-2">Initial Description</p>
-                    <p className="text-zinc-300 whitespace-pre-wrap">{selectedTicket.description}</p>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm font-semibold text-foreground/80 mb-2">Initial Description</p>
+                    <p className="text-foreground/80 whitespace-pre-wrap">{selectedTicket.description}</p>
                   </div>
                   {messages.map(msg => (
                     <div key={msg.id} className={`flex gap-3 ${msg.sender_email === currentUser.email ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`p-3 rounded-lg max-w-lg ${msg.sender_email === currentUser.email ? 'bg-[#b38922]/30 text-[#fef3d6]' : 'bg-zinc-900 text-zinc-300'}`}>
+                      <div className={`p-3 rounded-lg max-w-lg ${msg.sender_email === currentUser.email ? 'bg-[#b38922]/30 text-[#fef3d6]' : 'bg-muted text-foreground/80'}`}>
                         <div className="flex items-center gap-2 mb-1">
                           {msg.sender_email === currentUser.email ? <Shield className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
                           <p className="font-semibold text-sm">{getUserName(msg.sender_email)}</p>
@@ -361,7 +361,7 @@ export default function AdminSupport() {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type your response..."
-                      className="bg-zinc-900 border-[#ccab6c]/20 pr-12"
+                      className="bg-muted border-[#ccab6c]/20 pr-12"
                       rows={3}
                     />
                     <Button
@@ -376,7 +376,7 @@ export default function AdminSupport() {
               </>
             ) : (
               <div className="flex-grow flex flex-col items-center justify-center gap-2">
-                <p className="text-zinc-500">Select a ticket to view details</p>
+                <p className="text-muted-foreground">Select a ticket to view details</p>
                 {isSuperAdmin && unassignedCount > 0 && (
                   <p className="text-xs text-red-400">{unassignedCount} tickets need to be assigned</p>
                 )}

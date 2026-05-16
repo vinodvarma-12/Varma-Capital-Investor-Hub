@@ -95,16 +95,16 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-white">Portfolio Overview</h1>
-          <p className="text-[#ccab6c]/90">Detailed view of your investments and transactions</p>
+          <h1 className="text-3xl font-bold text-foreground">Portfolio Overview</h1>
+          <p className="text-gold/90">Detailed view of your investments and transactions</p>
         </div>
 
         <Tabs defaultValue="holdings" className="space-y-6">
-          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+          <TabsList className="bg-muted border-[#ccab6c]/20">
             <TabsTrigger value="holdings" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               Holdings
             </TabsTrigger>
@@ -114,9 +114,9 @@ export default function Portfolio() {
           </TabsList>
 
           <TabsContent value="holdings">
-            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+            <Card className="bg-card border border-[#ccab6c]/30">
               <CardHeader>
-                <CardTitle className="text-white">Current Holdings</CardTitle>
+                <CardTitle className="text-foreground">Current Holdings</CardTitle>
               </CardHeader>
               <CardContent>
                 {enrichedInvestments.length > 0 ? (
@@ -124,13 +124,13 @@ export default function Portfolio() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-[#ccab6c]/25">
-                          <TableHead className="text-[#ccab6c]/90">Product</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Units</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Cost Basis</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Current Value</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">P&L</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Status</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Lock-in</TableHead>
+                          <TableHead className="text-gold/90">Product</TableHead>
+                          <TableHead className="text-gold/90">Units</TableHead>
+                          <TableHead className="text-gold/90">Cost Basis</TableHead>
+                          <TableHead className="text-gold/90">Current Value</TableHead>
+                          <TableHead className="text-gold/90">P&L</TableHead>
+                          <TableHead className="text-gold/90">Status</TableHead>
+                          <TableHead className="text-gold/90">Lock-in</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -138,19 +138,19 @@ export default function Portfolio() {
                           <TableRow key={investment.id} className="border-[#ccab6c]/25">
                             <TableCell>
                               <div>
-                                <p className="font-medium text-white">{investment.productName}</p>
-                                <p className="text-sm text-[#ccab6c]/90">
+                                <p className="font-medium text-foreground">{investment.productName}</p>
+                                <p className="text-sm text-gold/90">
                                   Purchased: {format(new Date(investment.purchase_date), 'MMM dd, yyyy')}
                                 </p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               {investment.current_units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '0'}
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               ${investment.invested_amount?.toLocaleString()}
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               ${investment.currentValue.toLocaleString()}
                             </TableCell>
                             <TableCell>
@@ -183,7 +183,7 @@ export default function Portfolio() {
                                     <Lock className="w-4 h-4 text-red-400" />
                                     <div className="text-sm">
                                       <p className="text-red-400">Locked</p>
-                                      <p className="text-[#ccab6c]/90">
+                                      <p className="text-gold/90">
                                         Until {format(new Date(investment.lock_in_end_date), 'MMM dd, yyyy')}
                                       </p>
                                     </div>
@@ -203,8 +203,8 @@ export default function Portfolio() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-[#ccab6c]/90 text-lg">No investments found</p>
-                    <p className="text-zinc-500 text-sm mt-2">Start investing to see your portfolio here</p>
+                    <p className="text-gold/90 text-lg">No investments found</p>
+                    <p className="text-muted-foreground text-sm mt-2">Start investing to see your portfolio here</p>
                   </div>
                 )}
               </CardContent>
@@ -212,9 +212,9 @@ export default function Portfolio() {
           </TabsContent>
 
           <TabsContent value="transactions">
-            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+            <Card className="bg-card border border-[#ccab6c]/30">
               <CardHeader>
-                <CardTitle className="text-white">Transaction History</CardTitle>
+                <CardTitle className="text-foreground">Transaction History</CardTitle>
               </CardHeader>
               <CardContent>
                 {transactions.length > 0 ? (
@@ -222,22 +222,22 @@ export default function Portfolio() {
                     <Table>
                       <TableHeader>
                         <TableRow className="border-[#ccab6c]/25">
-                          <TableHead className="text-[#ccab6c]/90">Date</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Product</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Type</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Units</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">NAV per Unit</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Amount</TableHead>
-                          <TableHead className="text-[#ccab6c]/90">Status</TableHead>
+                          <TableHead className="text-gold/90">Date</TableHead>
+                          <TableHead className="text-gold/90">Product</TableHead>
+                          <TableHead className="text-gold/90">Type</TableHead>
+                          <TableHead className="text-gold/90">Units</TableHead>
+                          <TableHead className="text-gold/90">NAV per Unit</TableHead>
+                          <TableHead className="text-gold/90">Amount</TableHead>
+                          <TableHead className="text-gold/90">Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {transactions.map((transaction) => (
                           <TableRow key={transaction.id} className="border-[#ccab6c]/25">
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               {format(new Date(transaction.transaction_date), 'MMM dd, yyyy')}
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               {getProductName(transaction.product_id)}
                             </TableCell>
                             <TableCell>
@@ -246,21 +246,21 @@ export default function Portfolio() {
                                 className={`capitalize ${
                                   transaction.type === 'subscription' ? 'border-green-400 text-green-400' :
                                   transaction.type === 'redemption' ? 'border-red-400 text-red-400' :
-                                  'border-[#ccab6c]/45 text-[#ccab6c]/90'
+                                  'border-[#ccab6c]/45 text-gold/90'
                                 }`}
                               >
                                 {transaction.type}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               {transaction.units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '-'}
                             </TableCell>
-                            <TableCell className="text-zinc-300">
+                            <TableCell className="text-foreground/80">
                               {transaction.nav_per_unit ? `$${transaction.nav_per_unit.toLocaleString()}` : '-'}
                             </TableCell>
                             <TableCell className={`font-medium ${
                               transaction.type === 'subscription' ? 'text-green-400' : 
-                              transaction.type === 'redemption' ? 'text-red-400' : 'text-zinc-300'
+                              transaction.type === 'redemption' ? 'text-red-400' : 'text-foreground/80'
                             }`}>
                               {transaction.type === 'subscription' ? '+' : transaction.type === 'redemption' ? '-' : ''}
                               ${transaction.amount?.toLocaleString()}
@@ -270,9 +270,9 @@ export default function Portfolio() {
                                 variant={transaction.status === 'completed' ? 'default' : 'secondary'}
                                 className={
                                   transaction.status === 'completed' ? 'bg-green-900 text-green-400' :
-                                  transaction.status === 'pending' ? 'bg-[#b38922]/25 text-[#fedea0]' :
+                                  transaction.status === 'pending' ? 'bg-[#b38922]/25 text-gold-bright' :
                                   transaction.status === 'failed' ? 'bg-red-900 text-red-400' :
-                                  'bg-zinc-900 text-[#ccab6c]/90'
+                                  'bg-muted text-gold/90'
                                 }
                               >
                                 {transaction.status}
@@ -285,8 +285,8 @@ export default function Portfolio() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-[#ccab6c]/90 text-lg">No transactions found</p>
-                    <p className="text-zinc-500 text-sm mt-2">Your transaction history will appear here</p>
+                    <p className="text-gold/90 text-lg">No transactions found</p>
+                    <p className="text-muted-foreground text-sm mt-2">Your transaction history will appear here</p>
                   </div>
                 )}
               </CardContent>

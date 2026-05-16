@@ -69,8 +69,8 @@ import { format, addMonths, differenceInDays, isAfter } from "date-fns";
 import { darkCardClass, mutedGoldText } from "@/lib/varmaTheme";
 
 const TAB_TRIGGER_CLASS = "data-[state=active]:bg-[#fedea0] data-[state=active]:text-black shrink-0";
-const TABLE_HEAD_CLASS = "text-[#ccab6c]/90";
-const TABLE_ROW_CLASS = "border-[#ccab6c]/25 hover:bg-zinc-900/20";
+const TABLE_HEAD_CLASS = "text-gold/90";
+const TABLE_ROW_CLASS = "border-[#ccab6c]/25 hover:bg-muted/50";
 
 const formatCurrency = (value) =>
   `$${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -83,17 +83,17 @@ const formatPercent = (value) => {
 const getKycBadge = (status) => {
   const styles = {
     verified: 'bg-green-900 text-green-400 border-green-700',
-    pending: 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45',
+    pending: 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45',
     rejected: 'bg-red-900 text-red-400 border-red-700',
   };
-  return <Badge variant="outline" className={`capitalize ${styles[status] || 'bg-zinc-800'}`}>{status || 'unknown'}</Badge>;
+  return <Badge variant="outline" className={`capitalize ${styles[status] || 'bg-secondary'}`}>{status || 'unknown'}</Badge>;
 };
 
 const TabCard = ({ title, icon: Icon, children, actions }) => (
   <Card className={darkCardClass}>
     <CardHeader className="flex flex-row items-center justify-between gap-4">
-      <CardTitle className="flex items-center gap-2 text-white">
-        {Icon && <Icon className="w-5 h-5 text-[#ccab6c]" />}
+      <CardTitle className="flex items-center gap-2 text-foreground">
+        {Icon && <Icon className="w-5 h-5 text-gold" />}
         {title}
       </CardTitle>
       {actions}
@@ -105,7 +105,7 @@ const TabCard = ({ title, icon: Icon, children, actions }) => (
 const EmptyState = ({ title, description }) => (
   <div className="text-center py-12">
     <p className={`${mutedGoldText} text-lg`}>{title}</p>
-    {description && <p className="text-zinc-500 text-sm mt-2">{description}</p>}
+    {description && <p className="text-muted-foreground text-sm mt-2">{description}</p>}
   </div>
 );
 
@@ -131,13 +131,13 @@ const isLocked = (investment) => {
 
 const AuditChanges = ({ changes }) => {
   if (!changes || typeof changes !== 'object') {
-    return <span className="text-zinc-500">—</span>;
+    return <span className="text-muted-foreground">—</span>;
   }
   return (
-    <ul className="space-y-1 text-xs text-zinc-300">
+    <ul className="space-y-1 text-xs text-foreground/80">
       {Object.entries(changes).map(([key, value]) => (
         <li key={key} className="whitespace-pre-wrap break-words">
-          <span className="text-[#ccab6c]/90">{key}:</span>{' '}
+          <span className="text-gold/90">{key}:</span>{' '}
           {typeof value === 'object' ? JSON.stringify(value) : String(value)}
         </li>
       ))}
@@ -287,7 +287,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                 type="number"
                 value={formData.totalInvested}
                 onChange={e => setFormData({ ...formData, totalInvested: e.target.value })}
-                className="bg-zinc-900 border-[#ccab6c]/20"
+                className="bg-muted border-[#ccab6c]/20"
               />
             </div>
             <div>
@@ -296,7 +296,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                 type="number"
                 value={formData.currentValue}
                 onChange={e => setFormData({ ...formData, currentValue: e.target.value })}
-                className="bg-zinc-900 border-[#ccab6c]/20"
+                className="bg-muted border-[#ccab6c]/20"
               />
             </div>
             <div>
@@ -306,7 +306,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                 step="0.01"
                 value={formData.pnlPercent}
                 onChange={e => setFormData({ ...formData, pnlPercent: e.target.value })}
-                className="bg-zinc-900 border-[#ccab6c]/20"
+                className="bg-muted border-[#ccab6c]/20"
               />
             </div>
             <div>
@@ -315,7 +315,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
                 type="date"
                 value={formData.nextLockInDate}
                 onChange={e => setFormData({ ...formData, nextLockInDate: e.target.value })}
-                className="bg-zinc-900 border-[#ccab6c]/20"
+                className="bg-muted border-[#ccab6c]/20"
               />
             </div>
           </div>
@@ -325,7 +325,7 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder="Explain why these values are being changed..."
-              className="bg-zinc-900 border-[#ccab6c]/20"
+              className="bg-muted border-[#ccab6c]/20"
             />
           </div>
           <div className="flex gap-2 justify-end">
@@ -345,29 +345,29 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
             {statCards.map(({ label, value, icon: Icon, valueClass }) => (
               <div
                 key={label}
-                className="rounded-lg border border-[#ccab6c]/25 bg-zinc-900/50 p-4 space-y-2"
+                className="rounded-lg border border-[#ccab6c]/25 bg-muted/50 p-4 space-y-2"
               >
                 <div className="flex items-center gap-2">
-                  <Icon className="w-4 h-4 text-[#ccab6c]" />
+                  <Icon className="w-4 h-4 text-gold" />
                   <p className={`text-sm ${mutedGoldText}`}>{label}</p>
                 </div>
-                <p className={`text-2xl font-bold ${valueClass || 'text-white'}`}>{value}</p>
+                <p className={`text-2xl font-bold ${valueClass || 'text-foreground'}`}>{value}</p>
               </div>
             ))}
           </div>
 
-          <div className="rounded-lg border border-[#ccab6c]/25 bg-zinc-900/30 p-4">
-            <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
-              <UserIcon className="w-4 h-4 text-[#ccab6c]" /> Profile
+          <div className="rounded-lg border border-[#ccab6c]/25 bg-muted/30 p-4">
+            <h3 className="text-foreground font-semibold flex items-center gap-2 mb-4">
+              <UserIcon className="w-4 h-4 text-gold" /> Profile
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className={mutedGoldText}>Investor ID</p>
-                <p className="text-white font-mono mt-1">{investor.investor_id || '—'}</p>
+                <p className="text-foreground font-mono mt-1">{investor.investor_id || '—'}</p>
               </div>
               <div>
                 <p className={mutedGoldText}>Email</p>
-                <p className="text-white mt-1 break-all">{investor.email}</p>
+                <p className="text-foreground mt-1 break-all">{investor.email}</p>
               </div>
               <div>
                 <p className={mutedGoldText}>KYC Status</p>
@@ -375,15 +375,15 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
               </div>
               <div>
                 <p className={mutedGoldText}>Role</p>
-                <p className="text-white capitalize mt-1">{investor.role || 'investor'}</p>
+                <p className="text-foreground capitalize mt-1">{investor.role || 'investor'}</p>
               </div>
               <div>
                 <p className={mutedGoldText}>Holdings</p>
-                <p className="text-white mt-1">{investments.length} product{investments.length !== 1 ? 's' : ''}</p>
+                <p className="text-foreground mt-1">{investments.length} product{investments.length !== 1 ? 's' : ''}</p>
               </div>
               <div>
                 <p className={mutedGoldText}>Full Name</p>
-                <p className="text-white mt-1">{investor.full_name || '—'}</p>
+                <p className="text-foreground mt-1">{investor.full_name || '—'}</p>
               </div>
             </div>
           </div>
@@ -517,18 +517,18 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                 return (
                   <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
                     <TableCell>
-                      <p className="font-medium text-white">{getProductName(products, inv.product_id)}</p>
+                      <p className="font-medium text-foreground">{getProductName(products, inv.product_id)}</p>
                       {inv.purchase_date && (
-                        <p className="text-sm text-[#ccab6c]/90">
+                        <p className="text-sm text-gold/90">
                           Purchased: {format(new Date(inv.purchase_date), 'MMM dd, yyyy')}
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">
                       {inv.current_units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '0'}
                     </TableCell>
-                    <TableCell className="text-zinc-300">{formatCurrency(inv.invested_amount)}</TableCell>
-                    <TableCell className="text-zinc-300">{formatCurrency(currentValue)}</TableCell>
+                    <TableCell className="text-foreground/80">{formatCurrency(inv.invested_amount)}</TableCell>
+                    <TableCell className="text-foreground/80">{formatCurrency(currentValue)}</TableCell>
                     <TableCell>
                       <p className={`font-medium ${pnlAmount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {pnlAmount >= 0 ? '+' : '-'}{formatCurrency(Math.abs(pnlAmount))}
@@ -545,7 +545,7 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                             <div className="text-sm">
                               <p className="text-red-400">Locked</p>
                               {inv.lock_in_end_date && (
-                                <p className="text-[#ccab6c]/90">
+                                <p className="text-gold/90">
                                   Until {format(new Date(inv.lock_in_end_date), 'MMM dd, yyyy')}
                                 </p>
                               )}
@@ -566,7 +566,7 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-zinc-950 border-[#ccab6c]/30">
+                        <DropdownMenuContent className="bg-card border-[#ccab6c]/30">
                           <DropdownMenuItem onClick={() => openModal(inv, setAmountModalOpen)}>
                             <DollarSign className="w-4 h-4 mr-2" /> Edit Amount
                           </DropdownMenuItem>
@@ -603,21 +603,21 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
 
     {/* Add Holding Dialog */}
     <Dialog open={addHoldingOpen} onOpenChange={setAddHoldingOpen}>
-      <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white max-w-lg">
+      <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-white">Add Holding</DialogTitle>
+          <DialogTitle className="text-foreground">Add Holding</DialogTitle>
           <p className="text-sm text-[#ccab6c]/80 mt-1">{investorEmail}</p>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* Product */}
           <div>
-            <Label className="text-[#ccab6c]/90">Product <span className="text-red-400">*</span></Label>
+            <Label className="text-gold/90">Product <span className="text-red-400">*</span></Label>
             <Select value={holdingForm.product_id} onValueChange={v => handleHoldingFormChange('product_id', v)}>
-              <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1">
+              <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
+              <SelectContent className="bg-muted border-[#ccab6c]/20">
                 {products.map(p => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                 ))}
@@ -628,21 +628,21 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
           {/* Invested Amount & Cost Basis */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-[#ccab6c]/90">Invested Amount ($) <span className="text-red-400">*</span></Label>
+              <Label className="text-gold/90">Invested Amount ($) <span className="text-red-400">*</span></Label>
               <Input
                 type="number" min="0" step="0.01" placeholder="0.00"
                 value={holdingForm.invested_amount}
                 onChange={e => handleHoldingFormChange('invested_amount', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
             <div>
-              <Label className="text-[#ccab6c]/90">Cost Basis ($) <span className="text-zinc-500 text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Cost Basis ($) <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Input
                 type="number" min="0" step="0.01" placeholder="Defaults to invested amount"
                 value={holdingForm.cost_basis}
                 onChange={e => handleHoldingFormChange('cost_basis', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
           </div>
@@ -650,21 +650,21 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
           {/* Units & Purchase Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-[#ccab6c]/90">Current Units <span className="text-zinc-500 text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Current Units <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Input
                 type="number" min="0" step="0.0001" placeholder="e.g. 100.5"
                 value={holdingForm.current_units}
                 onChange={e => handleHoldingFormChange('current_units', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
             <div>
-              <Label className="text-[#ccab6c]/90">Purchase Date</Label>
+              <Label className="text-gold/90">Purchase Date</Label>
               <Input
                 type="date"
                 value={holdingForm.purchase_date}
                 onChange={e => handleHoldingFormChange('purchase_date', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
           </div>
@@ -672,33 +672,33 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
           {/* Lock-in Months & Lock-in End Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-[#ccab6c]/90">Lock-in Months <span className="text-zinc-500 text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Lock-in Months <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Input
                 type="number" min="0" step="1" placeholder="e.g. 12"
                 value={holdingForm.lock_in_months}
                 onChange={e => handleHoldingFormChange('lock_in_months', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
             <div>
-              <Label className="text-[#ccab6c]/90">Lock-in End Date <span className="text-zinc-500 text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Lock-in End Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Input
                 type="date"
                 value={holdingForm.lock_in_end_date}
                 onChange={e => handleHoldingFormChange('lock_in_end_date', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                className="bg-muted border-[#ccab6c]/20 mt-1"
               />
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <Label className="text-[#ccab6c]/90">Status</Label>
+            <Label className="text-gold/90">Status</Label>
             <Select value={holdingForm.status} onValueChange={v => handleHoldingFormChange('status', v)}>
-              <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1">
+              <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
+              <SelectContent className="bg-muted border-[#ccab6c]/20">
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="redeemed">Redeemed</SelectItem>
                 <SelectItem value="suspended">Suspended</SelectItem>
@@ -736,19 +736,19 @@ const PerformanceTab = ({ investor, investments, products, navs }) => {
   return (
     <TabCard title="Performance" icon={BarChart3}>
       <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-lg border border-[#ccab6c]/25 bg-zinc-900/50 p-3">
+        <div className="rounded-lg border border-[#ccab6c]/25 bg-muted/50 p-3">
           <p className={`text-sm ${mutedGoldText}`}>Portfolio P&L</p>
           <p className={`text-xl font-bold ${pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {formatPercent(pnlPercent)}
           </p>
         </div>
-        <div className="rounded-lg border border-[#ccab6c]/25 bg-zinc-900/50 p-3">
+        <div className="rounded-lg border border-[#ccab6c]/25 bg-muted/50 p-3">
           <p className={`text-sm ${mutedGoldText}`}>Total Invested</p>
-          <p className="text-xl font-bold text-white">{formatCurrency(totalInvested)}</p>
+          <p className="text-xl font-bold text-foreground">{formatCurrency(totalInvested)}</p>
         </div>
-        <div className="rounded-lg border border-[#ccab6c]/25 bg-zinc-900/50 p-3">
+        <div className="rounded-lg border border-[#ccab6c]/25 bg-muted/50 p-3">
           <p className={`text-sm ${mutedGoldText}`}>Current Value</p>
-          <p className="text-xl font-bold text-white">{formatCurrency(currentValue)}</p>
+          <p className="text-xl font-bold text-foreground">{formatCurrency(currentValue)}</p>
         </div>
       </div>
       {investments.length === 0 ? (
@@ -775,9 +775,9 @@ const PerformanceTab = ({ investor, investments, products, navs }) => {
                 const pct = inv.invested_amount > 0 ? (pnl / inv.invested_amount) * 100 : 0;
                 return (
                   <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
-                    <TableCell className="text-white">{getProductName(products, inv.product_id)}</TableCell>
-                    <TableCell className="text-zinc-300">{formatCurrency(inv.invested_amount)}</TableCell>
-                    <TableCell className="text-zinc-300">{formatCurrency(val)}</TableCell>
+                    <TableCell className="text-foreground">{getProductName(products, inv.product_id)}</TableCell>
+                    <TableCell className="text-foreground/80">{formatCurrency(inv.invested_amount)}</TableCell>
+                    <TableCell className="text-foreground/80">{formatCurrency(val)}</TableCell>
                     <TableCell className={pnl >= 0 ? 'text-green-400' : 'text-red-400'}>{formatCurrency(pnl)}</TableCell>
                     <TableCell className={pct >= 0 ? 'text-green-400' : 'text-red-400'}>{formatPercent(pct)}</TableCell>
                   </TableRow>
@@ -835,14 +835,14 @@ const LockInsTab = ({ investor, investments, products }) => {
                     : null;
                   return (
                     <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
-                      <TableCell className="text-white">{getProductName(products, inv.product_id)}</TableCell>
-                      <TableCell className="text-zinc-300">
+                      <TableCell className="text-foreground">{getProductName(products, inv.product_id)}</TableCell>
+                      <TableCell className="text-foreground/80">
                         {inv.lock_in_months ? `${inv.lock_in_months} months` : '—'}
                       </TableCell>
-                      <TableCell className="text-zinc-300">
+                      <TableCell className="text-foreground/80">
                         {inv.lock_in_end_date ? format(new Date(inv.lock_in_end_date), 'MMM dd, yyyy') : 'N/A'}
                       </TableCell>
-                      <TableCell className="text-zinc-300">
+                      <TableCell className="text-foreground/80">
                         {daysLeft != null ? (daysLeft > 0 ? `${daysLeft} days` : 'Expired') : '—'}
                       </TableCell>
                       <TableCell>
@@ -861,7 +861,7 @@ const LockInsTab = ({ investor, investments, products }) => {
 
       <TabCard title="Lock-in Override History" icon={History}>
         {loading ? (
-          <p className="text-zinc-400">Loading override history...</p>
+          <p className="text-muted-foreground">Loading override history...</p>
         ) : overrides.length === 0 ? (
           <EmptyState title="No overrides" description="Lock-in adjustments made by admins will appear here." />
         ) : (
@@ -879,18 +879,18 @@ const LockInsTab = ({ investor, investments, products }) => {
               <TableBody>
                 {overrides.map(o => (
                   <TableRow key={o.id} className={TABLE_ROW_CLASS}>
-                    <TableCell className="text-zinc-300">{o.adjusted_lock_months} months</TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">{o.adjusted_lock_months} months</TableCell>
+                    <TableCell className="text-foreground/80">
                       {o.new_end_date ? format(new Date(o.new_end_date), 'MMM dd, yyyy') : '—'}
                     </TableCell>
-                    <TableCell className="text-zinc-300 capitalize">
+                    <TableCell className="text-foreground/80 capitalize">
                       {o.penalty_type === 'none' ? 'None' :
                         o.penalty_type === 'fixed' ? `$${o.penalty_amount}` :
                         o.penalty_type === 'percentage' ? `${o.penalty_percent}%` :
                         o.penalty_type || '—'}
                     </TableCell>
-                    <TableCell className="text-zinc-300 text-sm">{o.approved_by || '—'}</TableCell>
-                    <TableCell className="text-zinc-400 text-sm max-w-xs whitespace-pre-wrap break-words">
+                    <TableCell className="text-foreground/80 text-sm">{o.approved_by || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm max-w-xs whitespace-pre-wrap break-words">
                       {o.reason || '—'}
                     </TableCell>
                   </TableRow>
@@ -1014,7 +1014,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
         }
       >
         {loading ? (
-          <p className="text-zinc-400">Loading transactions...</p>
+          <p className="text-muted-foreground">Loading transactions...</p>
         ) : transactions.length === 0 ? (
           <EmptyState title="No transactions found" description="Transaction history will appear here." />
         ) : (
@@ -1035,10 +1035,10 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
               <TableBody>
                 {transactions.map(tx => (
                   <TableRow key={tx.id} className={TABLE_ROW_CLASS}>
-                    <TableCell className="text-zinc-300 whitespace-nowrap">
+                    <TableCell className="text-foreground/80 whitespace-nowrap">
                       {tx.transaction_date ? format(new Date(tx.transaction_date), 'MMM dd, yyyy') : '—'}
                     </TableCell>
-                    <TableCell className="text-zinc-300">{getProductName(products, tx.product_id)}</TableCell>
+                    <TableCell className="text-foreground/80">{getProductName(products, tx.product_id)}</TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -1047,22 +1047,22 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                           tx.type === 'redemption' ? 'border-red-400 text-red-400' :
                           tx.type === 'dividend' ? 'border-blue-400 text-blue-400' :
                           tx.type === 'fee' ? 'border-orange-400 text-orange-400' :
-                          'border-[#ccab6c]/45 text-[#ccab6c]/90'
+                          'border-[#ccab6c]/45 text-gold/90'
                         }`}
                       >
                         {tx.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">
                       {tx.units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '—'}
                     </TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">
                       {tx.nav_per_unit ? formatCurrency(tx.nav_per_unit) : '—'}
                     </TableCell>
                     <TableCell className={`font-medium ${
                       tx.type === 'subscription' || tx.type === 'dividend' ? 'text-green-400' :
                       tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty' ? 'text-red-400' :
-                      'text-zinc-300'
+                      'text-foreground/80'
                     }`}>
                       {(tx.type === 'subscription' || tx.type === 'dividend') ? '+' :
                        (tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty') ? '-' : ''}
@@ -1073,15 +1073,15 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                         variant="outline"
                         className={
                           tx.status === 'completed' ? 'bg-green-900 text-green-400 border-green-700' :
-                          tx.status === 'pending' ? 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45' :
+                          tx.status === 'pending' ? 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45' :
                           tx.status === 'failed' ? 'bg-red-900 text-red-400 border-red-700' :
-                          'bg-zinc-900 text-[#ccab6c]/90'
+                          'bg-muted text-gold/90'
                         }
                       >
                         {tx.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-zinc-400 text-sm max-w-[160px] truncate">
+                    <TableCell className="text-muted-foreground text-sm max-w-[160px] truncate">
                       {tx.notes || '—'}
                     </TableCell>
                   </TableRow>
@@ -1094,21 +1094,21 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
 
       {/* Add Transaction Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white max-w-lg">
+        <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white">Add Transaction</DialogTitle>
+            <DialogTitle className="text-foreground">Add Transaction</DialogTitle>
             <p className="text-sm text-[#ccab6c]/80 mt-1">{investor.full_name} — {investor.email}</p>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             {/* Product */}
             <div>
-              <Label className="text-[#ccab6c]/90">Product <span className="text-red-400">*</span></Label>
+              <Label className="text-gold/90">Product <span className="text-red-400">*</span></Label>
               <Select value={form.product_id} onValueChange={v => handleFormChange('product_id', v)}>
-                <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1">
+                <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
                   <SelectValue placeholder="Select product" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
+                <SelectContent className="bg-muted border-[#ccab6c]/20">
                   {availableProducts.map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
@@ -1117,7 +1117,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                     products
                       .filter(p => !investments.some(i => i.product_id === p.id))
                       .map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-zinc-500">{p.name} (not held)</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-muted-foreground">{p.name} (not held)</SelectItem>
                       ))
                   }
                 </SelectContent>
@@ -1127,12 +1127,12 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
             {/* Type & Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#ccab6c]/90">Type <span className="text-red-400">*</span></Label>
+                <Label className="text-gold/90">Type <span className="text-red-400">*</span></Label>
                 <Select value={form.type} onValueChange={v => handleFormChange('type', v)}>
-                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1">
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
+                  <SelectContent className="bg-muted border-[#ccab6c]/20">
                     <SelectItem value="subscription">Subscription</SelectItem>
                     <SelectItem value="redemption">Redemption</SelectItem>
                     <SelectItem value="dividend">Dividend</SelectItem>
@@ -1142,12 +1142,12 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                 </Select>
               </div>
               <div>
-                <Label className="text-[#ccab6c]/90">Date <span className="text-red-400">*</span></Label>
+                <Label className="text-gold/90">Date <span className="text-red-400">*</span></Label>
                 <Input
                   type="date"
                   value={form.transaction_date}
                   onChange={e => handleFormChange('transaction_date', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                  className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
             </div>
@@ -1155,7 +1155,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
             {/* Amount & Status */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#ccab6c]/90">Amount ($) <span className="text-red-400">*</span></Label>
+                <Label className="text-gold/90">Amount ($) <span className="text-red-400">*</span></Label>
                 <Input
                   type="number"
                   min="0"
@@ -1163,16 +1163,16 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                   placeholder="0.00"
                   value={form.amount}
                   onChange={e => handleFormChange('amount', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                  className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
               <div>
-                <Label className="text-[#ccab6c]/90">Status</Label>
+                <Label className="text-gold/90">Status</Label>
                 <Select value={form.status} onValueChange={v => handleFormChange('status', v)}>
-                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20 mt-1">
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-[#ccab6c]/20">
+                  <SelectContent className="bg-muted border-[#ccab6c]/20">
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="failed">Failed</SelectItem>
@@ -1185,7 +1185,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
             {/* Units & NAV */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-[#ccab6c]/90">Units <span className="text-zinc-500 text-xs">(optional)</span></Label>
+                <Label className="text-gold/90">Units <span className="text-muted-foreground text-xs">(optional)</span></Label>
                 <Input
                   type="number"
                   min="0"
@@ -1193,11 +1193,11 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                   placeholder="e.g. 100.5"
                   value={form.units}
                   onChange={e => handleFormChange('units', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                  className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
               <div>
-                <Label className="text-[#ccab6c]/90">NAV / Unit <span className="text-zinc-500 text-xs">(optional)</span></Label>
+                <Label className="text-gold/90">NAV / Unit <span className="text-muted-foreground text-xs">(optional)</span></Label>
                 <Input
                   type="number"
                   min="0"
@@ -1205,19 +1205,19 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                   placeholder="e.g. 105.25"
                   value={form.nav_per_unit}
                   onChange={e => handleFormChange('nav_per_unit', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20 mt-1"
+                  className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
             </div>
 
             {/* Notes */}
             <div>
-              <Label className="text-[#ccab6c]/90">Notes <span className="text-zinc-500 text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Notes <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Textarea
                 placeholder="Any additional notes..."
                 value={form.notes}
                 onChange={e => handleFormChange('notes', e.target.value)}
-                className="bg-zinc-900 border-[#ccab6c]/20 mt-1 resize-none"
+                className="bg-muted border-[#ccab6c]/20 mt-1 resize-none"
                 rows={2}
               />
             </div>
@@ -1269,7 +1269,7 @@ const DocumentsTab = ({ investor }) => {
   return (
     <TabCard title="Documents" icon={FolderOpen}>
       {loading ? (
-        <p className="text-zinc-400">Loading documents...</p>
+        <p className="text-muted-foreground">Loading documents...</p>
       ) : documents.length === 0 ? (
         <EmptyState title="No documents found" description="Investor and global documents will appear here." />
       ) : (
@@ -1288,15 +1288,15 @@ const DocumentsTab = ({ investor }) => {
             <TableBody>
               {documents.map(doc => (
                 <TableRow key={doc.id} className={TABLE_ROW_CLASS}>
-                  <TableCell className="text-white font-medium">{doc.title || '—'}</TableCell>
-                  <TableCell className="text-zinc-300 capitalize">{doc.type || '—'}</TableCell>
-                  <TableCell className="text-zinc-300">{doc.period || '—'}</TableCell>
+                  <TableCell className="text-foreground font-medium">{doc.title || '—'}</TableCell>
+                  <TableCell className="text-foreground/80 capitalize">{doc.type || '—'}</TableCell>
+                  <TableCell className="text-foreground/80">{doc.period || '—'}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={doc.scope === 'Investor' ? 'border-[#ccab6c]/45 text-[#fedea0]' : 'border-zinc-600 text-zinc-400'}>
+                    <Badge variant="outline" className={doc.scope === 'Investor' ? 'border-[#ccab6c]/45 text-gold-bright' : 'border-border text-muted-foreground'}>
                       {doc.scope}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-zinc-300">
+                  <TableCell className="text-foreground/80">
                     {doc.created_date ? format(new Date(doc.created_date), 'MMM dd, yyyy') : '—'}
                   </TableCell>
                   <TableCell>
@@ -1307,7 +1307,7 @@ const DocumentsTab = ({ investor }) => {
                         </a>
                       </Button>
                     ) : (
-                      <span className="text-zinc-500">—</span>
+                      <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
                 </TableRow>
@@ -1328,8 +1328,8 @@ const TicketsTab = ({ investor }) => {
     switch (priority) {
       case 'urgent': return 'bg-red-900 text-red-400 border-red-700';
       case 'high': return 'bg-orange-900 text-orange-400 border-orange-700';
-      case 'medium': return 'bg-[#b38922]/25 text-[#fedea0] border-[#8a6a1a]/45';
-      default: return 'bg-zinc-800 text-zinc-300 border-zinc-600';
+      case 'medium': return 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45';
+      default: return 'bg-secondary text-foreground/80 border-border';
     }
   };
 
@@ -1338,7 +1338,7 @@ const TicketsTab = ({ investor }) => {
       case 'open': return 'bg-blue-900 text-blue-400 border-blue-700';
       case 'in_progress': return 'bg-purple-900 text-purple-400 border-purple-700';
       case 'resolved': return 'bg-green-900 text-green-400 border-green-700';
-      default: return 'bg-zinc-900 text-[#ccab6c]/90 border-[#ccab6c]/20';
+      default: return 'bg-muted text-gold/90 border-[#ccab6c]/20';
     }
   };
 
@@ -1360,7 +1360,7 @@ const TicketsTab = ({ investor }) => {
   return (
     <TabCard title="Support Tickets" icon={LifeBuoy}>
       {loading ? (
-        <p className="text-zinc-400">Loading tickets...</p>
+        <p className="text-muted-foreground">Loading tickets...</p>
       ) : tickets.length === 0 ? (
         <EmptyState title="No support tickets" description="Support requests from this investor will appear here." />
       ) : (
@@ -1378,7 +1378,7 @@ const TicketsTab = ({ investor }) => {
             <TableBody>
               {tickets.map(ticket => (
                 <TableRow key={ticket.id} className={TABLE_ROW_CLASS}>
-                  <TableCell className="text-white font-medium max-w-xs whitespace-pre-wrap break-words">
+                  <TableCell className="text-foreground font-medium max-w-xs whitespace-pre-wrap break-words">
                     {ticket.subject || "—"}
                   </TableCell>
                   <TableCell>
@@ -1391,10 +1391,10 @@ const TicketsTab = ({ investor }) => {
                       {ticket.priority || "—"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-zinc-300">
+                  <TableCell className="text-foreground/80">
                     {ticket.created_date ? format(new Date(ticket.created_date), "MMM dd, yyyy") : "—"}
                   </TableCell>
-                  <TableCell className="text-zinc-300">
+                  <TableCell className="text-foreground/80">
                     {ticket.updated_date ? format(new Date(ticket.updated_date), "MMM dd, yyyy") : "—"}
                   </TableCell>
                 </TableRow>
@@ -1433,7 +1433,7 @@ const AuditTab = ({ investor }) => {
   return (
     <TabCard title="Audit Trail" icon={History}>
       {loading ? (
-        <p className="text-zinc-400">Loading audit logs...</p>
+        <p className="text-muted-foreground">Loading audit logs...</p>
       ) : logs.length === 0 ? (
         <EmptyState title="No audit entries" description="Admin actions related to this investor will appear here." />
       ) : (
@@ -1451,14 +1451,14 @@ const AuditTab = ({ investor }) => {
             <TableBody>
               {logs.map(log => (
                 <TableRow key={log.id} className={TABLE_ROW_CLASS}>
-                  <TableCell className="text-zinc-300 whitespace-nowrap">
+                  <TableCell className="text-foreground/80 whitespace-nowrap">
                     {format(new Date(log.created_date), "PPpp")}
                   </TableCell>
-                  <TableCell className="text-zinc-300 text-sm">{log.user_email}</TableCell>
+                  <TableCell className="text-foreground/80 text-sm">{log.user_email}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">{log.action}</Badge>
                   </TableCell>
-                  <TableCell className="text-zinc-300">{log.entity_type}</TableCell>
+                  <TableCell className="text-foreground/80">{log.entity_type}</TableCell>
                   <TableCell className="max-w-md">
                     <AuditChanges changes={log.changes} />
                   </TableCell>
@@ -1496,11 +1496,11 @@ export default function InvestorDetailDrawer({
   return (
     <div className="p-4 h-full flex flex-col min-h-0 flex-1">
       <div className="flex-shrink-0 border-b border-[#ccab6c]/20 pb-4 pr-8">
-        <h2 className="text-2xl font-bold text-white">{investor.full_name}</h2>
+        <h2 className="text-2xl font-bold text-foreground">{investor.full_name}</h2>
         <div className="flex flex-wrap items-center gap-3 mt-2">
           <p className={`text-sm ${mutedGoldText}`}>{investor.email}</p>
           {investor.investor_id && (
-            <Badge variant="outline" className="font-mono text-xs border-[#ccab6c]/30 text-zinc-300">
+            <Badge variant="outline" className="font-mono text-xs border-[#ccab6c]/30 text-foreground/80">
               {investor.investor_id}
             </Badge>
           )}
@@ -1510,7 +1510,7 @@ export default function InvestorDetailDrawer({
 
       <Tabs defaultValue="overview" className="mt-4 flex flex-col min-h-0 flex-1">
         <div className="flex-shrink-0 overflow-x-auto pb-1">
-          <TabsList className="bg-zinc-900 border border-[#ccab6c]/20 w-max min-w-full flex-nowrap h-auto p-1">
+          <TabsList className="bg-muted border border-[#ccab6c]/20 w-max min-w-full flex-nowrap h-auto p-1">
             {allTabs.map(tab => (
               <TabsTrigger key={tab.id} value={tab.id} className={TAB_TRIGGER_CLASS}>
                 {tab.icon && <tab.icon className="w-3.5 h-3.5 mr-1" />}

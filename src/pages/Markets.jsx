@@ -12,23 +12,23 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 const TickerCard = ({ ticker, isLive = false }) => {
   const isPositive = ticker.change_percent >= 0;
   return (
-    <Card className="bg-zinc-950 border border-[#ccab6c]/30 hover:border-[#b38922] transition-all duration-200 relative">
+    <Card className="bg-card border border-[#ccab6c]/30 hover:border-[#b38922] transition-all duration-200 relative">
       {isLive && (
         <div className="absolute top-2 right-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
         </div>
       )}
       <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
+        <CardTitle className="text-foreground flex items-center justify-between">
           <span className="text-lg">{ticker.name}</span>
-          <Badge variant="outline" className="bg-zinc-900 text-zinc-300 text-xs">
+          <Badge variant="outline" className="bg-muted text-foreground/80 text-xs">
             {ticker.symbol}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             ${ticker.current_price?.toLocaleString(undefined, { 
               minimumFractionDigits: ticker.current_price < 1 ? 4 : 2,
               maximumFractionDigits: ticker.current_price < 1 ? 4 : 2 
@@ -40,24 +40,24 @@ const TickerCard = ({ ticker, isLive = false }) => {
             <span className="font-semibold">
               {isPositive ? '+' : ''}{ticker.change_percent?.toFixed(2)}%
             </span>
-            <span className="text-[#ccab6c]/90 text-sm">24h</span>
+            <span className="text-gold/90 text-sm">24h</span>
           </div>
 
           {ticker.market_cap && (
-            <div className="text-xs text-zinc-500">
-              <span className="text-[#ccab6c]/90">Market Cap: </span>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-gold/90">Market Cap: </span>
               ${(ticker.market_cap / 1e9).toFixed(1)}B
             </div>
           )}
 
           {ticker.volume && (
-            <div className="text-xs text-zinc-500">
-              <span className="text-[#ccab6c]/90">Volume: </span>
+            <div className="text-xs text-muted-foreground">
+              <span className="text-gold/90">Volume: </span>
               ${(ticker.volume / 1e6).toFixed(1)}M
             </div>
           )}
           
-          <div className="text-xs text-zinc-500 flex items-center gap-1">
+          <div className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {ticker.last_updated ? 
               `Updated ${formatDistanceToNow(new Date(ticker.last_updated))} ago` :
@@ -179,23 +179,23 @@ export default function Markets() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <RefreshCw className="w-8 h-8 text-[#fedea0] animate-spin mx-auto" />
-          <div className="text-white">Loading live market data...</div>
+          <RefreshCw className="w-8 h-8 text-gold-bright animate-spin mx-auto" />
+          <div className="text-foreground">Loading live market data...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header with controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">Live Markets</h1>
-            <p className="text-[#ccab6c]/90">Real-time prices from CoinGecko and Alpha Vantage</p>
+            <h1 className="text-3xl font-bold text-foreground">Live Markets</h1>
+            <p className="text-gold/90">Real-time prices from CoinGecko and Alpha Vantage</p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -214,7 +214,7 @@ export default function Markets() {
               variant="outline"
               size="sm"
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={autoRefresh ? 'border-green-400 text-green-400' : 'border-zinc-600'}
+              className={autoRefresh ? 'border-green-400 text-green-400' : 'border-border'}
             >
               Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
             </Button>
@@ -223,7 +223,7 @@ export default function Markets() {
               variant="outline"
               size="sm"
               onClick={handleManualRefresh}
-              className="border-[#b38922] text-[#fedea0]"
+              className="border-[#b38922] text-gold-bright"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -234,7 +234,7 @@ export default function Markets() {
         {/* Last update info */}
         {lastUpdate && (
           <div className="text-center">
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-muted-foreground">
               Last updated: {formatDistanceToNow(lastUpdate)} ago
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function Markets() {
           return (
             <div key={category}>
               <div className="flex items-center gap-3 mb-6">
-                <h2 className="text-2xl font-semibold text-[#fedea0]">
+                <h2 className="text-2xl font-semibold text-gold-bright">
                   {categoryNames[category]}
                 </h2>
                 {isLiveCategory && (
@@ -275,8 +275,8 @@ export default function Markets() {
 
         {allTickers.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-[#ccab6c]/90 text-lg">No market data available</p>
-            <p className="text-zinc-500 text-sm mt-2">Check your internet connection and try refreshing</p>
+            <p className="text-gold/90 text-lg">No market data available</p>
+            <p className="text-muted-foreground text-sm mt-2">Check your internet connection and try refreshing</p>
           </div>
         )}
       </div>

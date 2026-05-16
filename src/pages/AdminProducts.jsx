@@ -174,12 +174,12 @@ export default function AdminProducts() {
   const visibleProducts = isSuperAdmin ? products : products.filter(p => p.is_public);
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">Product Management</h1>
-            <p className="text-[#ccab6c]/90">Add, edit, and manage investment products</p>
+            <h1 className="text-3xl font-bold text-foreground">Product Management</h1>
+            <p className="text-gold/90">Add, edit, and manage investment products</p>
           </div>
           {isSuperAdmin && (
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -189,7 +189,7 @@ export default function AdminProducts() {
                   New Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
+              <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground">
                 <DialogHeader>
                   <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
                 </DialogHeader>
@@ -199,39 +199,39 @@ export default function AdminProducts() {
           )}
         </div>
 
-        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
-          <CardHeader><CardTitle className="text-white">All Products</CardTitle></CardHeader>
+        <Card className="bg-card border border-[#ccab6c]/30">
+          <CardHeader><CardTitle className="text-foreground">All Products</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#ccab6c]/25">
-                    <TableHead className="text-[#ccab6c]/90">Name</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Risk Band</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Min. Ticket</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Lock-in</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Mgt. Fee</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Perf. Fee</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Status</TableHead>
-                    {isSuperAdmin && <TableHead className="text-[#ccab6c]/90">Actions</TableHead>}
+                    <TableHead className="text-gold/90">Name</TableHead>
+                    <TableHead className="text-gold/90">Risk Band</TableHead>
+                    <TableHead className="text-gold/90">Min. Ticket</TableHead>
+                    <TableHead className="text-gold/90">Lock-in</TableHead>
+                    <TableHead className="text-gold/90">Mgt. Fee</TableHead>
+                    <TableHead className="text-gold/90">Perf. Fee</TableHead>
+                    <TableHead className="text-gold/90">Status</TableHead>
+                    {isSuperAdmin && <TableHead className="text-gold/90">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {visibleProducts.map(product => (
                     <TableRow key={product.id} className="border-[#ccab6c]/25">
-                      <TableCell className="font-medium text-white">{product.name}</TableCell>
-                      <TableCell className="capitalize text-zinc-300">{product.risk_band}</TableCell>
-                      <TableCell className="text-zinc-300">${product.minimum_ticket?.toLocaleString()}</TableCell>
-                      <TableCell className="text-zinc-300">{product.lock_in_months} months</TableCell>
-                      <TableCell className="text-zinc-300">{product.management_fee_percent}%</TableCell>
-                      <TableCell className="text-zinc-300">{product.performance_fee_percent || 0}%</TableCell>
+                      <TableCell className="font-medium text-foreground">{product.name}</TableCell>
+                      <TableCell className="capitalize text-foreground/80">{product.risk_band}</TableCell>
+                      <TableCell className="text-foreground/80">${product.minimum_ticket?.toLocaleString()}</TableCell>
+                      <TableCell className="text-foreground/80">{product.lock_in_months} months</TableCell>
+                      <TableCell className="text-foreground/80">{product.management_fee_percent}%</TableCell>
+                      <TableCell className="text-foreground/80">{product.performance_fee_percent || 0}%</TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
                           <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
                             {product.status}
                           </Badge>
                           {isSuperAdmin && (
-                            <span className={`inline-flex items-center gap-1 text-xs ${product.is_public ? 'text-green-400' : 'text-zinc-500'}`}>
+                            <span className={`inline-flex items-center gap-1 text-xs ${product.is_public ? 'text-green-400' : 'text-muted-foreground'}`}>
                               {product.is_public ? <><Globe className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Private</>}
                             </span>
                           )}

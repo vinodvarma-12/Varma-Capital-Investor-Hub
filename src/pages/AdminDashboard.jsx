@@ -185,71 +185,71 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-[#ccab6c]/90">Manage your investor portal and monitor key metrics</p>
+          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+          <p className="text-gold/90">Manage your investor portal and monitor key metrics</p>
         </div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Total Investors
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{metrics.totalInvestors}</div>
+              <div className="text-2xl font-bold text-foreground">{metrics.totalInvestors}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Total AUM
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 ${metrics.totalAUM.toLocaleString()}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <Package className="w-4 h-4" />
                 Active Products
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{metrics.activeProducts}</div>
+              <div className="text-2xl font-bold text-foreground">{metrics.activeProducts}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-[#ccab6c]/90 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-gold/90 flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 Pending Requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-[#fedea0]">{metrics.pendingRequests}</div>
+              <div className="text-2xl font-bold text-gold-bright">{metrics.pendingRequests}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* AUM Growth Chart */}
-        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+        <Card className="bg-card border border-[#ccab6c]/30">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
               AUM Growth
             </CardTitle>
@@ -285,11 +285,11 @@ export default function AdminDashboard() {
 
         {/* Pending Allocation Requests */}
         <div className="grid lg:grid-cols-2 gap-6">
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
+              <CardTitle className="text-foreground flex items-center justify-between">
                 Pending Allocation Requests
-                <Badge variant="outline" className="bg-[#b38922]/25 text-[#fedea0]">
+                <Badge variant="outline" className="bg-[#b38922]/25 text-gold-bright">
                   {allocationRequests.length}
                 </Badge>
               </CardTitle>
@@ -301,11 +301,11 @@ export default function AdminDashboard() {
                     <div key={request.id} className="border border-[#ccab6c]/25 rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-medium text-white">{request.investor_email}</p>
-                          <p className="text-sm text-[#ccab6c]/90">
+                          <p className="font-medium text-foreground">{request.investor_email}</p>
+                          <p className="text-sm text-gold/90">
                             Product: {products.find(p => p.id === request.product_id)?.name}
                           </p>
-                          <p className="text-sm text-[#ccab6c]/90">
+                          <p className="text-sm text-gold/90">
                             Amount: ${request.requested_amount?.toLocaleString()}
                           </p>
                         </div>
@@ -333,15 +333,15 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[#ccab6c]/90 text-center py-8">No pending requests</p>
+                <p className="text-gold/90 text-center py-8">No pending requests</p>
               )}
             </CardContent>
           </Card>
 
           {/* Open Support Tickets */}
-          <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+          <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
+              <CardTitle className="text-foreground flex items-center justify-between">
                 Open Support Tickets
                 <Badge variant="outline" className="bg-red-900 text-red-400">
                   {supportTickets.length}
@@ -355,21 +355,21 @@ export default function AdminDashboard() {
                     <div key={ticket.id} className="border border-[#ccab6c]/25 rounded-lg p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <p className="font-medium text-white">{ticket.subject}</p>
-                          <p className="text-sm text-[#ccab6c]/90">{ticket.investor_email}</p>
+                          <p className="font-medium text-foreground">{ticket.subject}</p>
+                          <p className="text-sm text-gold/90">{ticket.investor_email}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className={`text-xs ${
                             ticket.priority === 'urgent' ? 'border-red-400 text-red-400' :
                             ticket.priority === 'high' ? 'border-orange-400 text-orange-400' :
-                            ticket.priority === 'medium' ? 'border-[#b38922] text-[#fedea0]' :
-                            'border-[#ccab6c]/45 text-[#ccab6c]/90'
+                            ticket.priority === 'medium' ? 'border-[#b38922] text-gold-bright' :
+                            'border-[#ccab6c]/45 text-gold/90'
                           }`}>
                             {ticket.priority}
                           </Badge>
                         </div>
                       </div>
-                      <p className="text-sm text-zinc-300 mb-3 line-clamp-2">
+                      <p className="text-sm text-foreground/80 mb-3 line-clamp-2">
                         {ticket.description}
                       </p>
                       <Badge variant="outline" className="text-xs">
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[#ccab6c]/90 text-center py-8">No open tickets</p>
+                <p className="text-gold/90 text-center py-8">No open tickets</p>
               )}
             </CardContent>
           </Card>

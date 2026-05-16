@@ -83,11 +83,11 @@ export default function OTPManagement({ investorEmail }) {
   }
 
   return (
-    <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+    <Card className="bg-card border border-[#ccab6c]/30">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="text-white flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-[#fedea0]" />
+          <CardTitle className="text-foreground flex items-center gap-2">
+            <KeyRound className="w-5 h-5 text-gold-bright" />
             One-Time Passwords (OTP)
           </CardTitle>
           <Button 
@@ -112,30 +112,30 @@ export default function OTPManagement({ investorEmail }) {
       
       <CardContent>
         {loading ? (
-          <div className="text-center py-4 text-[#ccab6c]/90">Loading OTPs...</div>
+          <div className="text-center py-4 text-gold/90">Loading OTPs...</div>
         ) : otps.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-[#ccab6c]/25">
-                  <TableHead className="text-[#ccab6c]/90">Code</TableHead>
-                  <TableHead className="text-[#ccab6c]/90">Status</TableHead>
-                  <TableHead className="text-[#ccab6c]/90">Created</TableHead>
-                  <TableHead className="text-[#ccab6c]/90">Expires</TableHead>
-                  <TableHead className="text-[#ccab6c]/90">Created By</TableHead>
+                  <TableHead className="text-gold/90">Code</TableHead>
+                  <TableHead className="text-gold/90">Status</TableHead>
+                  <TableHead className="text-gold/90">Created</TableHead>
+                  <TableHead className="text-gold/90">Expires</TableHead>
+                  <TableHead className="text-gold/90">Created By</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {otps.map((otp) => (
                   <TableRow key={otp.id} className="border-[#ccab6c]/25">
-                    <TableCell className="text-white font-mono">
+                    <TableCell className="text-foreground font-mono">
                       {maskOTP(otp.otp_code)}
                     </TableCell>
                     <TableCell>{getOTPStatus(otp)}</TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">
                       {format(new Date(otp.created_date), 'MMM dd, HH:mm')}
                     </TableCell>
-                    <TableCell className="text-zinc-300">
+                    <TableCell className="text-foreground/80">
                       {format(new Date(otp.expires_at), 'MMM dd, HH:mm')}
                     </TableCell>
                     <TableCell className="text-zinc-300 text-sm">
@@ -148,14 +148,14 @@ export default function OTPManagement({ investorEmail }) {
           </div>
         ) : (
           <div className="text-center py-8">
-            <KeyRound className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-            <p className="text-[#ccab6c]/90">No OTPs generated for this investor</p>
-            <p className="text-zinc-500 text-sm mt-2">Click "Generate New OTP" to create one</p>
+            <KeyRound className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-gold/90">No OTPs generated for this investor</p>
+            <p className="text-muted-foreground text-sm mt-2">Click "Generate New OTP" to create one</p>
           </div>
         )}
         
-        <div className="mt-4 p-3 bg-zinc-900 rounded-lg">
-          <p className="text-[#ccab6c]/90 text-xs">
+        <div className="mt-4 p-3 bg-muted rounded-lg">
+          <p className="text-gold/90 text-xs">
             <strong>Note:</strong> OTPs expire in 15 minutes and can only be used once. 
             A new OTP invalidates any existing active OTPs for security.
           </p>

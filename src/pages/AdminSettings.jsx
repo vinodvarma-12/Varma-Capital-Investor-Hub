@@ -47,10 +47,10 @@ import { format } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 const SettingSection = ({ title, icon, children }) => (
-  <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+  <Card className="bg-card border border-[#ccab6c]/30">
     <CardHeader className="flex flex-row items-center gap-3">
       {icon}
-      <CardTitle className="text-white">{title}</CardTitle>
+      <CardTitle className="text-foreground">{title}</CardTitle>
     </CardHeader>
     <CardContent className="space-y-4">
       {children}
@@ -278,52 +278,52 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">System Settings</h1>
-            <p className="text-[#ccab6c]/90">Configure system-wide settings and preferences</p>
+            <h1 className="text-3xl font-bold text-foreground">System Settings</h1>
+            <p className="text-gold/90">Configure system-wide settings and preferences</p>
           </div>
           <div className="flex gap-3">
             <Dialog open={isInviteAdminOpen} onOpenChange={setIsInviteAdminOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="border-[#b38922] text-[#fedea0] hover:bg-[#fedea0] hover:text-black">
+                <Button variant="outline" className="border-[#b38922] text-gold-bright hover:bg-[#fedea0] hover:text-black">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Invite Admin
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
+              <DialogContent className="bg-card border border-[#ccab6c]/30">
                 <DialogHeader>
-                  <DialogTitle className="text-white">Invite Admin User</DialogTitle>
+                  <DialogTitle className="text-foreground">Invite Admin User</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label className="text-zinc-300">Full Name</Label>
+                    <Label className="text-foreground/80">Full Name</Label>
                     <Input 
                       value={inviteForm.full_name}
                       onChange={(e) => setInviteForm({...inviteForm, full_name: e.target.value})}
                       placeholder="John Doe"
-                      className="bg-zinc-900 border-[#ccab6c]/20"
+                      className="bg-muted border-[#ccab6c]/20"
                     />
                   </div>
                   <div>
-                    <Label className="text-zinc-300">Email</Label>
+                    <Label className="text-foreground/80">Email</Label>
                     <Input 
                       type="email"
                       value={inviteForm.email}
                       onChange={(e) => setInviteForm({...inviteForm, email: e.target.value})}
                       placeholder="admin@company.com"
-                      className="bg-zinc-900 border-[#ccab6c]/20"
+                      className="bg-muted border-[#ccab6c]/20"
                     />
                   </div>
                   <div>
-                    <Label className="text-zinc-300">Role</Label>
+                    <Label className="text-foreground/80">Role</Label>
                     <Select value={inviteForm.role} onValueChange={(val) => setInviteForm({...inviteForm, role: val})}>
-                      <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+                      <SelectTrigger className="bg-muted border-[#ccab6c]/20">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 text-white">
+                      <SelectContent className="bg-muted text-foreground">
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
                       </SelectContent>
@@ -354,7 +354,7 @@ export default function AdminSettings() {
         </div>
 
         <Tabs defaultValue="branding" className="space-y-6">
-          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+          <TabsList className="bg-muted border-[#ccab6c]/20">
             <TabsTrigger value="branding" className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black">
               <Palette className="w-4 h-4 mr-2" />
               Branding
@@ -382,39 +382,39 @@ export default function AdminSettings() {
           </TabsList>
 
           <TabsContent value="branding" className="space-y-6">
-            <SettingSection title="Brand Identity" icon={<Palette className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="Brand Identity" icon={<Palette className="w-5 h-5 text-gold-bright" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Company Name</Label>
+                  <Label className="text-foreground/80">Company Name</Label>
                   <Input 
                     value={settings.company_name} 
                     onChange={(e) => updateSetting('company_name', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Domain</Label>
+                  <Label className="text-foreground/80">Domain</Label>
                   <Input 
                     value={settings.domain} 
                     onChange={(e) => updateSetting('domain', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div>
-                <Label className="text-zinc-300">Primary Color (Gold)</Label>
+                <Label className="text-foreground/80">Primary Color (Gold)</Label>
                 <div className="flex gap-3 items-center mt-2">
                   <Input 
                     type="color"
                     value={settings.primary_color} 
                     onChange={(e) => updateSetting('primary_color', e.target.value)}
-                    className="w-20 h-10 bg-zinc-900 border-[#ccab6c]/20"
+                    className="w-20 h-10 bg-muted border-[#ccab6c]/20"
                   />
                   <Input 
                     value={settings.primary_color} 
                     onChange={(e) => updateSetting('primary_color', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                     placeholder="#FFD700"
                   />
                 </div>
@@ -422,13 +422,13 @@ export default function AdminSettings() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Light Mode Logo</Label>
+                  <Label className="text-foreground/80">Light Mode Logo</Label>
                   <div className="mt-2 space-y-2">
                     <Input 
                       type="file" 
                       accept="image/*"
                       onChange={(e) => e.target.files[0] && handleLogoUpload(e.target.files[0], 'light')}
-                      className="bg-zinc-900 border-[#ccab6c]/20"
+                      className="bg-muted border-[#ccab6c]/20"
                       disabled={uploadingLogo}
                     />
                     {settings.logo_light_url && (
@@ -437,17 +437,17 @@ export default function AdminSettings() {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Dark Mode Logo</Label>
+                  <Label className="text-foreground/80">Dark Mode Logo</Label>
                   <div className="mt-2 space-y-2">
                     <Input 
                       type="file" 
                       accept="image/*"
                       onChange={(e) => e.target.files[0] && handleLogoUpload(e.target.files[0], 'dark')}
-                      className="bg-zinc-900 border-[#ccab6c]/20"
+                      className="bg-muted border-[#ccab6c]/20"
                       disabled={uploadingLogo}
                     />
                     {settings.logo_dark_url && (
-                      <img src={settings.logo_dark_url} alt="Dark logo" className="h-12 bg-zinc-900 p-2 rounded" />
+                      <img src={settings.logo_dark_url} alt="Dark logo" className="h-12 bg-muted p-2 rounded" />
                     )}
                   </div>
                 </div>
@@ -456,17 +456,17 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
-            <SettingSection title="Notification Settings" icon={<Bell className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="Notification Settings" icon={<Bell className="w-5 h-5 text-gold-bright" />}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">Email Notifications</Label>
+                  <Label className="text-foreground/80">Email Notifications</Label>
                   <Switch 
                     checked={settings.email_notifications} 
                     onCheckedChange={(val) => updateSetting('email_notifications', val)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">SMS Notifications</Label>
+                  <Label className="text-foreground/80">SMS Notifications</Label>
                   <Switch 
                     checked={settings.sms_notifications} 
                     onCheckedChange={(val) => updateSetting('sms_notifications', val)}
@@ -474,12 +474,12 @@ export default function AdminSettings() {
                 </div>
                 
                 <div>
-                  <Label className="text-zinc-300">Email Provider</Label>
+                  <Label className="text-foreground/80">Email Provider</Label>
                   <Select value={settings.email_provider} onValueChange={(val) => updateSetting('email_provider', val)}>
-                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+                    <SelectTrigger className="bg-muted border-[#ccab6c]/20">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 text-white">
+                    <SelectContent className="bg-muted text-foreground">
                       <SelectItem value="ses">Amazon SES</SelectItem>
                       <SelectItem value="smtp">Custom SMTP</SelectItem>
                       <SelectItem value="sendgrid">SendGrid</SelectItem>
@@ -491,30 +491,30 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <SettingSection title="Security Settings" icon={<Shield className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="Security Settings" icon={<Shield className="w-5 h-5 text-gold-bright" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Session Timeout (hours)</Label>
+                  <Label className="text-foreground/80">Session Timeout (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.session_timeout} 
                     onChange={(e) => updateSetting('session_timeout', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Max Login Attempts</Label>
+                  <Label className="text-foreground/80">Max Login Attempts</Label>
                   <Input 
                     type="number"
                     value={settings.max_login_attempts} 
                     onChange={(e) => updateSetting('max_login_attempts', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div className="flex items-center justify-between">
-                <Label className="text-zinc-300">Require Two-Factor Authentication</Label>
+                <Label className="text-foreground/80">Require Two-Factor Authentication</Label>
                 <Switch 
                   checked={settings.require_2fa} 
                   onCheckedChange={(val) => updateSetting('require_2fa', val)}
@@ -522,12 +522,12 @@ export default function AdminSettings() {
               </div>
               
               <div>
-                <Label className="text-zinc-300">Password Policy</Label>
+                <Label className="text-foreground/80">Password Policy</Label>
                 <Select value={settings.password_policy} onValueChange={(val) => updateSetting('password_policy', val)}>
-                  <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 text-white">
+                  <SelectContent className="bg-muted text-foreground">
                     <SelectItem value="standard">Standard (8+ chars)</SelectItem>
                     <SelectItem value="strong">Strong (12+ chars, mixed case, numbers, symbols)</SelectItem>
                     <SelectItem value="enterprise">Enterprise (16+ chars, complex requirements)</SelectItem>
@@ -538,40 +538,40 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="sla" className="space-y-6">
-            <SettingSection title="Service Level Agreements" icon={<Clock className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="Service Level Agreements" icon={<Clock className="w-5 h-5 text-gold-bright" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Standard Response Time (hours)</Label>
+                  <Label className="text-foreground/80">Standard Response Time (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.response_time_hours} 
                     onChange={(e) => updateSetting('response_time_hours', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Standard Resolution Time (hours)</Label>
+                  <Label className="text-foreground/80">Standard Resolution Time (hours)</Label>
                   <Input 
                     type="number"
                     value={settings.resolution_time_hours} 
                     onChange={(e) => updateSetting('resolution_time_hours', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div>
-                <Label className="text-zinc-300">Urgent Priority Response Time (hours)</Label>
+                <Label className="text-foreground/80">Urgent Priority Response Time (hours)</Label>
                 <Input 
                   type="number"
                   value={settings.urgent_response_hours} 
                   onChange={(e) => updateSetting('urgent_response_hours', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20"
+                  className="bg-muted border-[#ccab6c]/20"
                 />
               </div>
               
               <div className="flex items-center justify-between">
-                <Label className="text-zinc-300">Enable Automatic Escalation</Label>
+                <Label className="text-foreground/80">Enable Automatic Escalation</Label>
                 <Switch 
                   checked={settings.escalation_enabled} 
                   onCheckedChange={(val) => updateSetting('escalation_enabled', val)}
@@ -581,57 +581,57 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-6">
-            <SettingSection title="Legal & Compliance" icon={<FileText className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="Legal & Compliance" icon={<FileText className="w-5 h-5 text-gold-bright" />}>
               <div>
-                <Label className="text-zinc-300">Jurisdiction</Label>
+                <Label className="text-foreground/80">Jurisdiction</Label>
                 <Input 
                   value={settings.jurisdiction} 
                   onChange={(e) => updateSetting('jurisdiction', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20"
+                  className="bg-muted border-[#ccab6c]/20"
                 />
               </div>
               
               <div>
-                <Label className="text-zinc-300">Risk Disclosure Statement</Label>
+                <Label className="text-foreground/80">Risk Disclosure Statement</Label>
                 <Textarea 
                   value={settings.risk_disclosure} 
                   onChange={(e) => updateSetting('risk_disclosure', e.target.value)}
-                  className="bg-zinc-900 border-[#ccab6c]/20 h-32"
+                  className="bg-muted border-[#ccab6c]/20 h-32"
                   placeholder="Enter your standard risk disclosure..."
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Privacy Policy URL</Label>
+                  <Label className="text-foreground/80">Privacy Policy URL</Label>
                   <Input 
                     value={settings.privacy_policy_url} 
                     onChange={(e) => updateSetting('privacy_policy_url', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                     placeholder="https://..."
                   />
                 </div>
                 <div>
-                  <Label className="text-zinc-300">Terms of Service URL</Label>
+                  <Label className="text-foreground/80">Terms of Service URL</Label>
                   <Input 
                     value={settings.terms_of_service_url} 
                     onChange={(e) => updateSetting('terms_of_service_url', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                     placeholder="https://..."
                   />
                 </div>
               </div>
             </SettingSection>
 
-            <SettingSection title="NAV & Valuation Settings" icon={<Settings className="w-5 h-5 text-[#fedea0]" />}>
+            <SettingSection title="NAV & Valuation Settings" icon={<Settings className="w-5 h-5 text-gold-bright" />}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-zinc-300">Official NAV Frequency</Label>
+                  <Label className="text-foreground/80">Official NAV Frequency</Label>
                   <Select value={settings.official_nav_frequency} onValueChange={(val) => updateSetting('official_nav_frequency', val)}>
-                    <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+                    <SelectTrigger className="bg-muted border-[#ccab6c]/20">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 text-white">
+                    <SelectContent className="bg-muted text-foreground">
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
                       <SelectItem value="monthly">Monthly (Recommended)</SelectItem>
@@ -640,26 +640,26 @@ export default function AdminSettings() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-zinc-300">NAV Cutoff Time</Label>
+                  <Label className="text-foreground/80">NAV Cutoff Time</Label>
                   <Input 
                     type="time"
                     value={settings.nav_cutoff_time} 
                     onChange={(e) => updateSetting('nav_cutoff_time', e.target.value)}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                   />
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">Enable Indicative Daily NAV</Label>
+                  <Label className="text-foreground/80">Enable Indicative Daily NAV</Label>
                   <Switch 
                     checked={settings.indicative_nav_enabled} 
                     onCheckedChange={(val) => updateSetting('indicative_nav_enabled', val)}
                   />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-zinc-300">Auto-Calculate P&L</Label>
+                  <Label className="text-foreground/80">Auto-Calculate P&L</Label>
                   <Switch 
                     checked={settings.auto_calculate_pnl} 
                     onCheckedChange={(val) => updateSetting('auto_calculate_pnl', val)}
@@ -670,10 +670,10 @@ export default function AdminSettings() {
           </TabsContent>
 
           <TabsContent value="audit" className="space-y-6">
-            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+            <Card className="bg-card border border-[#ccab6c]/30">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-3">
-                  <History className="w-5 h-5 text-[#fedea0]" />
+                <CardTitle className="text-foreground flex items-center gap-3">
+                  <History className="w-5 h-5 text-gold-bright" />
                   Audit Trail
                 </CardTitle>
               </CardHeader>
@@ -682,29 +682,29 @@ export default function AdminSettings() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-[#ccab6c]/25">
-                        <TableHead className="text-[#ccab6c]/90">Timestamp</TableHead>
-                        <TableHead className="text-[#ccab6c]/90">User</TableHead>
-                        <TableHead className="text-[#ccab6c]/90">Action</TableHead>
-                        <TableHead className="text-[#ccab6c]/90">Entity</TableHead>
-                        <TableHead className="text-[#ccab6c]/90">Changes</TableHead>
+                        <TableHead className="text-gold/90">Timestamp</TableHead>
+                        <TableHead className="text-gold/90">User</TableHead>
+                        <TableHead className="text-gold/90">Action</TableHead>
+                        <TableHead className="text-gold/90">Entity</TableHead>
+                        <TableHead className="text-gold/90">Changes</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {auditLogs.map((log) => (
                         <TableRow key={log.id} className="border-[#ccab6c]/25">
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {format(new Date(log.created_date), 'MMM dd, yyyy HH:mm')}
                           </TableCell>
-                          <TableCell className="text-zinc-300">{log.user_email}</TableCell>
+                          <TableCell className="text-foreground/80">{log.user_email}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
                               {log.action}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-zinc-300">{log.entity_type}</TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">{log.entity_type}</TableCell>
+                          <TableCell className="text-foreground/80">
                             {log.changes ? (
-                              <Button variant="ghost" size="sm" className="text-[#fedea0]">
+                              <Button variant="ghost" size="sm" className="text-gold-bright">
                                 <Eye className="w-3 h-3 mr-1" />
                                 View
                               </Button>

@@ -83,7 +83,7 @@ const MaterialForm = ({ material, onSave, onDone }) => {
       <div>
         <Label>Content File (PDF, etc.)</Label>
         <Input type="file" onChange={e => handleFileUpload(e.target.files[0])} disabled={isUploading} />
-        {formData.file_url && <a href={formData.file_url} target="_blank" className="text-xs text-[#fedea0] truncate">{formData.file_url}</a>}
+        {formData.file_url && <a href={formData.file_url} target="_blank" className="text-xs text-gold-bright truncate">{formData.file_url}</a>}
       </div>
 
        <div>
@@ -166,12 +166,12 @@ export default function AdminInsights() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">Insights & Content</h1>
-            <p className="text-[#ccab6c]/90">Manage articles, reports, and other content for investors.</p>
+            <h1 className="text-3xl font-bold text-foreground">Insights & Content</h1>
+            <p className="text-gold/90">Manage articles, reports, and other content for investors.</p>
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
@@ -180,7 +180,7 @@ export default function AdminInsights() {
                 New Material
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 text-white">
+            <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground">
               <DialogHeader>
                 <DialogTitle>{editingMaterial ? 'Edit Material' : 'Create New Material'}</DialogTitle>
               </DialogHeader>
@@ -189,25 +189,25 @@ export default function AdminInsights() {
           </Dialog>
         </div>
         
-        <Card className="bg-zinc-950 border border-[#ccab6c]/30">
-          <CardHeader><CardTitle className="text-white">All Materials</CardTitle></CardHeader>
+        <Card className="bg-card border border-[#ccab6c]/30">
+          <CardHeader><CardTitle className="text-foreground">All Materials</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#ccab6c]/25">
-                    <TableHead className="text-[#ccab6c]/90">Title</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Category</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Created</TableHead>
-                    <TableHead className="text-[#ccab6c]/90">Actions</TableHead>
+                    <TableHead className="text-gold/90">Title</TableHead>
+                    <TableHead className="text-gold/90">Category</TableHead>
+                    <TableHead className="text-gold/90">Created</TableHead>
+                    <TableHead className="text-gold/90">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {materials.map(material => (
                     <TableRow key={material.id} className="border-[#ccab6c]/25">
-                      <TableCell className="font-medium text-white">{material.title}</TableCell>
+                      <TableCell className="font-medium text-foreground">{material.title}</TableCell>
                       <TableCell><Badge variant="outline" className="capitalize">{material.category.replace("_", " ")}</Badge></TableCell>
-                      <TableCell className="text-zinc-300">{new Date(material.created_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-foreground/80">{new Date(material.created_date).toLocaleDateString()}</TableCell>
                       <TableCell className="space-x-2">
                         <Button variant="outline" size="sm" onClick={() => openFormForEdit(material)}><Edit className="w-3 h-3 mr-1"/> Edit</Button>
                         <Button variant="destructive" size="sm" onClick={() => handleDelete(material.id)}><Trash2 className="w-3 h-3 mr-1"/> Delete</Button>

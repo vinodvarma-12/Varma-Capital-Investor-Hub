@@ -261,7 +261,7 @@ const CSVUploadForm = ({ products, onUpload, onCancel }) => {
           accept=".csv"
           onChange={(e) => setSelectedFile(e.target.files[0])}
         />
-        <p className="text-xs text-[#ccab6c]/90 mt-1">
+        <p className="text-xs text-gold/90 mt-1">
           Expected columns: date, nav_per_unit, return_percent, investor_email
           (optional)
         </p>
@@ -422,14 +422,14 @@ export default function AdminNAV() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-foreground">
               NAV & Returns Management
             </h1>
-            <p className="text-[#ccab6c]/90">
+            <p className="text-gold/90">
               Set NAVs, fabricate returns, and manage investor portfolio values
             </p>
           </div>
@@ -438,15 +438,15 @@ export default function AdminNAV() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-[#b38922] text-[#fedea0]"
+                  className="border-[#b38922] text-gold-bright"
                 >
                   <FileSpreadsheet className="w-4 h-4 mr-2" />
                   Upload CSV
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
+              <DialogContent className="bg-card border border-[#ccab6c]/30">
                 <DialogHeader>
-                  <DialogTitle className="text-white">
+                  <DialogTitle className="text-foreground">
                     Upload NAV Data via CSV
                   </DialogTitle>
                 </DialogHeader>
@@ -465,9 +465,9 @@ export default function AdminNAV() {
                   Set NAV/Return
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30 max-w-2xl">
+              <DialogContent className="bg-card border border-[#ccab6c]/30 max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle className="text-white">
+                  <DialogTitle className="text-foreground">
                     {editingNAV ? "Edit NAV/Return" : "Set New NAV/Return"}
                   </DialogTitle>
                 </DialogHeader>
@@ -486,7 +486,7 @@ export default function AdminNAV() {
         </div>
 
         <Tabs defaultValue="fabricated" className="space-y-6">
-          <TabsList className="bg-zinc-900 border-[#ccab6c]/20">
+          <TabsList className="bg-muted border-[#ccab6c]/20">
             <TabsTrigger
               value="fabricated"
               className="data-[state=active]:bg-[#fedea0] data-[state=active]:text-black"
@@ -502,10 +502,10 @@ export default function AdminNAV() {
           </TabsList>
 
           <TabsContent value="fabricated">
-            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+            <Card className="bg-card border border-[#ccab6c]/30">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-[#fedea0]" />
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-gold-bright" />
                   Admin-Controlled Returns & NAVs
                 </CardTitle>
               </CardHeader>
@@ -514,25 +514,25 @@ export default function AdminNAV() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-[#ccab6c]/25">
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Date
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Product
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Investor
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           NAV/Unit
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Return %
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Override
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Actions
                         </TableHead>
                       </TableRow>
@@ -543,16 +543,16 @@ export default function AdminNAV() {
                           key={record.id}
                           className="border-[#ccab6c]/25"
                         >
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {format(
                               new Date(record.effective_date),
                               "MMM dd, yyyy",
                             )}
                           </TableCell>
-                          <TableCell className="text-white font-medium">
+                          <TableCell className="text-foreground font-medium">
                             {getProductName(record.product_id)}
                           </TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {record.investor_email || (
                               <Badge
                                 variant="secondary"
@@ -562,7 +562,7 @@ export default function AdminNAV() {
                               </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             ${record.nav_per_unit?.toFixed(4)}
                           </TableCell>
                           <TableCell
@@ -577,7 +577,7 @@ export default function AdminNAV() {
                           </TableCell>
                           <TableCell>
                             {record.override_calculated ? (
-                              <Badge className="bg-[#b38922]/25 text-[#fedea0]">
+                              <Badge className="bg-[#b38922]/25 text-gold-bright">
                                 <AlertCircle className="w-3 h-3 mr-1" />
                                 Override
                               </Badge>
@@ -611,9 +611,9 @@ export default function AdminNAV() {
           </TabsContent>
 
           <TabsContent value="official">
-            <Card className="bg-zinc-950 border border-[#ccab6c]/30">
+            <Card className="bg-card border border-[#ccab6c]/30">
               <CardHeader>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Official NAV Records
                 </CardTitle>
               </CardHeader>
@@ -622,19 +622,19 @@ export default function AdminNAV() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-[#ccab6c]/25">
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Date
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Product
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           NAV per Unit
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Total AUM
                         </TableHead>
-                        <TableHead className="text-[#ccab6c]/90">
+                        <TableHead className="text-gold/90">
                           Type
                         </TableHead>
                       </TableRow>
@@ -642,16 +642,16 @@ export default function AdminNAV() {
                     <TableBody>
                       {navRecords.map((nav) => (
                         <TableRow key={nav.id} className="border-[#ccab6c]/25">
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {format(new Date(nav.date), "MMM dd, yyyy")}
                           </TableCell>
-                          <TableCell className="text-white font-medium">
+                          <TableCell className="text-foreground font-medium">
                             {getProductName(nav.product_id)}
                           </TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             ${nav.nav_per_unit?.toFixed(4)}
                           </TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {nav.total_aum
                               ? `$${nav.total_aum.toLocaleString()}`
                               : "-"}

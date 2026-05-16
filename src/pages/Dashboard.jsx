@@ -209,8 +209,8 @@ export default function Dashboard() {
     : "bg-white border border-[#ccab6c]/45 shadow-sm";
   const rowDivider = darkMode ? "border-[#ccab6c]/20" : "border-[#ccab6c]/25";
   const subtitle = darkMode ? "text-[#ccab6c]/85" : "text-stone-600";
-  const kpiLabel = darkMode ? "text-[#ccab6c]/90" : "text-stone-600";
-  const kpiValue = darkMode ? "text-[#fedea0]" : "text-stone-900";
+  const kpiLabel = darkMode ? "text-gold/90" : "text-stone-600";
+  const kpiValue = darkMode ? "text-gold-bright" : "text-stone-900";
   const sectionTitle = darkMode ? "text-white" : "text-stone-900";
   const bodyMuted = darkMode ? "text-zinc-400" : "text-stone-600";
   const legendMuted = darkMode ? "text-zinc-300" : "text-stone-700";
@@ -229,7 +229,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`min-h-screen p-6 ${darkMode ? "bg-black" : "bg-stone-50"}`}>
+    <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div
@@ -363,7 +363,7 @@ export default function Dashboard() {
                       className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
                         chartTimeline === key
                           ? darkMode
-                            ? 'bg-[#b38922]/40 text-[#fedea0] border border-[#ccab6c]/60'
+                            ? 'bg-[#b38922]/40 text-gold-bright border border-[#ccab6c]/60'
                             : 'bg-[#fedea0] text-[#8a6818] border border-[#b38922]/50'
                           : darkMode
                             ? 'text-[#ccab6c]/60 hover:text-[#fedea0] hover:bg-[#b38922]/20'
@@ -434,7 +434,7 @@ export default function Dashboard() {
                         {item.name}
                       </span>
                     </div>
-                    <span className={`text-sm font-medium ${darkMode ? "text-[#fedea0]" : "text-stone-900"}`}>
+                    <span className={`text-sm font-medium ${darkMode ? "text-gold-bright" : "text-stone-900"}`}>
                       ${item.value.toLocaleString()}
                     </span>
                   </div>
@@ -474,7 +474,7 @@ export default function Dashboard() {
                       </p>
                       <Badge
                         variant="outline"
-                        className={`text-xs mt-1 ${darkMode ? "border-[#ccab6c]/50 text-[#ccab6c]" : "border-[#b38922]/45 text-[#8a6818]"}`}
+                        className={`text-xs mt-1 ${darkMode ? "border-[#ccab6c]/50 text-gold" : "border-[#b38922]/45 text-[#8a6818]"}`}
                       >
                         {transaction.status}
                       </Badge>
@@ -493,14 +493,14 @@ export default function Dashboard() {
           <Card className={cardSurface}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className={sectionTitle}>Recent Documents</CardTitle>
-              <Bell className="w-5 h-5 text-[#fedea0]" />
+              <Bell className="w-5 h-5 text-gold-bright" />
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {documents.length > 0 ? documents.map((doc) => (
                   <div key={doc.id} className={`flex items-center justify-between py-3 border-b last:border-b-0 ${rowDivider}`}>
                     <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-[#fedea0]" />
+                      <FileText className="w-5 h-5 text-gold-bright" />
                       <div>
                         <p className={`font-medium ${sectionTitle}`}>
                           {doc.title}
@@ -515,7 +515,7 @@ export default function Dashboard() {
                       size="sm"
                       className={
                         darkMode
-                          ? "border-[#b38922] text-[#fedea0] hover:bg-[#b38922]/25 hover:text-[#fedea0]"
+                          ? "border-[#b38922] text-gold-bright hover:bg-[#b38922]/25 hover:text-[#fedea0]"
                           : "border-[#b38922] text-[#8a6818] hover:bg-[#fedea0]/40 hover:text-[#5c4510]"
                       }
                     >

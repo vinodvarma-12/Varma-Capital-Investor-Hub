@@ -271,10 +271,10 @@ export default function Layout({ children, currentPageName }) {
   // Full-page loader only on genuine first load — when there is no user yet
   if (!user && !isPublicPage && (!authChecked || authSessionLoading)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center space-y-4">
-          <RefreshCw className="w-8 h-8 text-[#fedea0] animate-spin mx-auto" />
-          <div className="text-white text-sm">Loading...</div>
+          <RefreshCw className="w-8 h-8 text-gold-bright animate-spin mx-auto" />
+          <div className="text-foreground text-sm">Loading...</div>
         </div>
       </div>
     );
@@ -331,7 +331,7 @@ export default function Layout({ children, currentPageName }) {
                             className={`transition-all duration-200 rounded-xl mb-1 ${
                                                               location.pathname === item.url || 
                                                               (item.title === "News & Insights" && currentPageName === "NewsAndInsights") ? 
-                                                              'bg-sidebar-accent text-[#fedea0] dark:text-[#fedea0] light:bg-[#fedea0]/30 light:text-[#8a6818]' : 
+                                                              'bg-sidebar-accent text-gold-bright dark:text-gold-bright light:bg-[#fedea0]/30 light:text-[#8a6818]' : 
                                                               'text-sidebar-foreground hover:bg-sidebar-accent hover:text-[#fedea0] light:hover:text-[#b38922]'
                                                             }`}
                           >

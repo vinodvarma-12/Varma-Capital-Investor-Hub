@@ -49,7 +49,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
           </div>
         </div>
         <CardTitle className="text-white">Two-Factor Authentication</CardTitle>
-        <CardDescription className="text-[#ccab6c]/90">
+        <CardDescription className="text-gold/90">
           {useRecoveryCode 
             ? "Enter one of your recovery codes" 
             : "Enter the 6-digit code from your authenticator app"}
@@ -115,7 +115,7 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
               <button
                 type="button"
                 onClick={onCancel}
-                className="text-sm text-[#ccab6c]/90 hover:text-zinc-300"
+                className="text-sm text-gold/90 hover:text-zinc-300"
               >
                 Cancel and go back
               </button>

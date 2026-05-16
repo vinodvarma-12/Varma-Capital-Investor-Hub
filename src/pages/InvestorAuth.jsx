@@ -89,7 +89,7 @@ export default function InvestorAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-4">
@@ -99,13 +99,13 @@ export default function InvestorAuth() {
               className="w-20 h-20 mx-auto"
             />
             <div>
-              <h1 className="text-3xl font-bold text-white">Welcome to Varma Capital</h1>
-              <p className="text-[#ccab6c]/90 mt-2">Secure investor portal. Invite-only access.</p>
+              <h1 className="text-3xl font-bold text-foreground">Welcome to Varma Capital</h1>
+              <p className="text-gold/90 mt-2">Secure investor portal. Invite-only access.</p>
             </div>
           </div>
 
-          <div className="bg-zinc-950 border border-[#ccab6c]/30 rounded-xl p-6 space-y-5">
-            <h2 className="text-lg font-semibold text-white text-center">Sign in</h2>
+          <div className="bg-card border border-[#ccab6c]/30 rounded-xl p-6 space-y-5">
+            <h2 className="text-lg font-semibold text-foreground text-center">Sign in</h2>
             <div className="flex gap-2 justify-center">
               <Button type="button" variant={mode === "otp" ? "default" : "outline"} size="sm" onClick={() => setMode("otp")}>
                 OTP
@@ -117,7 +117,7 @@ export default function InvestorAuth() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="email" className="text-zinc-300 flex items-center gap-2 mb-2">
+                <Label htmlFor="email" className="text-foreground/80 flex items-center gap-2 mb-2">
                   <Mail className="w-4 h-4" />
                   Email
                 </Label>
@@ -127,14 +127,14 @@ export default function InvestorAuth() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-zinc-900 border-[#ccab6c]/20"
+                  className="bg-muted border-[#ccab6c]/20"
                   placeholder="your.email@example.com"
                 />
               </div>
 
               {mode === "otp" ? (
                 <div>
-                  <Label htmlFor="otpCode" className="text-zinc-300 flex items-center gap-2 mb-2">
+                  <Label htmlFor="otpCode" className="text-foreground/80 flex items-center gap-2 mb-2">
                     <KeyRound className="w-4 h-4" />
                     OTP
                   </Label>
@@ -144,14 +144,14 @@ export default function InvestorAuth() {
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     required={mode === "otp"}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                     placeholder="Enter 6-digit code"
                     maxLength={6}
                   />
                 </div>
               ) : (
                 <div>
-                  <Label htmlFor="password" className="text-zinc-300 flex items-center gap-2 mb-2">
+                  <Label htmlFor="password" className="text-foreground/80 flex items-center gap-2 mb-2">
                     <Lock className="w-4 h-4" />
                     Password
                   </Label>
@@ -161,7 +161,7 @@ export default function InvestorAuth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required={mode === "password"}
-                    className="bg-zinc-900 border-[#ccab6c]/20"
+                    className="bg-muted border-[#ccab6c]/20"
                     placeholder="Your account password"
                   />
                 </div>
@@ -184,10 +184,10 @@ export default function InvestorAuth() {
             </form>
           </div>
 
-          <div className="bg-zinc-950 border border-[#ccab6c]/30 rounded-xl p-6 text-center space-y-4">
-            <h2 className="text-lg font-semibold text-white">New to Varma Capital?</h2>
+          <div className="bg-card border border-[#ccab6c]/30 rounded-xl p-6 text-center space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">New to Varma Capital?</h2>
             <Link to={createPageUrl("Waitlist")}>
-              <Button variant="outline" className="w-full border-[#b38922] text-[#fedea0] hover:bg-[#fedea0] hover:text-black font-semibold py-3">
+              <Button variant="outline" className="w-full border-[#b38922] text-gold-bright hover:bg-[#fedea0] hover:text-black font-semibold py-3">
                 Join Waitlist
               </Button>
             </Link>
@@ -195,7 +195,7 @@ export default function InvestorAuth() {
         </div>
       </div>
 
-      <footer className="text-center py-6 text-zinc-500 text-sm border-t border-[#ccab6c]/25">
+      <footer className="text-center py-6 text-muted-foreground text-sm border-t border-[#ccab6c]/25">
         Varma Capital © 2026 | All Rights Reserved
       </footer>
     </div>

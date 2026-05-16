@@ -51,16 +51,16 @@ const NewTicketForm = ({ user, onTicketCreated }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="subject" className="text-zinc-300">Subject</Label>
-        <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required className="bg-zinc-900 border-[#ccab6c]/20"/>
+        <Label htmlFor="subject" className="text-foreground/80">Subject</Label>
+        <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required className="bg-muted border-[#ccab6c]/20"/>
       </div>
       <div>
-        <Label htmlFor="category" className="text-zinc-300">Category</Label>
+        <Label htmlFor="category" className="text-foreground/80">Category</Label>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="bg-zinc-900 border-[#ccab6c]/20">
+          <SelectTrigger className="bg-muted border-[#ccab6c]/20">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900 border-[#ccab6c]/20 text-white">
+          <SelectContent className="bg-muted border-[#ccab6c]/20 text-foreground">
             <SelectItem value="general">General Inquiry</SelectItem>
             <SelectItem value="account">Account</SelectItem>
             <SelectItem value="investment">Investment</SelectItem>
@@ -71,8 +71,8 @@ const NewTicketForm = ({ user, onTicketCreated }) => {
         </Select>
       </div>
       <div>
-        <Label htmlFor="description" className="text-zinc-300">Description</Label>
-        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="bg-zinc-900 border-[#ccab6c]/20"/>
+        <Label htmlFor="description" className="text-foreground/80">Description</Label>
+        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="bg-muted border-[#ccab6c]/20"/>
       </div>
       <Button type="submit" disabled={isSubmitting} className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]">
         {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
@@ -145,14 +145,14 @@ export default function Support() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-white">Support Center</h1>
-            <p className="text-[#ccab6c]/90">Create and track your support requests</p>
-            <p className="text-[#ccab6c]/90 text-sm">
-              For urgent enquiries, please email <a href="mailto:support@varmacapital.io" className="text-[#fedea0] hover:text-[#fedea0] underline">support@varmacapital.io</a>
+            <h1 className="text-3xl font-bold text-foreground">Support Center</h1>
+            <p className="text-gold/90">Create and track your support requests</p>
+            <p className="text-gold/90 text-sm">
+              For urgent enquiries, please email <a href="mailto:support@varmacapital.io" className="text-gold-bright hover:text-[#fedea0] underline">support@varmacapital.io</a>
             </p>
           </div>
           <Dialog open={isNewTicketDialogOpen} onOpenChange={setIsNewTicketDialogOpen}>
@@ -162,9 +162,9 @@ export default function Support() {
                 New Ticket
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border border-[#ccab6c]/30">
+            <DialogContent className="bg-card border border-[#ccab6c]/30">
               <DialogHeader>
-                <DialogTitle className="text-white">Create a New Support Ticket</DialogTitle>
+                <DialogTitle className="text-foreground">Create a New Support Ticket</DialogTitle>
               </DialogHeader>
               <NewTicketForm user={user} onTicketCreated={() => {
                 setIsNewTicketDialogOpen(false);
@@ -176,45 +176,45 @@ export default function Support() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Ticket List */}
-          <Card className="lg:col-span-1 bg-zinc-950 border border-[#ccab6c]/30">
-            <CardHeader><CardTitle className="text-white">Your Tickets</CardTitle></CardHeader>
+          <Card className="lg:col-span-1 bg-card border border-[#ccab6c]/30">
+            <CardHeader><CardTitle className="text-foreground">Your Tickets</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {tickets.map(ticket => (
                   <div key={ticket.id} onClick={() => setSelectedTicket(ticket)}
                     className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedTicket?.id === ticket.id ? 'bg-zinc-900' : 'hover:bg-zinc-900'
+                      selectedTicket?.id === ticket.id ? 'bg-muted' : 'hover:bg-muted'
                     }`}>
                     <div className="flex justify-between items-start">
-                      <p className="font-medium text-white">{ticket.subject}</p>
+                      <p className="font-medium text-foreground">{ticket.subject}</p>
                       <Badge variant={ticket.status === 'open' ? 'destructive' : 'default'} className="capitalize">{ticket.status}</Badge>
                     </div>
-                    <p className="text-sm text-[#ccab6c]/90">
+                    <p className="text-sm text-gold/90">
                       {format(new Date(ticket.created_date), 'MMM dd, yyyy')}
                     </p>
                   </div>
                 ))}
                 {tickets.length === 0 && (
-                  <p className="text-center text-zinc-500 py-8">No tickets found.</p>
+                  <p className="text-center text-muted-foreground py-8">No tickets found.</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* Ticket Details */}
-          <Card className="lg:col-span-2 bg-zinc-950 border border-[#ccab6c]/30 flex flex-col">
+          <Card className="lg:col-span-2 bg-card border border-[#ccab6c]/30 flex flex-col">
             {selectedTicket ? (
               <>
                 <CardHeader>
-                  <CardTitle className="text-white">{selectedTicket.subject}</CardTitle>
-                  <div className="text-sm text-[#ccab6c]/90">
+                  <CardTitle className="text-foreground">{selectedTicket.subject}</CardTitle>
+                  <div className="text-sm text-gold/90">
                     Category: {selectedTicket.category} | Status: <span className="capitalize">{selectedTicket.status}</span>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-4 overflow-y-auto">
                   {messages.map(msg => (
                     <div key={msg.id} className={`flex ${msg.sender_email === user.email ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-lg p-3 rounded-lg ${msg.sender_email === user.email ? 'bg-[#b38922]/25 text-[#fef3d6]' : 'bg-zinc-900 text-zinc-300'}`}>
+                      <div className={`max-w-lg p-3 rounded-lg ${msg.sender_email === user.email ? 'bg-[#b38922]/25 text-[#fef3d6]' : 'bg-muted text-foreground/80'}`}>
                         <p>{msg.message}</p>
                         <p className="text-xs text-right mt-1 opacity-70">
                           {format(new Date(msg.created_date), 'p, MMM dd')}
@@ -229,10 +229,10 @@ export default function Support() {
                       value={newMessage} 
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type your message..."
-                      className="bg-zinc-900 border-[#ccab6c]/20 pr-20"
+                      className="bg-muted border-[#ccab6c]/20 pr-20"
                     />
                     <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center gap-1">
-                      <Button variant="ghost" size="icon"><Paperclip className="w-4 h-4 text-[#ccab6c]/90"/></Button>
+                      <Button variant="ghost" size="icon"><Paperclip className="w-4 h-4 text-gold/90"/></Button>
                       <Button size="icon" onClick={handleSendMessage} className="bg-[#fedea0] hover:bg-[#ccab6c]">
                         <Send className="w-4 h-4 text-black"/>
                       </Button>
@@ -242,7 +242,7 @@ export default function Support() {
               </>
             ) : (
               <div className="flex-grow flex items-center justify-center">
-                <p className="text-zinc-500">Select a ticket to view details</p>
+                <p className="text-muted-foreground">Select a ticket to view details</p>
               </div>
             )}
           </Card>

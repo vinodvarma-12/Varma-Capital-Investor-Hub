@@ -15,7 +15,7 @@ export default function Legal() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link to={createPageUrl("InvestorAuth")}>
-            <Button variant="ghost" className="text-[#ccab6c]/90 hover:text-white">
+            <Button variant="ghost" className="text-gold/90 hover:text-white">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Button>
@@ -29,7 +29,7 @@ export default function Legal() {
             className="w-16 h-16 mx-auto"
           />
           <h1 className="text-3xl font-bold text-white">Legal Documents</h1>
-          <p className="text-[#ccab6c]/90">Varma Capital Investor Portal</p>
+          <p className="text-gold/90">Varma Capital Investor Portal</p>
         </div>
 
         <Tabs defaultValue={initialTab} className="w-full">
@@ -52,12 +52,12 @@ export default function Legal() {
             <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardContent className="p-8 prose prose-invert max-w-none">
                 <h1 className="text-2xl font-bold text-white mb-2">Privacy Policy</h1>
-                <p className="text-[#ccab6c]/90 text-sm mb-6">
+                <p className="text-gold/90 text-sm mb-6">
                   <strong>Effective Date:</strong> January 2025 | <strong>Last Updated:</strong> January 2025
                 </p>
 
                 <p className="text-zinc-300">
-                  Varma Capital ("we", "us", "our") operates a private, invite-only investor platform available at <strong className="text-[#fedea0]">app.varmacapital.io</strong> (the "Portal"). This Privacy Policy outlines how we collect, use, store, and protect your information when you access or use the Portal.
+                  Varma Capital ("we", "us", "our") operates a private, invite-only investor platform available at <strong className="text-gold-bright">app.varmacapital.io</strong> (the "Portal"). This Privacy Policy outlines how we collect, use, store, and protect your information when you access or use the Portal.
                 </p>
 
                 <h2 className="text-xl font-semibold text-white mt-8 mb-4">1. Information We Collect</h2>
@@ -120,7 +120,7 @@ export default function Legal() {
 
                 <h2 className="text-xl font-semibold text-white mt-8 mb-4">10. Contact Us</h2>
                 <p className="text-zinc-300">
-                  Email: <a href="mailto:support@varmacapital.com" className="text-[#fedea0] hover:underline">support@varmacapital.com</a>
+                  Email: <a href="mailto:support@varmacapital.com" className="text-gold-bright hover:underline">support@varmacapital.com</a>
                 </p>
               </CardContent>
             </Card>
@@ -130,12 +130,12 @@ export default function Legal() {
             <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardContent className="p-8 prose prose-invert max-w-none">
                 <h1 className="text-2xl font-bold text-white mb-2">Terms of Service</h1>
-                <p className="text-[#ccab6c]/90 text-sm mb-6">
+                <p className="text-gold/90 text-sm mb-6">
                   <strong>Effective Date:</strong> January 2025 | <strong>Last Updated:</strong> January 2025
                 </p>
 
                 <p className="text-zinc-300">
-                  These Terms of Service ("Terms") govern your use of the Varma Capital Investor Portal at <strong className="text-[#fedea0]">app.varmacapital.io</strong>. By accessing or using the Portal, you agree to these Terms.
+                  These Terms of Service ("Terms") govern your use of the Varma Capital Investor Portal at <strong className="text-gold-bright">app.varmacapital.io</strong>. By accessing or using the Portal, you agree to these Terms.
                 </p>
 
                 <h2 className="text-xl font-semibold text-white mt-8 mb-4">1. Eligibility</h2>
@@ -192,7 +192,7 @@ export default function Legal() {
 
                 <h2 className="text-xl font-semibold text-white mt-8 mb-4">11. Contact</h2>
                 <p className="text-zinc-300">
-                  Email: <a href="mailto:support@varmacapital.com" className="text-[#fedea0] hover:underline">support@varmacapital.com</a>
+                  Email: <a href="mailto:support@varmacapital.com" className="text-gold-bright hover:underline">support@varmacapital.com</a>
                 </p>
               </CardContent>
             </Card>
@@ -202,7 +202,7 @@ export default function Legal() {
             <Card className="bg-zinc-950 border border-[#ccab6c]/30">
               <CardContent className="p-8 prose prose-invert max-w-none">
                 <h1 className="text-2xl font-bold text-white mb-2">Risk Disclosure & Performance Disclaimer</h1>
-                <p className="text-[#ccab6c]/90 text-sm mb-6">
+                <p className="text-gold/90 text-sm mb-6">
                   <strong>Effective Date:</strong> January 2025 | <strong>Last Updated:</strong> January 2025
                 </p>
 
@@ -242,7 +242,7 @@ export default function Legal() {
 
                 <h2 className="text-xl font-semibold text-white mt-8 mb-4">7. Contact</h2>
                 <p className="text-zinc-300">
-                  Email: <a href="mailto:support@varmacapital.com" className="text-[#fedea0] hover:underline">support@varmacapital.com</a>
+                  Email: <a href="mailto:support@varmacapital.com" className="text-gold-bright hover:underline">support@varmacapital.com</a>
                 </p>
               </CardContent>
             </Card>
