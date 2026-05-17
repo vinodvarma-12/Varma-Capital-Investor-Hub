@@ -192,7 +192,7 @@ export default function Documents() {
   };
 
   // Default: all groups open (treat missing key as open)
-  const isGroupOpen = (key) => openGroups[key] !== false;
+  const isGroupOpen = (key) => openGroups[key] === true;
 
   const getUploaderLabel = (key) => {
     if (key === '__varma__') return 'Varma Capital';
@@ -483,16 +483,6 @@ export default function Documents() {
                 <span className="text-lg">📢</span>
                 <div>
                   <p className="text-foreground font-medium">Notices</p>
-                  <p className="text-xs text-gold/90">Important announcements and updates</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
                   <p className="text-xs text-gold/90">Important announcements and updates</p>
                 </div>
               </div>

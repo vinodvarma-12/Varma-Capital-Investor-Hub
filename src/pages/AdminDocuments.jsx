@@ -447,7 +447,7 @@ export default function AdminDocuments() {
     setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const isGroupOpen = (key) => openGroups[key] !== false;
+  const isGroupOpen = (key) => openGroups[key] === true;
 
   const getUploaderLabel = (key) => {
     if (key === '__unknown__') return 'Unknown / Legacy';
@@ -651,6 +651,15 @@ export default function AdminDocuments() {
                                   </div>
                                 </div>
                                 <div className="flex gap-2 flex-shrink-0 ml-4">
+                                  <Button variant="outline" size="sm" onClick={() => {
+                                    const a = document.createElement('a');
+                                    a.href = doc.file_url;
+                                    a.download = doc.title || 'document';
+                                    a.target = '_blank';
+                                    a.click();
+                                  }} className="text-gold-bright border-[#b38922] hover:bg-[#fedea0] hover:text-black">
+                                    <Download className="w-3 h-3 mr-1" />Download
+                                  </Button>
                                   <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url, '_blank')} className="text-gold/90 hover:text-foreground">
                                     <Eye className="w-3 h-3 mr-1" />View
                                   </Button>

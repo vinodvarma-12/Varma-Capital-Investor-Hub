@@ -38,17 +38,23 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [darkMode, setDarkMode] = useState(
+    () => document.documentElement.classList.contains('dark')
+  );
   const [chartTimeline, setChartTimeline] = useState('1Y');
+
+  // Stay in sync with the global theme toggle (Layout toggles html.dark / html.light)
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setDarkMode(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
-
-  useEffect(() => {
-    // Set dark mode based on user preferences, default to true (dark) if not found
-    setDarkMode(user?.preferences?.dark_mode ?? true);
-  }, [user]);
 
   const loadDashboardData = async () => {
     try {
@@ -159,7 +165,7 @@ export default function Dashboard() {
     if (monthsBack < 1) monthsBack = 1;
 
     const months = [];
-    for (let i = monthsBack; i >= 0; i--) {
+    for (let i = monthsBack - 1; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       months.push({
         month: chartTimeline === '5Y' ? format(date, 'MMM yy') : format(date, 'MMM'),
