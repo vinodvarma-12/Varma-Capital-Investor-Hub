@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -41,41 +48,126 @@ import OTPManagement from "@/components/admin/OTPManagement"; // Added OTPManage
 import { sendInvitationEmail } from "@/functions/sendInvitationEmail";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-const InviteInvestorForm = ({ onInvite, onDone }) => {
+const InviteInvestorForm = ({ onInvite, onDone, products = [] }) => {
     const [email, setEmail] = useState('');
     const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [country, setCountry] = useState('');
+    const [investorType, setInvestorType] = useState('');
+    const [productId, setProductId] = useState('');
+    const [committedAmount, setCommittedAmount] = useState('');
+    const [lockInMonths, setLockInMonths] = useState('');
+    const [subscriptionDate, setSubscriptionDate] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-          await onInvite(email, fullName);
-          setEmail('');
-          setFullName('');
-          onDone(); // Close dialog on success
+          await onInvite({
+            email,
+            fullName,
+            phone: phone || null,
+            country: country || null,
+            investorType: investorType || null,
+            productId: productId || null,
+            committedAmount: committedAmount ? Number(committedAmount) : null,
+            lockInMonths: lockInMonths ? Number(lockInMonths) : null,
+            subscriptionDate: subscriptionDate || null,
+          });
+          onDone();
         } catch (error) {
           console.error("Invite form submission failed:", error);
-          // Don't close the form on error, the parent `handleInvite` will show an alert
         } finally {
           setIsSubmitting(false);
         }
     };
 
+    const inputCls = "bg-muted border-[#ccab6c]/20";
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            {/* ── Basic Info ── */}
+            <p className="text-xs font-semibold uppercase tracking-widest text-gold/70 pt-1">Basic Information</p>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Label htmlFor="fullName">Full Name <span className="text-red-400">*</span></Label>
+                    <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} required className={inputCls} placeholder="Jane Doe" />
+                </div>
+                <div>
+                    <Label htmlFor="email">Email <span className="text-red-400">*</span></Label>
+                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className={inputCls} placeholder="jane@example.com" />
+                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={inputCls} placeholder="+1 555 000 0000" />
+                </div>
+                <div>
+                    <Label htmlFor="country">Country of Residence</Label>
+                    <Input id="country" value={country} onChange={e => setCountry(e.target.value)} className={inputCls} placeholder="United Arab Emirates" />
+                </div>
+            </div>
+
+            {/* ── Investor Classification ── */}
+            <p className="text-xs font-semibold uppercase tracking-widest text-gold/70 pt-2">Investor Classification</p>
             <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} required className="bg-muted border-[#ccab6c]/20" />
+                <Label>Investor Type</Label>
+                <Select value={investorType} onValueChange={setInvestorType}>
+                    <SelectTrigger className={inputCls}>
+                        <SelectValue placeholder="Select type…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="individual">Individual</SelectItem>
+                        <SelectItem value="company">Company</SelectItem>
+                        <SelectItem value="trust">Trust</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* ── Investment Details ── */}
+            <p className="text-xs font-semibold uppercase tracking-widest text-gold/70 pt-2">Investment Details</p>
+            <div>
+                <Label>Assigned Product</Label>
+                <Select value={productId} onValueChange={setProductId}>
+                    <SelectTrigger className={inputCls}>
+                        <SelectValue placeholder="Select fund / product…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {products.map(p => (
+                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Label htmlFor="committedAmount">Committed Capital (USD)</Label>
+                    <Input id="committedAmount" type="number" min="0" step="0.01" value={committedAmount} onChange={e => setCommittedAmount(e.target.value)} className={inputCls} placeholder="100,000" />
+                </div>
+                <div>
+                    <Label>Lock-in Period</Label>
+                    <Select value={lockInMonths} onValueChange={setLockInMonths}>
+                        <SelectTrigger className={inputCls}>
+                            <SelectValue placeholder="Select period…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="12">12 Months</SelectItem>
+                            <SelectItem value="24">24 Months</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
             <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-muted border-[#ccab6c]/20"/>
+                <Label htmlFor="subscriptionDate">Subscription Date</Label>
+                <Input id="subscriptionDate" type="date" value={subscriptionDate} onChange={e => setSubscriptionDate(e.target.value)} className={inputCls} />
             </div>
-            <DialogFooter>
+
+            <DialogFooter className="pt-2">
                  <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
                  <Button type="submit" disabled={isSubmitting} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
-                    {isSubmitting ? 'Sending...' : 'Send Invitation'}
+                    {isSubmitting ? 'Sending…' : 'Send Invitation'}
                 </Button>
             </DialogFooter>
         </form>
@@ -118,9 +210,9 @@ export default function AdminInvestors() {
     }
   };
 
-  const handleInvite = async (email, fullName) => {
+  const handleInvite = async (payload) => {
     try {
-        const response = await sendInvitationEmail({ email, fullName });
+        const response = await sendInvitationEmail(payload);
 
         if (response.success === false) {
              const errorMessage = response.error || 'An unknown application error occurred.';
@@ -130,7 +222,7 @@ export default function AdminInvestors() {
 
         alert('Invitation sent successfully!');
         setIsInviteDialogOpen(false);
-        
+
     } catch (error) {
         console.error("Error sending invitation:", error);
         alert(`Failed to send invitation: ${error.message}`);
@@ -200,11 +292,12 @@ export default function AdminInvestors() {
                     Invite Investor
                 </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border border-[#ccab6c]/30">
+            <DialogContent className="bg-card border border-[#ccab6c]/30 sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle className="text-foreground">Invite New Investor</DialogTitle>
+                    <DialogDescription className="text-gold/70">Fill in the investor's details. Only Full Name and Email are required.</DialogDescription>
                 </DialogHeader>
-                <InviteInvestorForm onInvite={handleInvite} onDone={() => setIsInviteDialogOpen(false)} />
+                <InviteInvestorForm onInvite={handleInvite} onDone={() => setIsInviteDialogOpen(false)} products={products} />
             </DialogContent>
           </Dialog>
         </div>

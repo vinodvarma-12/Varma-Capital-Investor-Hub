@@ -33,8 +33,11 @@ import {
   ChevronDown,
   ChevronRight,
   LayoutList,
-  Rows3
+  Rows3,
+  Archive,
+  Loader2
 } from "lucide-react";
+import JSZip from "jszip";
 import { format } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
@@ -432,6 +435,7 @@ export default function AdminDocuments() {
   // Grouped view
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'grouped'
   const [openGroups, setOpenGroups] = useState({});
+  const [zipLoading, setZipLoading] = useState({});
 
   const groupedDocuments = useMemo(() => {
     const groups = {};
@@ -448,6 +452,40 @@ export default function AdminDocuments() {
   };
 
   const isGroupOpen = (key) => openGroups[key] === true;
+
+  const handleDownloadAllZip = async (e, key, docs) => {
+    e.stopPropagation();
+    setZipLoading(prev => ({ ...prev, [key]: true }));
+    try {
+      const zip = new JSZip();
+      await Promise.all(
+        docs.map(async (doc) => {
+          try {
+            const res = await fetch(doc.file_url);
+            const blob = await res.blob();
+            const urlExt = doc.file_url.split('?')[0].split('.').pop() || 'pdf';
+            const safeName = (doc.title || 'document').replace(/[^a-zA-Z0-9_\-. ]/g, '_');
+            zip.file(`${safeName}.${urlExt}`, blob);
+          } catch (err) {
+            console.warn(`Skipping ${doc.title}: ${err.message}`);
+          }
+        })
+      );
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const label = getUploaderLabel(key).replace(/[^a-zA-Z0-9_\- ]/g, '_');
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Varma_Capital_${label}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('ZIP error:', err);
+      alert('Failed to create ZIP. Please try downloading files individually.');
+    } finally {
+      setZipLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
 
   const getUploaderLabel = (key) => {
     if (key === '__unknown__') return 'Unknown / Legacy';
@@ -624,9 +662,22 @@ export default function AdminDocuments() {
                               <p className="text-xs text-muted-foreground">{docs.length} document{docs.length !== 1 ? 's' : ''}</p>
                             </div>
                           </div>
-                          {open
-                            ? <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            : <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handleDownloadAllZip(e, key, docs)}
+                              disabled={zipLoading[key]}
+                              className="text-gold-bright border-[#b38922] hover:bg-[#fedea0] hover:text-black"
+                            >
+                              {zipLoading[key]
+                                ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Zipping…</>
+                                : <><Archive className="w-3 h-3 mr-1" />Download All</>}
+                            </Button>
+                            {open
+                              ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                              : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                          </div>
                         </button>
                         {open && (
                           <div className="border-t border-[#ccab6c]/20">

@@ -58,6 +58,10 @@ Deno.serve(async (req) => {
       investor_id: assignedRole === "investor"
         ? "INV-" + Math.random().toString(36).substring(2, 11).toUpperCase()
         : null,
+      // Copy onboarding fields captured at invite time
+      phone: invitation.phone ?? null,
+      country: invitation.country ?? null,
+      investor_type: invitation.investor_type ?? null,
     }).eq("id", uid);
 
     await admin.from("invitations").update({ status: "accepted" }).eq("id", invitation.id);

@@ -10,6 +10,22 @@ import { AuditLog } from "@/entities/AuditLog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -18,15 +34,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Users, 
-  Package, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Users,
+  Package,
+  DollarSign,
+  TrendingUp,
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Pencil
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -38,6 +55,11 @@ export default function AdminDashboard() {
   const [allocationRequests, setAllocationRequests] = useState([]);
   const [supportTickets, setSupportTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit dialog state
+  const [editingRequest, setEditingRequest] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     loadAdminData();
@@ -64,6 +86,37 @@ export default function AdminDashboard() {
       console.error("Error loading admin data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEditDialog = (request) => {
+    setEditingRequest(request);
+    setEditForm({
+      requested_amount: request.requested_amount ?? '',
+      product_id: request.product_id ?? '',
+      lock_in_months: request.lock_in_months ?? '',
+      subscription_date: request.subscription_date ?? '',
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRequest) return;
+    setIsSavingEdit(true);
+    try {
+      const patch = {
+        requested_amount: parseFloat(editForm.requested_amount),
+        product_id: editForm.product_id || editingRequest.product_id,
+        lock_in_months: editForm.lock_in_months && editForm.lock_in_months !== 'default' ? parseInt(editForm.lock_in_months) : null,
+        subscription_date: editForm.subscription_date || null,
+      };
+      await AllocationRequest.update(editingRequest.id, patch);
+      setEditingRequest(null);
+      loadAdminData();
+    } catch (err) {
+      console.error('Failed to save edits:', err);
+      alert('Failed to save changes: ' + err.message);
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -101,11 +154,14 @@ export default function AdminDashboard() {
             console.warn('No NAV found for product, units will be null');
           }
 
-          // Calculate lock-in end date from product
+          // Use admin-overridden lock-in if set, otherwise fall back to product default
+          const effectiveLockIn = request.lock_in_months ?? product?.lock_in_months ?? null;
+          const startDate = request.subscription_date || today;
+
           let lockInEndDate = null;
-          if (product?.lock_in_months) {
-            const endDate = new Date();
-            endDate.setMonth(endDate.getMonth() + product.lock_in_months);
+          if (effectiveLockIn) {
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + effectiveLockIn);
             lockInEndDate = endDate.toISOString().split('T')[0];
           }
 
@@ -116,8 +172,8 @@ export default function AdminDashboard() {
             invested_amount: request.requested_amount,
             current_units: currentUnits,
             cost_basis: request.requested_amount,
-            purchase_date: today,
-            lock_in_months: product?.lock_in_months || null,
+            purchase_date: startDate,
+            lock_in_months: effectiveLockIn,
             lock_in_end_date: lockInEndDate,
             status: 'active',
           });
@@ -300,27 +356,42 @@ export default function AdminDashboard() {
                   {allocationRequests.slice(0, 5).map((request) => (
                     <div key={request.id} className="border border-[#ccab6c]/25 rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between">
-                        <div>
+                        <div className="space-y-0.5">
                           <p className="font-medium text-foreground">{request.investor_email}</p>
                           <p className="text-sm text-gold/90">
-                            Product: {products.find(p => p.id === request.product_id)?.name}
+                            Product: {products.find(p => p.id === request.product_id)?.name ?? '—'}
                           </p>
                           <p className="text-sm text-gold/90">
                             Amount: ${request.requested_amount?.toLocaleString()}
                           </p>
+                          {request.lock_in_months && (
+                            <p className="text-xs text-muted-foreground">Lock-in: {request.lock_in_months} months</p>
+                          )}
+                          {request.subscription_date && (
+                            <p className="text-xs text-muted-foreground">Sub. date: {request.subscription_date}</p>
+                          )}
                         </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-gold/70 hover:text-foreground"
+                          onClick={() => openEditDialog(request)}
+                        >
+                          <Pencil className="w-3.5 h-3.5 mr-1" />
+                          Edit
+                        </Button>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => handleAllocationRequest(request.id, 'approved')}
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
                           Approve
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           className="border-red-600 text-red-400 hover:bg-red-900"
                           onClick={() => handleAllocationRequest(request.id, 'rejected')}
@@ -385,6 +456,89 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
+
+      {/* Edit Allocation Request Dialog */}
+      <Dialog open={!!editingRequest} onOpenChange={(open) => { if (!open) setEditingRequest(null); }}>
+        <DialogContent className="bg-card border border-[#ccab6c]/30 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Edit Allocation Request</DialogTitle>
+            <p className="text-xs text-muted-foreground pt-1">{editingRequest?.investor_email}</p>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Product */}
+            <div>
+              <Label className="text-foreground/80">Product</Label>
+              <Select
+                value={editForm.product_id}
+                onValueChange={(v) => setEditForm(f => ({ ...f, product_id: v }))}
+              >
+                <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
+                  <SelectValue placeholder="Select product…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.filter(p => p.status === 'active').map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Amount */}
+            <div>
+              <Label className="text-foreground/80">Requested Amount (USD)</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={editForm.requested_amount}
+                onChange={(e) => setEditForm(f => ({ ...f, requested_amount: e.target.value }))}
+                className="bg-muted border-[#ccab6c]/20 mt-1"
+              />
+            </div>
+
+            {/* Lock-in period */}
+            <div>
+              <Label className="text-foreground/80">Lock-in Period Override</Label>
+              <Select
+                value={editForm.lock_in_months ? String(editForm.lock_in_months) : 'default'}
+                onValueChange={(v) => setEditForm(f => ({ ...f, lock_in_months: v === 'default' ? '' : v }))}
+              >
+                <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
+                  <SelectValue placeholder="Use product default…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Use product default</SelectItem>
+                  <SelectItem value="12">12 months</SelectItem>
+                  <SelectItem value="24">24 months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Subscription date */}
+            <div>
+              <Label className="text-foreground/80">Subscription Date</Label>
+              <Input
+                type="date"
+                value={editForm.subscription_date}
+                onChange={(e) => setEditForm(f => ({ ...f, subscription_date: e.target.value }))}
+                className="bg-muted border-[#ccab6c]/20 mt-1"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingRequest(null)}>Cancel</Button>
+            <Button
+              className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+              onClick={handleSaveEdit}
+              disabled={isSavingEdit || !editForm.requested_amount || !editForm.product_id}
+            >
+              {isSavingEdit ? 'Saving…' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

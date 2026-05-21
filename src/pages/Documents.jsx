@@ -22,7 +22,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Download, FileText, Search, Filter, Eye, Calendar, Plus, Upload, ChevronDown, ChevronRight, Users } from "lucide-react";
+import { Download, FileText, Search, Filter, Eye, Calendar, Plus, Upload, ChevronDown, ChevronRight, Users, Archive, Loader2 } from "lucide-react";
+import JSZip from "jszip";
 import { UploadFile } from "@/integrations/Core";
 import { format } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -186,9 +187,45 @@ export default function Documents() {
   }, [filteredDocuments, user]);
 
   const [openGroups, setOpenGroups] = useState({});
+  const [zipLoading, setZipLoading] = useState({}); // key → true while zipping
 
   const toggleGroup = (key) => {
     setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleDownloadAllZip = async (e, key, docs) => {
+    e.stopPropagation(); // don't toggle the accordion
+    setZipLoading(prev => ({ ...prev, [key]: true }));
+    try {
+      const zip = new JSZip();
+      await Promise.all(
+        docs.map(async (doc) => {
+          try {
+            const res = await fetch(doc.file_url);
+            const blob = await res.blob();
+            // derive a safe filename from title + original extension
+            const urlExt = doc.file_url.split('?')[0].split('.').pop() || 'pdf';
+            const safeName = (doc.title || 'document').replace(/[^a-zA-Z0-9_\-. ]/g, '_');
+            zip.file(`${safeName}.${urlExt}`, blob);
+          } catch (err) {
+            console.warn(`Skipping ${doc.title}: ${err.message}`);
+          }
+        })
+      );
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const label = getUploaderLabel(key).replace(/[^a-zA-Z0-9_\- ]/g, '_');
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Varma_Capital_${label}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('ZIP error:', err);
+      alert('Failed to create ZIP. Please try downloading files individually.');
+    } finally {
+      setZipLoading(prev => ({ ...prev, [key]: false }));
+    }
   };
 
   // Default: all groups open (treat missing key as open)
@@ -382,9 +419,22 @@ export default function Documents() {
                         </p>
                       </div>
                     </div>
-                    {open
-                      ? <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      : <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleDownloadAllZip(e, key, docs)}
+                        disabled={zipLoading[key]}
+                        className="text-gold-bright border-[#b38922] hover:bg-[#fedea0] hover:text-black"
+                      >
+                        {zipLoading[key]
+                          ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Zipping…</>
+                          : <><Archive className="w-3 h-3 mr-1" />Download All</>}
+                      </Button>
+                      {open
+                        ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                        : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                    </div>
                   </button>
 
                   {/* Document rows */}

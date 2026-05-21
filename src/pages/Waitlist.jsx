@@ -51,7 +51,7 @@ export default function WaitlistPage() {
     try {
       const submissionData = {
         ...formData,
-        amount_interested: formData.amount_interested ? parseFloat(formData.amount_interested) : null
+        amount_interested: formData.amount_interested || null
       };
 
       // await Waitlist.create(submissionData);
@@ -193,17 +193,22 @@ export default function WaitlistPage() {
               </div>
 
               <div>
-                <Label htmlFor="amount_interested" className="text-foreground/80">Estimated Investment Amount *</Label>
-                <Input
-                  id="amount_interested"
-                  type="number"
+                <Label className="text-foreground/80">Estimated Investment Amount *</Label>
+                <Select
                   value={formData.amount_interested}
-                  onChange={(e) => handleInputChange('amount_interested', e.target.value)}
+                  onValueChange={(value) => handleInputChange('amount_interested', value)}
                   required
-                  className="bg-muted border-[#ccab6c]/20 mt-1"
-                  placeholder="USD"
-                  min="0"
-                />
+                >
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
+                    <SelectValue placeholder="Select a range…" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted border-[#ccab6c]/20 text-foreground">
+                    <SelectItem className="text-foreground" value="$10,000 – $49,999">$10,000 – $49,999</SelectItem>
+                    <SelectItem className="text-foreground" value="$50,000 – $249,999">$50,000 – $249,999</SelectItem>
+                    <SelectItem className="text-foreground" value="$250,000 – $999,999">$250,000 – $999,999</SelectItem>
+                    <SelectItem className="text-foreground" value="$1,000,000+">$1,000,000+</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

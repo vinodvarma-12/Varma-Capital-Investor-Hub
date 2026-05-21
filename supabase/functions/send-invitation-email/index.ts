@@ -34,6 +34,15 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: "Email and Full Name required" }, { status: 400, headers: cors });
     }
 
+    // Optional onboarding fields
+    const phone = body?.phone ? String(body.phone).trim() : null;
+    const country = body?.country ? String(body.country).trim() : null;
+    const investorType = body?.investorType ?? null;
+    const productId = body?.productId ?? null;
+    const committedAmount = body?.committedAmount ? Number(body.committedAmount) : null;
+    const lockInMonths = body?.lockInMonths ? Number(body.lockInMonths) : null;
+    const subscriptionDate = body?.subscriptionDate ?? null;
+
     const token = crypto.randomUUID();
     const { error: dbErr } = await admin.from("invitations").insert({
       email: inviteeEmail,
@@ -41,6 +50,13 @@ Deno.serve(async (req) => {
       invitation_token: token,
       invited_by: profile.email,
       status: "pending",
+      phone,
+      country,
+      investor_type: investorType,
+      product_id: productId,
+      committed_amount: committedAmount,
+      lock_in_months: lockInMonths,
+      subscription_date: subscriptionDate,
     });
     if (dbErr) {
       console.error(dbErr);
