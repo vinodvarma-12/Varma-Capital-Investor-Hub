@@ -9,5 +9,3 @@ invite investor details added ----/
 the admin can now update the fields of the fund request allocation
 
 testing pending
-
-65 to 40 in 50 mins
