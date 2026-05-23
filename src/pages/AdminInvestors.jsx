@@ -3,7 +3,9 @@ import { User } from "@/entities/User";
 import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
+import { FabricatedReturns } from "@/entities/FabricatedReturns";
 import { Invitation } from "@/entities/Invitation";
+import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,44 +128,6 @@ const InviteInvestorForm = ({ onInvite, onDone, products = [] }) => {
                 </Select>
             </div>
 
-            {/* ── Investment Details ── */}
-            <p className="text-xs font-semibold uppercase tracking-widest text-gold/70 pt-2">Investment Details</p>
-            <div>
-                <Label>Assigned Product</Label>
-                <Select value={productId} onValueChange={setProductId}>
-                    <SelectTrigger className={inputCls}>
-                        <SelectValue placeholder="Select fund / product…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {products.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <Label htmlFor="committedAmount">Committed Capital (USD)</Label>
-                    <Input id="committedAmount" type="number" min="0" step="0.01" value={committedAmount} onChange={e => setCommittedAmount(e.target.value)} className={inputCls} placeholder="100,000" />
-                </div>
-                <div>
-                    <Label>Lock-in Period</Label>
-                    <Select value={lockInMonths} onValueChange={setLockInMonths}>
-                        <SelectTrigger className={inputCls}>
-                            <SelectValue placeholder="Select period…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="12">12 Months</SelectItem>
-                            <SelectItem value="24">24 Months</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-            <div>
-                <Label htmlFor="subscriptionDate">Subscription Date</Label>
-                <Input id="subscriptionDate" type="date" value={subscriptionDate} onChange={e => setSubscriptionDate(e.target.value)} className={inputCls} />
-            </div>
-
             <DialogFooter className="pt-2">
                  <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
                  <Button type="submit" disabled={isSubmitting} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
@@ -179,6 +143,7 @@ export default function AdminInvestors() {
   const [investments, setInvestments] = useState([]);
   const [products, setProducts] = useState([]);
   const [navs, setNavs] = useState([]);
+  const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -192,17 +157,19 @@ export default function AdminInvestors() {
   const loadCrmData = async () => {
     setLoading(true);
     try {
-      const [allUsers, allInvestments, productsData, navData] = await Promise.all([
+      const [allUsers, allInvestments, productsData, navData, fabricatedData] = await Promise.all([
         User.list(),
         Investment.list(null, 1000),
         Product.list(),
-        NAV.list('-date', 1000)
+        NAV.list('-date', 1000),
+        FabricatedReturns.list(),
       ]);
       const investorUsers = allUsers.filter(u => u.role === 'investor');
       setInvestors(investorUsers);
       setInvestments(allInvestments);
       setProducts(productsData);
       setNavs(navData);
+      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading CRM data:", error);
     } finally {
@@ -230,23 +197,84 @@ export default function AdminInvestors() {
     }
   };
 
+  // Parse date string as local date to avoid UTC timezone shifts
+  const parseLocalDate = (dateStr) => {
+    if (!dateStr) return null;
+    const s = typeof dateStr === 'string' ? dateStr.slice(0, 10) : String(dateStr);
+    const [year, month, day] = s.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  // Calculate prorated current value for a single investment
+  const getAdjustedCurrentValue = (investment) => {
+    if (!investment.invested_amount) return 0;
+
+    const productNavs = navs
+      .filter(n => n.product_id === investment.product_id)
+      .sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+    if (productNavs.length < 2) return investment.invested_amount;
+
+    const overrides = fabricatedReturns.filter(
+      fr => fr.investor_email === investment.investor_email && fr.product_id === investment.product_id
+    );
+
+    const purchaseDate = investment.purchase_date
+      ? parseLocalDate(investment.purchase_date)
+      : parseLocalDate(productNavs[0].date);
+
+    let value = investment.invested_amount;
+
+    for (let i = 1; i < productNavs.length; i++) {
+      const prevNav = productNavs[i - 1];
+      const currNav = productNavs[i];
+      const prevDate = parseLocalDate(prevNav.date);
+      const currDate = parseLocalDate(currNav.date);
+
+      if (currDate <= purchaseDate) continue;
+
+      const prevNavUnit = parseFloat(prevNav.nav_per_unit) || 0;
+      const currNavUnit = parseFloat(currNav.nav_per_unit) || 0;
+      const officialReturn = prevNavUnit > 0
+        ? ((currNavUnit - prevNavUnit) / prevNavUnit) * 100
+        : parseFloat(currNav.return_percent) || 0;
+
+      const periodKey = format(prevDate, 'yyyy-MM');
+      const override = overrides.find(fr =>
+        fr.period === periodKey ||
+        (fr.effective_date && fr.effective_date.slice(0, 7) === periodKey)
+      );
+
+      let returnPct;
+      if (override) {
+        returnPct = (override.return_percent || 0) / 100;
+      } else if (purchaseDate > prevDate && purchaseDate < currDate) {
+        const totalPeriodDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+        const daysInFund = Math.round((currDate - purchaseDate) / (1000 * 60 * 60 * 24));
+        returnPct = totalPeriodDays > 0
+          ? (officialReturn * (daysInFund / totalPeriodDays)) / 100
+          : 0;
+      } else {
+        returnPct = officialReturn / 100;
+      }
+
+      value = value * (1 + returnPct);
+    }
+
+    return Math.round(value * 100) / 100;
+  };
+
   const getInvestorMetrics = (investorEmail) => {
-    const investorInvestments = investments.filter(i => i.investor_email === investorEmail);
-    const totalInvested = investorInvestments.reduce((sum, i) => sum + (i.invested_amount || 0), 0);
-
-    const currentValue = investorInvestments.reduce((sum, i) => {
-        const latestNav = navs.find(n => n.product_id === i.product_id);
-        const navValue = (i.current_units || 0) * (latestNav?.nav_per_unit || 1);
-        return sum + navValue;
-    }, 0);
-
+    const investorInvestments = investments.filter(i => i.investor_email === investorEmail && i.status === 'active');
+    const totalInvested = investorInvestments.reduce((sum, i) => sum + (parseFloat(i.invested_amount) || 0), 0);
+    const currentValue = investorInvestments.reduce((sum, i) => sum + getAdjustedCurrentValue(i), 0);
     const pnl = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested) * 100 : 0;
 
     const lockInDates = investorInvestments
-        .map(i => i.lock_in_end_date)
-        .filter(Boolean)
-        .map(d => new Date(d))
-        .filter(d => d > new Date());
+      .map(i => i.lock_in_end_date)
+      .filter(Boolean)
+      .map(d => new Date(d))
+      .filter(d => d > new Date());
 
     const nextLockIn = lockInDates.length > 0 ? Math.min(...lockInDates) : null;
 
@@ -381,6 +409,7 @@ export default function AdminInvestors() {
                   investments={investments.filter(i => i.investor_email === selectedInvestor.email)}
                   products={products}
                   navs={navs}
+                  fabricatedReturns={fabricatedReturns.filter(fr => fr.investor_email === selectedInvestor.email)}
                   onDataChange={loadCrmData}
                   additionalTabs={[
                     {

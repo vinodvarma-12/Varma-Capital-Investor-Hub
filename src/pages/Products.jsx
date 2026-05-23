@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Product } from "@/entities/Product";
+import { ProductAccess } from "@/entities/ProductAccess";
 import { AllocationRequest } from "@/entities/AllocationRequest";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,19 @@ export default function Products() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [requestAmount, setRequestAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const openDialog = (product) => {
+    setSelectedProduct(product);
+    setRequestAmount('');
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedProduct(null);
+    setRequestAmount('');
+  };
 
   useEffect(() => {
     loadData();
@@ -34,8 +48,17 @@ export default function Products() {
       const userData = await User.me();
       setUser(userData);
 
-      const productsData = await Product.filter({ status: 'active' });
-      setProducts(productsData);
+      const [allProductsData, accessData] = await Promise.all([
+        Product.list('-created_date'),
+        ProductAccess.filter({ investor_email: userData.email }),
+      ]);
+
+      // Rules:
+      // - suspended / closed  → hidden from investors entirely
+      // - active + public     → show with "Request Allocation" button
+      // - active + private    → show as "Coming Soon" teaser, no allocation button
+      const visibleProducts = allProductsData.filter(p => p.status === 'active');
+      setProducts(visibleProducts);
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -56,8 +79,7 @@ export default function Products() {
         requested_amount: parseFloat(requestAmount)
       });
       
-      setSelectedProduct(null);
-      setRequestAmount('');
+      closeDialog();
       alert('Allocation request submitted successfully! You will be notified once reviewed.');
     } catch (error) {
       console.error("Error submitting allocation request:", error);
@@ -71,6 +93,7 @@ export default function Products() {
     const colors = {
       low: 'bg-green-900 text-green-400 border-green-700',
       medium: 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45',
+      medium_high: 'bg-orange-900/60 text-orange-300 border-orange-700/60',
       high: 'bg-orange-900 text-orange-400 border-orange-700',
       very_high: 'bg-red-900 text-red-400 border-red-700'
     };
@@ -93,25 +116,20 @@ export default function Products() {
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <Card key={product.id} className="bg-card border border-[#ccab6c]/30 relative overflow-hidden">
-              {/* Locked Overlay — only shown for private products */}
-              {!product.is_public && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-muted border-2 border-[#b38922]/50 flex items-center justify-center mb-4">
-                    <Lock className="w-8 h-8 text-gold-bright" />
-                  </div>
-                  <p className="text-white font-semibold text-lg">Coming Soon</p>
-                  <p className="text-white/70 text-sm mt-1">Contact admin to unlock</p>
-                </div>
-              )}
+            <Card key={product.id} className={`bg-card border border-[#ccab6c]/30 relative overflow-hidden ${!product.is_public ? 'opacity-80' : ''}`}>
 
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
-                    <CardTitle className="text-foreground text-xl">{product.name}</CardTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <CardTitle className="text-foreground text-xl">{product.name}</CardTitle>
+                      {!product.is_public && (
+                        <Badge className="bg-blue-900/60 text-blue-300 border-blue-700/60 text-xs">Coming Soon</Badge>
+                      )}
+                    </div>
                     <Badge className={getRiskBadgeColor(product.risk_band)}>
                       <Shield className="w-3 h-3 mr-1" />
-                      {product.risk_band?.replace('_', ' ').toUpperCase()} RISK
+                      {product.risk_band?.replace(/_/g, '-').toUpperCase()} RISK
                     </Badge>
                   </div>
                   <Package className="w-8 h-8 text-gold-bright" />
@@ -123,6 +141,13 @@ export default function Products() {
                 <p className="text-foreground/80 text-sm leading-relaxed">
                   {product.description}
                 </p>
+
+                {/* Strategy */}
+                {product.strategy && (
+                  <div className="text-xs text-gold/80 bg-[#ccab6c]/10 border border-[#ccab6c]/20 rounded px-3 py-1.5">
+                    <span className="font-semibold text-gold-bright">Strategy: </span>{product.strategy}
+                  </div>
+                )}
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-4">
@@ -190,75 +215,22 @@ export default function Products() {
                 </div>
 
                 {/* CTA Button */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="w-full bg-[#fedea0] hover:bg-[#ccab6c] text-black font-semibold"
-                      onClick={() => setSelectedProduct(product)}
-                    >
-                      Request Allocation
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-card border border-[#ccab6c]/30">
-                    <DialogHeader>
-                      <DialogTitle className="text-foreground">
-                        Request Allocation - {selectedProduct?.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                      <div className="space-y-2">
-                        <Label className="text-foreground/80">Investment Amount (USD)</Label>
-                        <Input
-                          type="number"
-                          placeholder="Enter amount"
-                          value={requestAmount}
-                          onChange={(e) => setRequestAmount(e.target.value)}
-                          min={selectedProduct?.minimum_ticket}
-                          className="bg-muted border-[#ccab6c]/20 text-foreground"
-                        />
-                        {selectedProduct && (
-                          <p className="text-xs text-gold/90">
-                            Minimum investment: ${selectedProduct.minimum_ticket?.toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="bg-muted rounded-lg p-4 space-y-2">
-                        <h4 className="font-semibold text-foreground">Important Information:</h4>
-                        <ul className="text-sm text-foreground/80 space-y-1">
-                          <li>• This is a request and requires admin approval</li>
-                          <li>• Funds will be locked for {selectedProduct?.lock_in_months} months</li>
-                          <li>• Management fee: {selectedProduct?.management_fee_percent}% per annum</li>
-                          <li>• You will be notified once your request is reviewed</li>
-                        </ul>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <Button 
-                          variant="outline" 
-                          className="flex-1 border-border text-foreground/80"
-                          onClick={() => {
-                            setSelectedProduct(null);
-                            setRequestAmount('');
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          className="flex-1 bg-[#fedea0] hover:bg-[#ccab6c] text-black"
-                          onClick={handleAllocationRequest}
-                          disabled={
-                            isSubmitting || 
-                            !requestAmount || 
-                            parseFloat(requestAmount) < (selectedProduct?.minimum_ticket || 0)
-                          }
-                        >
-                          {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {!product.is_public ? (
+                  <Button
+                    className="w-full bg-muted text-muted-foreground font-semibold cursor-not-allowed"
+                    disabled
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Coming Soon
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full bg-[#fedea0] hover:bg-[#ccab6c] text-black font-semibold"
+                    onClick={() => openDialog(product)}
+                  >
+                    Request Allocation
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -272,6 +244,66 @@ export default function Products() {
           </div>
         )}
       </div>
+
+      {/* Single controlled allocation dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) closeDialog(); }}>
+        <DialogContent className="bg-card border border-[#ccab6c]/30">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">
+              Request Allocation — {selectedProduct?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label className="text-foreground/80">Investment Amount (USD)</Label>
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                value={requestAmount}
+                onChange={(e) => setRequestAmount(e.target.value)}
+                min={selectedProduct?.minimum_ticket}
+                className="bg-muted border-[#ccab6c]/20 text-foreground"
+              />
+              {selectedProduct && (
+                <p className="text-xs text-gold/90">
+                  Minimum investment: ${selectedProduct.minimum_ticket?.toLocaleString()}
+                </p>
+              )}
+            </div>
+
+            <div className="bg-muted rounded-lg p-4 space-y-2">
+              <h4 className="font-semibold text-foreground">Important Information:</h4>
+              <ul className="text-sm text-foreground/80 space-y-1">
+                <li>• This is a request and requires admin approval</li>
+                <li>• Funds will be locked for {selectedProduct?.lock_in_months} months</li>
+                <li>• Management fee: {selectedProduct?.management_fee_percent}% per annum</li>
+                <li>• You will be notified once your request is reviewed</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 border-border text-foreground/80"
+                onClick={closeDialog}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-[#fedea0] hover:bg-[#ccab6c] text-black"
+                onClick={handleAllocationRequest}
+                disabled={
+                  isSubmitting ||
+                  !requestAmount ||
+                  parseFloat(requestAmount) < (selectedProduct?.minimum_ticket || 0)
+                }
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

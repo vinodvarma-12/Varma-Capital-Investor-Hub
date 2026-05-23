@@ -3,6 +3,7 @@ import { User } from "@/entities/User";
 import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
+import { FabricatedReturns } from "@/entities/FabricatedReturns";
 import { Transaction } from "@/entities/Transaction";
 import { Document } from "@/entities/Document";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [investments, setInvestments] = useState([]);
   const [products, setProducts] = useState([]);
   const [navData, setNavData] = useState([]);
+  const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,12 +63,13 @@ export default function Dashboard() {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, productsData, navResults, transactionsData, documentsData] = await Promise.all([
+      const [investmentsData, productsData, navResults, transactionsData, documentsData, fabricatedData] = await Promise.all([
         Investment.filter({ investor_email: userData.email }),
         Product.list(),
         NAV.list('-date', 100),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 10),
         Document.filter({ investor_email: userData.email }, '-created_date', 5),
+        FabricatedReturns.filter({ investor_email: userData.email }),
       ]);
 
       setInvestments(investmentsData);
@@ -74,6 +77,7 @@ export default function Dashboard() {
       setNavData(navResults);
       setTransactions(transactionsData);
       setDocuments(documentsData);
+      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     } finally {
@@ -81,21 +85,89 @@ export default function Dashboard() {
     }
   };
 
-  // Calculate valuation for a single investment using NAV
-  const calculateInvestmentValue = (investment) => {
-    const invested = investment.invested_amount || 0;
-    const units = investment.current_units || 0;
+  // Parse date string as local date — avoids UTC timezone shifts
+  const parseLocalDate = (dateStr) => {
+    if (!dateStr) return null;
+    const s = typeof dateStr === 'string' ? dateStr.slice(0, 10) : String(dateStr);
+    const [year, month, day] = s.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
 
-    const latestNav = navData.find(nav => nav.product_id === investment.product_id);
-    if (latestNav && units > 0) {
-      const currentValue = units * latestNav.nav_per_unit;
-      const pnl = currentValue - invested;
-      const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
-      return { currentValue, pnl, pnlPercent, source: 'nav' };
+  // Calculate prorated current value — accounts for mid-month joins and overrides
+  const getAdjustedCurrentValue = (investment) => {
+    const invested = parseFloat(investment.invested_amount) || 0;
+    if (!invested) return null;
+
+    const productNavs = navData
+      .filter(n => n.product_id === investment.product_id)
+      .sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+    // No NAV at all → pending
+    if (productNavs.length === 0) return null;
+    // Only inception record → no return yet, show invested amount
+    if (productNavs.length < 2) return invested;
+
+    const overrides = fabricatedReturns.filter(
+      fr => fr.product_id === investment.product_id
+    );
+
+    const purchaseDate = investment.purchase_date
+      ? parseLocalDate(investment.purchase_date)
+      : parseLocalDate(productNavs[0].date);
+
+    let value = invested;
+
+    for (let i = 1; i < productNavs.length; i++) {
+      const prevNav = productNavs[i - 1];
+      const currNav = productNavs[i];
+      const prevDate = parseLocalDate(prevNav.date);
+      const currDate = parseLocalDate(currNav.date);
+
+      if (currDate <= purchaseDate) continue;
+
+      const prevNavUnit = parseFloat(prevNav.nav_per_unit) || 0;
+      const currNavUnit = parseFloat(currNav.nav_per_unit) || 0;
+      const officialReturn = prevNavUnit > 0
+        ? ((currNavUnit - prevNavUnit) / prevNavUnit) * 100
+        : parseFloat(currNav.return_percent) || 0;
+
+      const periodKey = format(prevDate, 'yyyy-MM');
+      const override = overrides.find(fr =>
+        fr.period === periodKey ||
+        (fr.effective_date && fr.effective_date.slice(0, 7) === periodKey)
+      );
+
+      let returnPct;
+      if (override) {
+        returnPct = (override.return_percent || 0) / 100;
+      } else if (purchaseDate > prevDate && purchaseDate < currDate) {
+        const totalPeriodDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+        const daysInFund = Math.round((currDate - purchaseDate) / (1000 * 60 * 60 * 24));
+        returnPct = totalPeriodDays > 0
+          ? (officialReturn * (daysInFund / totalPeriodDays)) / 100
+          : 0;
+      } else {
+        returnPct = officialReturn / 100;
+      }
+
+      value = value * (1 + returnPct);
     }
 
-    // No NAV data → Data Pending
-    return { currentValue: null, pnl: null, pnlPercent: null, source: 'pending' };
+    return Math.round(value * 100) / 100;
+  };
+
+  // Calculate valuation for a single investment using prorated NAV
+  const calculateInvestmentValue = (investment) => {
+    const invested = parseFloat(investment.invested_amount) || 0;
+    const currentValue = getAdjustedCurrentValue(investment);
+
+    if (currentValue === null) {
+      return { currentValue: null, pnl: null, pnlPercent: null, source: 'pending' };
+    }
+
+    const pnl = currentValue - invested;
+    const pnlPercent = invested > 0 ? (pnl / invested) * 100 : 0;
+    return { currentValue, pnl, pnlPercent, source: 'nav' };
   };
 
   const calculatePortfolioMetrics = () => {
@@ -149,30 +221,102 @@ export default function Dashboard() {
     return upcomingExpiries[0] || null;
   };
 
+  // Calculate this investment's compounded value at a specific past date (inclusive)
+  const getValueAtDate = (investment, targetDate) => {
+    const invested = parseFloat(investment.invested_amount) || 0;
+    if (!invested) return 0;
+
+    const purchaseDate = investment.purchase_date ? parseLocalDate(investment.purchase_date) : null;
+    // If the investor hadn't joined yet at this date, contribute 0
+    if (purchaseDate && purchaseDate > targetDate) return 0;
+
+    // Only NAV records on or before targetDate, sorted oldest → newest
+    const productNavs = navData
+      .filter(n => n.product_id === investment.product_id && parseLocalDate(n.date) <= targetDate)
+      .sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+    if (productNavs.length < 2) return invested;
+
+    const overrides = fabricatedReturns.filter(fr => fr.product_id === investment.product_id);
+    const effectivePurchase = purchaseDate || parseLocalDate(productNavs[0].date);
+
+    let value = invested;
+
+    for (let i = 1; i < productNavs.length; i++) {
+      const prevNav = productNavs[i - 1];
+      const currNav = productNavs[i];
+      const prevDate = parseLocalDate(prevNav.date);
+      const currDate = parseLocalDate(currNav.date);
+
+      if (currDate <= effectivePurchase) continue;
+
+      const prevNavUnit = parseFloat(prevNav.nav_per_unit) || 0;
+      const currNavUnit = parseFloat(currNav.nav_per_unit) || 0;
+      const officialReturn = prevNavUnit > 0
+        ? ((currNavUnit - prevNavUnit) / prevNavUnit) * 100
+        : parseFloat(currNav.return_percent) || 0;
+
+      const periodKey = format(prevDate, 'yyyy-MM');
+      const override = overrides.find(fr =>
+        fr.period === periodKey ||
+        (fr.effective_date && fr.effective_date.slice(0, 7) === periodKey)
+      );
+
+      let returnPct;
+      if (override) {
+        returnPct = (override.return_percent || 0) / 100;
+      } else if (effectivePurchase > prevDate && effectivePurchase < currDate) {
+        const totalPeriodDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+        const daysInFund = Math.round((currDate - effectivePurchase) / (1000 * 60 * 60 * 24));
+        returnPct = totalPeriodDays > 0
+          ? (officialReturn * (daysInFund / totalPeriodDays)) / 100
+          : 0;
+      } else {
+        returnPct = officialReturn / 100;
+      }
+
+      value = value * (1 + returnPct);
+    }
+
+    return Math.round(value * 100) / 100;
+  };
+
   const getPortfolioChartData = () => {
-    const currentDate = new Date();
-    let monthsBack;
+    if (!investments.length || !navData.length) return [];
 
+    const productIds = [...new Set(investments.map(inv => inv.product_id))];
+    const relevantNavs = navData.filter(n => productIds.includes(n.product_id));
+
+    // Unique NAV dates sorted oldest → newest
+    const navDates = [...new Set(relevantNavs.map(n => n.date))]
+      .map(d => parseLocalDate(d))
+      .sort((a, b) => a - b);
+
+    if (navDates.length === 0) return [];
+
+    // Determine cutoff date based on selected timeline
+    const now = new Date();
+    let cutoffDate;
     switch (chartTimeline) {
-      case '6M':  monthsBack = 6;  break;
-      case 'YTD': monthsBack = currentDate.getMonth(); break; // months since Jan 1
-      case '5Y':  monthsBack = 60; break;
+      case '6M':  cutoffDate = new Date(now.getFullYear(), now.getMonth() - 6, 1);  break;
+      case 'YTD': cutoffDate = new Date(now.getFullYear(), 0, 1);                   break;
+      case '5Y':  cutoffDate = new Date(now.getFullYear() - 5, now.getMonth(), 1);  break;
       case '1Y':
-      default:    monthsBack = 12; break;
+      default:    cutoffDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);  break;
     }
 
-    // Ensure at least 1 data point
-    if (monthsBack < 1) monthsBack = 1;
+    // Include one data point before the cutoff if available (anchors the left edge)
+    const cutoffIndex = navDates.findIndex(d => d >= cutoffDate);
+    const startIndex = cutoffIndex > 0 ? cutoffIndex - 1 : 0;
+    const visibleDates = navDates.slice(startIndex);
 
-    const months = [];
-    for (let i = monthsBack - 1; i >= 0; i--) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      months.push({
-        month: chartTimeline === '5Y' ? format(date, 'MMM yy') : format(date, 'MMM'),
-        value: Math.random() * 50000 + 100000, // Sample data — replace with real NAV later
-      });
-    }
-    return months;
+    return visibleDates.map(date => {
+      const totalValue = investments.reduce((sum, inv) => sum + getValueAtDate(inv, date), 0);
+      return {
+        month: format(date, 'MMM yy'),
+        value: Math.round(totalValue),
+      };
+    });
   };
 
   const getAllocationData = () => {
@@ -384,12 +528,26 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
+                {chartData.length < 2 ? (
+                  <div className="h-full flex flex-col items-center justify-center gap-2">
+                    <p className={`text-sm ${bodyMuted}`}>Not enough NAV data to plot a chart yet.</p>
+                    <p className={`text-xs ${bodyMuted} opacity-60`}>Data will appear once at least two monthly NAV records exist for your fund.</p>
+                  </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke={`${GOLD_MID}33`} />
                     <XAxis dataKey="month" stroke={GOLD_MID} tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }} />
-                    <YAxis stroke={GOLD_MID} tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }} />
-                    <Tooltip contentStyle={tooltipStyle} />
+                    <YAxis
+                      stroke={GOLD_MID}
+                      tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }}
+                      tickFormatter={(v) => `$${(v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)}`}
+                      width={60}
+                    />
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Portfolio Value']}
+                    />
                     <Line
                       type="monotone"
                       dataKey="value"
@@ -400,6 +558,7 @@ export default function Dashboard() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                )}
               </div>
             </CardContent>
           </Card>

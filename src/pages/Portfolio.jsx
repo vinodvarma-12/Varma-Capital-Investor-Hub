@@ -4,6 +4,8 @@ import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
 import { Transaction } from "@/entities/Transaction";
+import { FabricatedReturns } from "@/entities/FabricatedReturns";
+import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ export default function Portfolio() {
   const [products, setProducts] = useState([]);
   const [navData, setNavData] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,17 +40,30 @@ export default function Portfolio() {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, productsData, navResults, transactionsData] = await Promise.all([
+      const [investmentsData, navResults, transactionsData, fabricatedData] = await Promise.all([
         Investment.filter({ investor_email: userData.email }),
-        Product.list(),
         NAV.list('-date', 200),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 50),
+        FabricatedReturns.filter({ investor_email: userData.email }),
       ]);
+
+      // Fetch products by the exact IDs in this investor's investments
+      // — avoids RLS filtering out products that aren't "visible" but still need their name
+      const productIds = [...new Set(investmentsData.map(inv => inv.product_id).filter(Boolean))];
+      let productsData = [];
+      if (productIds.length > 0) {
+        const { data } = await supabase
+          .from('products')
+          .select('id, name, status')
+          .in('id', productIds);
+        productsData = data ?? [];
+      }
 
       setInvestments(investmentsData);
       setProducts(productsData);
       setNavData(navResults);
       setTransactions(transactionsData);
+      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading portfolio data:", error);
     } finally {
@@ -60,16 +76,90 @@ export default function Portfolio() {
     return product?.name || 'Unknown Product';
   };
 
-  const getCurrentValue = (investment) => {
-    const latestNav = navData.find(nav => nav.product_id === investment.product_id);
-    if (latestNav && investment.current_units) {
-      return investment.current_units * latestNav.nav_per_unit;
+  // Parse a date string (YYYY-MM-DD or ISO) as a LOCAL date — avoids UTC timezone shifts
+  const parseLocalDate = (dateStr) => {
+    if (!dateStr) return null;
+    const s = typeof dateStr === 'string' ? dateStr.slice(0, 10) : String(dateStr);
+    const [year, month, day] = s.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  // Returns the adjusted current value for an investment, accounting for:
+  // - Mid-month joins (prorated return for the first period)
+  // - Per-investor overrides (fabricated_returns)
+  // - Full monthly returns for all subsequent periods
+  const getAdjustedCurrentValue = (investment) => {
+    if (!investment.invested_amount) return 0;
+
+    // Get all NAV records for this product, sorted oldest → newest
+    const productNavs = navData
+      .filter(n => n.product_id === investment.product_id)
+      .sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+    // If no NAV records at all, return invested amount
+    if (productNavs.length === 0) return investment.invested_amount;
+
+    // If only inception record (1 record), return invested amount — no return period yet
+    if (productNavs.length < 2) return investment.invested_amount;
+
+    // Overrides for this investor + product
+    const overrides = fabricatedReturns.filter(
+      fr => fr.product_id === investment.product_id
+    );
+
+    const purchaseDate = investment.purchase_date
+      ? parseLocalDate(investment.purchase_date)
+      : parseLocalDate(productNavs[0].date); // fallback to inception date
+
+    let value = investment.invested_amount;
+
+    for (let i = 1; i < productNavs.length; i++) {
+      const prevNav = productNavs[i - 1];
+      const currNav = productNavs[i];
+      const prevDate = parseLocalDate(prevNav.date);
+      const currDate = parseLocalDate(currNav.date);
+
+      // Skip periods that ended before or on the day this investment started
+      if (currDate <= purchaseDate) continue;
+
+      // Official return for this period — calculated from actual NAV values
+      const prevNavUnit = parseFloat(prevNav.nav_per_unit) || 0;
+      const currNavUnit = parseFloat(currNav.nav_per_unit) || 0;
+      const officialReturn = prevNavUnit > 0
+        ? ((currNavUnit - prevNavUnit) / prevNavUnit) * 100
+        : parseFloat(currNav.return_percent) || 0;
+
+      // Check if there's an admin override for this period
+      const periodKey = format(prevDate, 'yyyy-MM');
+      const override = overrides.find(fr =>
+        fr.period === periodKey ||
+        (fr.effective_date && fr.effective_date.slice(0, 7) === periodKey)
+      );
+
+      let returnPct;
+      if (override) {
+        // Admin-set override takes priority
+        returnPct = (override.return_percent || 0) / 100;
+      } else if (purchaseDate > prevDate && purchaseDate < currDate) {
+        // Investor joined mid-period — auto-prorate by days
+        const totalPeriodDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+        const daysInFund = Math.round((currDate - purchaseDate) / (1000 * 60 * 60 * 24));
+        returnPct = totalPeriodDays > 0
+          ? (officialReturn * (daysInFund / totalPeriodDays)) / 100
+          : 0;
+      } else {
+        // Full period — apply the official return
+        returnPct = officialReturn / 100;
+      }
+
+      value = value * (1 + returnPct);
     }
-    return investment.invested_amount || 0;
+
+    return Math.round(value * 100) / 100;
   };
 
   const getPnL = (investment) => {
-    const currentValue = getCurrentValue(investment);
+    const currentValue = getAdjustedCurrentValue(investment);
     const investedAmount = investment.invested_amount || 0;
     return {
       amount: currentValue - investedAmount,
@@ -85,7 +175,7 @@ export default function Portfolio() {
   const enrichedInvestments = investments.map(investment => ({
     ...investment,
     productName: getProductName(investment.product_id),
-    currentValue: getCurrentValue(investment),
+    currentValue: getAdjustedCurrentValue(investment),
     pnl: getPnL(investment),
     locked: isLocked(investment)
   }));

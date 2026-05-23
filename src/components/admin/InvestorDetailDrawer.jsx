@@ -5,6 +5,7 @@ import { LockInOverrides } from "@/entities/LockInOverrides";
 import { AuditLog } from "@/entities/AuditLog";
 import { Transaction } from "@/entities/Transaction";
 import { Document } from "@/entities/Document";
+import { ProductAccess } from "@/entities/ProductAccess";
 import { SupportTicket } from "@/entities/SupportTicket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +58,7 @@ import {
   LifeBuoy,
   Download,
   PlusCircle,
+  Package,
 } from "lucide-react";
 import {
   EditAmountModal,
@@ -115,13 +118,81 @@ const TableShell = ({ children }) => (
 
 const getProductName = (products, id) => products.find(p => p.id === id)?.name || 'Unknown';
 
-const computeHoldingValue = (investment, navs) => {
-  const invested = investment.invested_amount || 0;
-  const latestNav = navs?.find(n => n.product_id === investment.product_id);
-  const currentValue = (investment.current_units || 0) * (latestNav?.nav_per_unit || 1);
+// Parse date string as local date to avoid UTC timezone shifts
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return null;
+  const s = typeof dateStr === 'string' ? dateStr.slice(0, 10) : String(dateStr);
+  const [year, month, day] = s.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+// Prorated holding value — accounts for mid-month joins and per-investor overrides
+const computeHoldingValue = (investment, navs, fabricatedReturns = []) => {
+  const invested = parseFloat(investment.invested_amount) || 0;
+
+  const productNavs = (navs || [])
+    .filter(n => n.product_id === investment.product_id)
+    .sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
+
+  // No NAV records at all — show cost, mark as no-nav
+  if (productNavs.length === 0) {
+    return { currentValue: invested, pnlAmount: 0, pnlPercent: 0, hasNav: false };
+  }
+  // Only inception record — no return period yet
+  if (productNavs.length < 2) {
+    return { currentValue: invested, pnlAmount: 0, pnlPercent: 0, hasNav: false };
+  }
+
+  const overrides = fabricatedReturns.filter(
+    fr => fr.investor_email === investment.investor_email && fr.product_id === investment.product_id
+  );
+
+  const purchaseDate = investment.purchase_date
+    ? parseLocalDate(investment.purchase_date)
+    : parseLocalDate(productNavs[0].date);
+
+  let value = invested;
+
+  for (let i = 1; i < productNavs.length; i++) {
+    const prevNav = productNavs[i - 1];
+    const currNav = productNavs[i];
+    const prevDate = parseLocalDate(prevNav.date);
+    const currDate = parseLocalDate(currNav.date);
+
+    if (currDate <= purchaseDate) continue;
+
+    const prevNavUnit = parseFloat(prevNav.nav_per_unit) || 0;
+    const currNavUnit = parseFloat(currNav.nav_per_unit) || 0;
+    const officialReturn = prevNavUnit > 0
+      ? ((currNavUnit - prevNavUnit) / prevNavUnit) * 100
+      : parseFloat(currNav.return_percent) || 0;
+
+    const periodKey = format(prevDate, 'yyyy-MM');
+    const override = overrides.find(fr =>
+      fr.period === periodKey ||
+      (fr.effective_date && fr.effective_date.slice(0, 7) === periodKey)
+    );
+
+    let returnPct;
+    if (override) {
+      returnPct = (override.return_percent || 0) / 100;
+    } else if (purchaseDate > prevDate && purchaseDate < currDate) {
+      const totalPeriodDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+      const daysInFund = Math.round((currDate - purchaseDate) / (1000 * 60 * 60 * 24));
+      returnPct = totalPeriodDays > 0
+        ? (officialReturn * (daysInFund / totalPeriodDays)) / 100
+        : 0;
+    } else {
+      returnPct = officialReturn / 100;
+    }
+
+    value = value * (1 + returnPct);
+  }
+
+  const currentValue = Math.round(value * 100) / 100;
   const pnlAmount = currentValue - invested;
   const pnlPercent = invested > 0 ? (pnlAmount / invested) * 100 : 0;
-  return { currentValue, pnlAmount, pnlPercent };
+  return { currentValue, pnlAmount, pnlPercent, hasNav: true };
 };
 
 const isLocked = (investment) => {
@@ -145,7 +216,7 @@ const AuditChanges = ({ changes }) => {
   );
 };
 
-const OverviewTab = ({ investor, investments, products, navs, onDataChange }) => {
+const OverviewTab = ({ investor, investments, products, navs, fabricatedReturns = [], onDataChange }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -166,10 +237,10 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
   }, []);
 
   useEffect(() => {
-    const totalInvested = investments.reduce((sum, i) => sum + (i.invested_amount || 0), 0);
+    const totalInvested = investments.reduce((sum, i) => sum + (parseFloat(i.invested_amount) || 0), 0);
     const currentValue = investments.reduce((sum, i) => {
-      const latestNav = navs?.find(n => n.product_id === i.product_id);
-      return sum + ((i.current_units || 0) * (latestNav?.nav_per_unit || 1));
+      const { currentValue: cv } = computeHoldingValue(i, navs, fabricatedReturns);
+      return sum + cv;
     }, 0);
     const pnlPercent = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested) * 100 : 0;
 
@@ -393,6 +464,175 @@ const OverviewTab = ({ investor, investments, products, navs, onDataChange }) =>
   );
 };
 
+// ── Product Access Tab ──────────────────────────────────────────────────────
+
+const ProductAccessTab = ({ investor, products, onDataChange }) => {
+  const [accessList, setAccessList] = useState([]);
+  const [loadingAccess, setLoadingAccess] = useState(true);
+  const [isGrantOpen, setIsGrantOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const loadAccess = async () => {
+    setLoadingAccess(true);
+    try {
+      const data = await ProductAccess.filter({ investor_email: investor.email });
+      setAccessList(data);
+    } catch (e) {
+      console.error('Error loading product access:', e);
+    } finally {
+      setLoadingAccess(false);
+    }
+  };
+
+  useEffect(() => { loadAccess(); }, [investor.email]);
+
+  const accessProductIds = new Set(accessList.map(a => a.product_id));
+  const availableProducts = products.filter(p => !accessProductIds.has(p.id));
+
+  const handleGrant = async () => {
+    if (!selectedProductId) return;
+    setSaving(true);
+    try {
+      const currentUser = await User.me();
+      await ProductAccess.grant({
+        investor_email: investor.email,
+        product_id: selectedProductId,
+        granted_by: currentUser.email,
+      });
+      setIsGrantOpen(false);
+      setSelectedProductId('');
+      loadAccess();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to grant access: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRevoke = async (productId) => {
+    if (!window.confirm('Revoke this investor\'s access to the product?')) return;
+    try {
+      await ProductAccess.revoke({ investor_email: investor.email, product_id: productId });
+      loadAccess();
+    } catch (e) {
+      console.error(e);
+      alert('Failed to revoke access: ' + e.message);
+    }
+  };
+
+  return (
+    <>
+      <TabCard
+        title="Product Access"
+        icon={Package}
+        actions={
+          <Button
+            size="sm"
+            className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+            onClick={() => { setSelectedProductId(''); setIsGrantOpen(true); }}
+          >
+            <PlusCircle className="w-3 h-3 mr-1" /> Grant Access
+          </Button>
+        }
+      >
+        {loadingAccess ? (
+          <p className="text-muted-foreground text-sm py-4">Loading…</p>
+        ) : accessList.length === 0 ? (
+          <EmptyState
+            title="No product access granted"
+            description="Use 'Grant Access' to allow this investor to view a private product"
+          />
+        ) : (
+          <TableShell>
+            <Table>
+              <TableHeader>
+                <TableRow className={TABLE_ROW_CLASS}>
+                  <TableHead className={TABLE_HEAD_CLASS}>Product</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Granted By</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Date</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {accessList.map(access => {
+                  const product = products.find(p => p.id === access.product_id);
+                  return (
+                    <TableRow key={access.id} className={TABLE_ROW_CLASS}>
+                      <TableCell className="font-medium text-foreground">
+                        {product?.name || access.product_id}
+                        {product?.is_public && (
+                          <Badge variant="outline" className="ml-2 text-xs border-green-700 text-green-400">Public</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-foreground/70 text-sm">{access.granted_by || '—'}</TableCell>
+                      <TableCell className="text-foreground/70 text-sm">{access.granted_date || '—'}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevoke(access.product_id)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Revoke
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableShell>
+        )}
+      </TabCard>
+
+      {/* Grant Access Dialog */}
+      <Dialog open={isGrantOpen} onOpenChange={(open) => { if (!open) setIsGrantOpen(false); }}>
+        <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground">
+          <DialogHeader>
+            <DialogTitle>Grant Product Access</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-foreground/80">Select Product</Label>
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+                <SelectTrigger className="bg-muted border-[#ccab6c]/20 text-foreground mt-1">
+                  <SelectValue placeholder="Choose a product…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableProducts.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {availableProducts.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  This investor already has access to all products.
+                </p>
+              )}
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setIsGrantOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+                onClick={handleGrant}
+                disabled={saving || !selectedProductId}
+              >
+                {saving ? 'Granting…' : 'Grant Access'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+// ── Holdings Tab ────────────────────────────────────────────────────────────
+
 const EMPTY_HOLDING_FORM = {
   product_id: '',
   invested_amount: '',
@@ -402,9 +642,10 @@ const EMPTY_HOLDING_FORM = {
   lock_in_months: '',
   lock_in_end_date: '',
   status: 'active',
+  payment_confirmed: false,
 };
 
-const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange }) => {
+const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], investorEmail, onDataChange }) => {
   const [selectedInvestment, setSelectedInvestment] = useState(null);
   const [amountModalOpen, setAmountModalOpen] = useState(false);
   const [unitsModalOpen, setUnitsModalOpen] = useState(false);
@@ -427,12 +668,78 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
   };
 
   const handleHoldingFormChange = (field, value) => {
-    setHoldingForm(prev => ({ ...prev, [field]: value }));
+    setHoldingForm(prev => {
+      const updated = { ...prev, [field]: value };
+
+      // When product changes, auto-set lock_in_months from product default
+      if (field === 'product_id') {
+        const product = products.find(p => p.id === value);
+        if (product?.lock_in_months) {
+          updated.lock_in_months = String(product.lock_in_months);
+        } else {
+          updated.lock_in_months = 'none';
+        }
+      }
+
+      // Auto-calculate lock-in end date
+      const months = field === 'lock_in_months' ? value : updated.lock_in_months;
+      const base = field === 'purchase_date' ? value : updated.purchase_date;
+      if (months && months !== 'none' && base) {
+        const end = new Date(base);
+        end.setMonth(end.getMonth() + parseInt(months));
+        updated.lock_in_end_date = end.toISOString().split('T')[0];
+      } else if (months === 'none' || !months) {
+        updated.lock_in_end_date = '';
+      }
+
+      // Auto-calculate units from invested amount ÷ NAV
+      const productId = field === 'product_id' ? value : updated.product_id;
+      const amount = field === 'invested_amount' ? value : updated.invested_amount;
+      const purchaseDate = field === 'purchase_date' ? value : updated.purchase_date;
+
+      if (productId && amount && parseFloat(amount) > 0) {
+        // Find NAVs for this product, pick closest to purchase date (or latest)
+        const productNavs = navs
+          .filter(n => n.product_id === productId)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        let matchedNav = productNavs[0]; // default: latest
+        if (purchaseDate && productNavs.length > 0) {
+          const pd = new Date(purchaseDate);
+          // Find the NAV record whose date is closest to (and not after) the purchase date
+          const onOrBefore = productNavs.filter(n => new Date(n.date) <= pd);
+          if (onOrBefore.length > 0) matchedNav = onOrBefore[0];
+        }
+
+        if (matchedNav && matchedNav.nav_per_unit > 0) {
+          updated.current_units = (parseFloat(amount) / matchedNav.nav_per_unit).toFixed(4);
+          updated._nav_used = matchedNav.nav_per_unit;
+          updated._nav_date = matchedNav.date;
+        } else {
+          updated.current_units = '';
+          updated._nav_used = null;
+          updated._nav_date = null;
+        }
+      } else {
+        updated.current_units = '';
+        updated._nav_used = null;
+        updated._nav_date = null;
+      }
+
+      return updated;
+    });
   };
 
   const handleAddHolding = async () => {
     if (!holdingForm.product_id) return alert('Please select a product.');
     if (!holdingForm.invested_amount || isNaN(parseFloat(holdingForm.invested_amount))) return alert('Please enter a valid invested amount.');
+
+    const selectedProduct = products.find(p => p.id === holdingForm.product_id);
+    const amount = parseFloat(holdingForm.invested_amount);
+    const minTicket = selectedProduct?.minimum_ticket ?? 0;
+    if (minTicket > 0 && amount < minTicket) {
+      return alert(`Amount $${amount.toLocaleString()} is below the minimum ticket of $${minTicket.toLocaleString()} for ${selectedProduct?.name}.`);
+    }
 
     setHoldingSaving(true);
     try {
@@ -445,9 +752,17 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
         current_units: holdingForm.current_units ? parseFloat(holdingForm.current_units) : null,
         cost_basis: holdingForm.cost_basis ? parseFloat(holdingForm.cost_basis) : parseFloat(holdingForm.invested_amount),
         purchase_date: holdingForm.purchase_date || null,
-        lock_in_months: holdingForm.lock_in_months ? parseInt(holdingForm.lock_in_months) : null,
+        lock_in_months: holdingForm.lock_in_months && holdingForm.lock_in_months !== 'none' ? parseInt(holdingForm.lock_in_months) : null,
         lock_in_end_date: holdingForm.lock_in_end_date || null,
         status: holdingForm.status,
+        payment_confirmed: holdingForm.payment_confirmed,
+      });
+
+      // Grant investor access to this product so it appears on their /products page
+      await ProductAccess.grant({
+        investor_email: investorEmail,
+        product_id: holdingForm.product_id,
+        granted_by: currentUser.email,
       });
 
       await AuditLog.create({
@@ -512,7 +827,7 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
             </TableHeader>
             <TableBody>
               {investments.map(inv => {
-                const { currentValue, pnlAmount, pnlPercent } = computeHoldingValue(inv, navs);
+                const { currentValue, pnlAmount, pnlPercent, hasNav } = computeHoldingValue(inv, navs, fabricatedReturns);
                 const locked = isLocked(inv);
                 return (
                   <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
@@ -528,14 +843,25 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                       {inv.current_units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '0'}
                     </TableCell>
                     <TableCell className="text-foreground/80">{formatCurrency(inv.invested_amount)}</TableCell>
-                    <TableCell className="text-foreground/80">{formatCurrency(currentValue)}</TableCell>
+                    <TableCell className="text-foreground/80">
+                      {formatCurrency(currentValue)}
+                      {!hasNav && (
+                        <p className="text-xs text-muted-foreground mt-0.5">No NAV — showing cost</p>
+                      )}
+                    </TableCell>
                     <TableCell>
-                      <p className={`font-medium ${pnlAmount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {pnlAmount >= 0 ? '+' : '-'}{formatCurrency(Math.abs(pnlAmount))}
-                      </p>
-                      <p className={`text-sm ${pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {formatPercent(pnlPercent)}
-                      </p>
+                      {hasNav ? (
+                        <>
+                          <p className={`font-medium ${pnlAmount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {pnlAmount >= 0 ? '+' : '-'}{formatCurrency(Math.abs(pnlAmount))}
+                          </p>
+                          <p className={`text-sm ${pnlPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {formatPercent(pnlPercent)}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-muted-foreground text-sm">—</p>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -618,7 +944,7 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                 <SelectValue placeholder="Select product" />
               </SelectTrigger>
               <SelectContent className="bg-muted border-[#ccab6c]/20">
-                {products.map(p => (
+                {products.filter(p => p.status === 'active' && p.is_public).map(p => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -635,6 +961,19 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
                 onChange={e => handleHoldingFormChange('invested_amount', e.target.value)}
                 className="bg-muted border-[#ccab6c]/20 mt-1"
               />
+              {(() => {
+                const prod = products.find(p => p.id === holdingForm.product_id);
+                const amt = parseFloat(holdingForm.invested_amount);
+                if (!prod?.minimum_ticket) return null;
+                const belowMin = amt < prod.minimum_ticket;
+                return (
+                  <p className={`text-xs mt-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                    {belowMin
+                      ? `⚠ Below minimum of $${prod.minimum_ticket.toLocaleString()}`
+                      : `Min: $${prod.minimum_ticket.toLocaleString()}`}
+                  </p>
+                );
+              })()}
             </div>
             <div>
               <Label className="text-gold/90">Cost Basis ($) <span className="text-muted-foreground text-xs">(optional)</span></Label>
@@ -650,13 +989,21 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
           {/* Units & Purchase Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gold/90">Current Units <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">Units <span className="text-muted-foreground text-xs">(auto-calculated)</span></Label>
               <Input
-                type="number" min="0" step="0.0001" placeholder="e.g. 100.5"
-                value={holdingForm.current_units}
-                onChange={e => handleHoldingFormChange('current_units', e.target.value)}
-                className="bg-muted border-[#ccab6c]/20 mt-1"
+                readOnly
+                value={holdingForm.current_units || ''}
+                placeholder="Set product + amount first"
+                className="bg-muted border-[#ccab6c]/20 mt-1 text-gold-bright cursor-default"
               />
+              {holdingForm._nav_used && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  NAV: ${holdingForm._nav_used} on {holdingForm._nav_date}
+                </p>
+              )}
+              {holdingForm.product_id && holdingForm.invested_amount && !holdingForm._nav_used && (
+                <p className="text-xs text-red-400 mt-1">No NAV found for this product</p>
+              )}
             </div>
             <div>
               <Label className="text-gold/90">Purchase Date</Label>
@@ -673,12 +1020,22 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-gold/90">Lock-in Months <span className="text-muted-foreground text-xs">(optional)</span></Label>
-              <Input
-                type="number" min="0" step="1" placeholder="e.g. 12"
-                value={holdingForm.lock_in_months}
-                onChange={e => handleHoldingFormChange('lock_in_months', e.target.value)}
-                className="bg-muted border-[#ccab6c]/20 mt-1"
-              />
+              <Select
+                value={holdingForm.lock_in_months ? String(holdingForm.lock_in_months) : 'none'}
+                onValueChange={v => handleHoldingFormChange('lock_in_months', v === 'none' ? '' : v)}
+              >
+                <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
+                  <SelectValue placeholder="Select period…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No lock-in</SelectItem>
+                  <SelectItem value="6">6 months</SelectItem>
+                  <SelectItem value="12">12 months</SelectItem>
+                  <SelectItem value="18">18 months</SelectItem>
+                  <SelectItem value="24">24 months</SelectItem>
+                  <SelectItem value="36">36 months</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-gold/90">Lock-in End Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
@@ -705,6 +1062,18 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
               </SelectContent>
             </Select>
           </div>
+
+          {/* Payment Confirmed */}
+          <div className="flex items-center justify-between rounded-lg border border-[#ccab6c]/20 bg-muted px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Payment Confirmed</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Toggle on once the investor's funds have been received</p>
+            </div>
+            <Switch
+              checked={holdingForm.payment_confirmed}
+              onCheckedChange={v => handleHoldingFormChange('payment_confirmed', v)}
+            />
+          </div>
         </div>
 
         <DialogFooter>
@@ -725,11 +1094,11 @@ const HoldingsTab = ({ investments, products, navs, investorEmail, onDataChange 
   );
 };
 
-const PerformanceTab = ({ investor, investments, products, navs }) => {
-  const totalInvested = investments.reduce((sum, i) => sum + (i.invested_amount || 0), 0);
+const PerformanceTab = ({ investor, investments, products, navs, fabricatedReturns = [] }) => {
+  const totalInvested = investments.reduce((sum, i) => sum + (parseFloat(i.invested_amount) || 0), 0);
   const currentValue = investments.reduce((sum, i) => {
-    const latestNav = navs?.find(n => n.product_id === i.product_id);
-    return sum + ((i.current_units || 0) * (latestNav?.nav_per_unit || 1));
+    const { currentValue: cv } = computeHoldingValue(i, navs, fabricatedReturns);
+    return sum + cv;
   }, 0);
   const pnlPercent = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested) * 100 : 0;
 
@@ -767,12 +1136,7 @@ const PerformanceTab = ({ investor, investments, products, navs }) => {
             </TableHeader>
             <TableBody>
               {investments.map(inv => {
-                const latestNav = navs?.find(n => n.product_id === inv.product_id);
-                const val = latestNav && inv.current_units
-                  ? inv.current_units * latestNav.nav_per_unit
-                  : inv.invested_amount || 0;
-                const pnl = val - (inv.invested_amount || 0);
-                const pct = inv.invested_amount > 0 ? (pnl / inv.invested_amount) * 100 : 0;
+                const { currentValue: val, pnlAmount: pnl, pnlPercent: pct } = computeHoldingValue(inv, navs, fabricatedReturns);
                 return (
                   <TableRow key={inv.id} className={TABLE_ROW_CLASS}>
                     <TableCell className="text-foreground">{getProductName(products, inv.product_id)}</TableCell>
@@ -1475,6 +1839,7 @@ const AuditTab = ({ investor }) => {
 const CORE_TABS = [
   { id: "overview", label: "Overview" },
   { id: "holdings", label: "Holdings" },
+  { id: "access", label: "Product Access" },
   { id: "performance", label: "Performance" },
   { id: "lockins", label: "Lock-ins" },
   { id: "transactions", label: "Transactions" },
@@ -1488,6 +1853,7 @@ export default function InvestorDetailDrawer({
   investments,
   products,
   navs,
+  fabricatedReturns = [],
   onDataChange,
   additionalTabs = [],
 }) {
@@ -1522,13 +1888,16 @@ export default function InvestorDetailDrawer({
 
         <div className="flex-1 min-h-0 mt-4 overflow-y-auto pr-1">
           <TabsContent value="overview" className="mt-0">
-            <OverviewTab investor={investor} investments={investments} products={products} navs={navs} onDataChange={onDataChange} />
+            <OverviewTab investor={investor} investments={investments} products={products} navs={navs} fabricatedReturns={fabricatedReturns} onDataChange={onDataChange} />
           </TabsContent>
           <TabsContent value="holdings" className="mt-0">
-            <HoldingsTab investments={investments} products={products} navs={navs} investorEmail={investor.email} onDataChange={onDataChange} />
+            <HoldingsTab investments={investments} products={products} navs={navs} fabricatedReturns={fabricatedReturns} investorEmail={investor.email} onDataChange={onDataChange} />
+          </TabsContent>
+          <TabsContent value="access" className="mt-0">
+            <ProductAccessTab investor={investor} products={products} onDataChange={onDataChange} />
           </TabsContent>
           <TabsContent value="performance" className="mt-0">
-            <PerformanceTab investor={investor} investments={investments} products={products} navs={navs} />
+            <PerformanceTab investor={investor} investments={investments} products={products} navs={navs} fabricatedReturns={fabricatedReturns} />
           </TabsContent>
           <TabsContent value="lockins" className="mt-0">
             <LockInsTab investor={investor} investments={investments} products={products} />

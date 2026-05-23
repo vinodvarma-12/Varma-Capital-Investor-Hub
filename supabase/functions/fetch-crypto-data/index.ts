@@ -18,8 +18,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const cgKey = Deno.env.get("COINGECKO_API_KEY") ?? "";
     const cryptoResponse = await fetch(
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h",
+      { headers: cgKey ? { "x-cg-demo-api-key": cgKey } : {} }
     );
     if (!cryptoResponse.ok) throw new Error(`CoinGecko API error: ${cryptoResponse.status}`);
     const cryptoData = await cryptoResponse.json();

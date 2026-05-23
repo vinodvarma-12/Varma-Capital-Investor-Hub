@@ -7,6 +7,7 @@ import { SupportTicket } from "@/entities/SupportTicket";
 import { Transaction } from "@/entities/Transaction";
 import { NAV } from "@/entities/NAV";
 import { AuditLog } from "@/entities/AuditLog";
+import { ProductAccess } from "@/entities/ProductAccess";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,13 +46,15 @@ import {
   AlertCircle,
   Pencil
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { format, subMonths, endOfMonth } from 'date-fns';
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [investments, setInvestments] = useState([]);
   const [products, setProducts] = useState([]);
+  const [aumPeriod, setAumPeriod] = useState('6M');
   const [allocationRequests, setAllocationRequests] = useState([]);
   const [supportTickets, setSupportTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,10 +104,24 @@ export default function AdminDashboard() {
 
   const handleSaveEdit = async () => {
     if (!editingRequest) return;
+
+    const selectedProduct = products.find(p => p.id === (editForm.product_id || editingRequest.product_id));
+    const amount = parseFloat(editForm.requested_amount);
+    const minTicket = selectedProduct?.minimum_ticket ?? 0;
+
+    if (!amount || isNaN(amount)) {
+      alert('Please enter a valid amount.');
+      return;
+    }
+    if (amount < minTicket) {
+      alert(`Amount $${amount.toLocaleString()} is below the minimum ticket of $${minTicket.toLocaleString()} for ${selectedProduct?.name}.`);
+      return;
+    }
+
     setIsSavingEdit(true);
     try {
       const patch = {
-        requested_amount: parseFloat(editForm.requested_amount),
+        requested_amount: amount,
         product_id: editForm.product_id || editingRequest.product_id,
         lock_in_months: editForm.lock_in_months && editForm.lock_in_months !== 'default' ? parseInt(editForm.lock_in_months) : null,
         subscription_date: editForm.subscription_date || null,
@@ -178,6 +195,13 @@ export default function AdminDashboard() {
             status: 'active',
           });
 
+          // Grant investor access to this product so it appears on their /products page
+          await ProductAccess.grant({
+            investor_email: request.investor_email,
+            product_id: request.product_id,
+            granted_by: currentUser.email,
+          });
+
           // Create subscription transaction
           await Transaction.create({
             investor_email: request.investor_email,
@@ -218,7 +242,9 @@ export default function AdminDashboard() {
 
   const calculateMetrics = () => {
     const totalInvestors = users.filter(u => u.role === 'investor').length;
-    const totalAUM = investments.reduce((sum, inv) => sum + (inv.invested_amount || 0), 0);
+    const totalAUM = investments
+      .filter(inv => inv.status === 'active')
+      .reduce((sum, inv) => sum + (inv.invested_amount || 0), 0);
     const activeProducts = products.filter(p => p.status === 'active').length;
     const pendingRequests = allocationRequests.length;
 
@@ -227,14 +253,63 @@ export default function AdminDashboard() {
 
   const metrics = calculateMetrics();
 
-  const chartData = [
-    { month: 'Jan', aum: 1200000 },
-    { month: 'Feb', aum: 1350000 },
-    { month: 'Mar', aum: 1480000 },
-    { month: 'Apr', aum: 1620000 },
-    { month: 'May', aum: 1750000 },
-    { month: 'Jun', aum: 1890000 },
-  ];
+  const activeProducts = products.filter(p => p.status === 'active');
+
+  // Fund colors for chart lines
+  const fundColors = ['#fedea0', '#ccab6c', '#f59e0b', '#a78640', '#e2b96f'];
+
+  // Derive which products actually have active investments (source of truth)
+  const activeInvestments = investments.filter(inv => inv.status === 'active');
+  const chartProductIds = [...new Set(activeInvestments.map(inv => inv.product_id))];
+
+  const getProductName = (productId) =>
+    products.find(p => p.id === productId)?.name ?? 'Unknown Fund';
+
+  // Build historical AUM data points from investment purchase_date
+  const getAumChartData = () => {
+    let monthCount;
+    if (aumPeriod === '3M') monthCount = 3;
+    else if (aumPeriod === '6M') monthCount = 6;
+    else if (aumPeriod === '1Y') monthCount = 12;
+    else {
+      // 'All' — span from the earliest purchase_date to now
+      const dates = activeInvestments
+        .filter(inv => inv.purchase_date)
+        .map(inv => new Date(inv.purchase_date));
+      if (dates.length === 0) monthCount = 6;
+      else {
+        const earliest = new Date(Math.min(...dates));
+        const now = new Date();
+        const diffMs = now - earliest;
+        monthCount = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 30)));
+      }
+    }
+
+    const now = new Date();
+    const points = [];
+
+    for (let i = monthCount; i >= 0; i--) {
+      const monthStart = subMonths(now, i);
+      const cutoff = endOfMonth(monthStart);
+      const label = format(monthStart, 'MMM yy');
+
+      const point = { month: label };
+      chartProductIds.forEach(productId => {
+        point[productId] = activeInvestments
+          .filter(inv =>
+            inv.product_id === productId &&
+            (!inv.purchase_date || new Date(inv.purchase_date) <= cutoff)
+          )
+          .reduce((sum, inv) => sum + (parseFloat(inv.invested_amount) || 0), 0);
+      });
+      points.push(point);
+    }
+    return points;
+  };
+
+  const aumChartData = getAumChartData();
+  const hasAnyAUM = chartProductIds.length > 0 &&
+    aumChartData.some(pt => chartProductIds.some(id => (pt[id] || 0) > 0));
 
   if (loading) {
     return <LoadingSpinner message="Loading admin dashboard..." />;
@@ -302,40 +377,94 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* AUM Growth Chart */}
+        {/* AUM Growth by Fund */}
         <Card className="bg-card border border-[#ccab6c]/30">
           <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              AUM Growth
-            </CardTitle>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-gold-bright" />
+                  AUM Growth by Fund
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-0.5">Cumulative invested capital over time</p>
+              </div>
+              {/* Period filter */}
+              <div className="flex gap-1 bg-muted rounded-lg p-1">
+                {['3M', '6M', '1Y', 'All'].map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setAumPeriod(p)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                      aumPeriod === p
+                        ? 'bg-[#fedea0] text-black'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="month" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                    formatter={(value) => [`$${value.toLocaleString()}`, 'AUM']}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="aum" 
-                    stroke="#FFD700" 
-                    strokeWidth={3}
-                    dot={{ fill: '#FFD700', strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {!hasAnyAUM ? (
+              <div className="h-72 flex items-center justify-center">
+                <p className="text-muted-foreground text-sm">No active investments yet — data will appear here once investors are onboarded</p>
+              </div>
+            ) : (
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={aumChartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      stroke="#6b7280"
+                      tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                    />
+                    <YAxis
+                      stroke="#6b7280"
+                      tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                      tickFormatter={(v) =>
+                        v >= 1000000 ? `$${(v / 1000000).toFixed(1)}M`
+                        : v >= 1000 ? `$${(v / 1000).toFixed(0)}K`
+                        : `$${v}`
+                      }
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1a1a1a',
+                        border: '1px solid #ccab6c50',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: 13,
+                      }}
+                      formatter={(value, name) => [
+                        `$${Number(value).toLocaleString()}`,
+                        getProductName(name),
+                      ]}
+                    />
+                    <Legend
+                      formatter={(value) => (
+                        <span style={{ color: '#9CA3AF', fontSize: 12 }}>
+                          {getProductName(value)}
+                        </span>
+                      )}
+                    />
+                    {chartProductIds.map((productId, i) => (
+                      <Line
+                        key={productId}
+                        type="monotone"
+                        dataKey={productId}
+                        stroke={fundColors[i % fundColors.length]}
+                        strokeWidth={2.5}
+                        dot={{ fill: fundColors[i % fundColors.length], r: 4, strokeWidth: 0 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -477,7 +606,7 @@ export default function AdminDashboard() {
                   <SelectValue placeholder="Select product…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.filter(p => p.status === 'active').map(p => (
+                  {products.filter(p => p.status === 'active' && p.is_public).map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -489,12 +618,25 @@ export default function AdminDashboard() {
               <Label className="text-foreground/80">Requested Amount (USD)</Label>
               <Input
                 type="number"
-                min="0"
+                min={products.find(p => p.id === (editForm.product_id || editingRequest?.product_id))?.minimum_ticket ?? 0}
                 step="0.01"
                 value={editForm.requested_amount}
                 onChange={(e) => setEditForm(f => ({ ...f, requested_amount: e.target.value }))}
                 className="bg-muted border-[#ccab6c]/20 mt-1"
               />
+              {(() => {
+                const prod = products.find(p => p.id === (editForm.product_id || editingRequest?.product_id));
+                const amt = parseFloat(editForm.requested_amount);
+                if (!prod) return null;
+                const belowMin = amt < prod.minimum_ticket;
+                return (
+                  <p className={`text-xs mt-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                    {belowMin
+                      ? `⚠ Below minimum ticket of $${prod.minimum_ticket.toLocaleString()}`
+                      : `Minimum ticket: $${prod.minimum_ticket.toLocaleString()}`}
+                  </p>
+                );
+              })()}
             </div>
 
             {/* Lock-in period */}

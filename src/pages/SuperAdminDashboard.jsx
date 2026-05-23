@@ -30,8 +30,8 @@ import {
   UserCheck,
   FileText
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { format, subMonths, endOfMonth } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function SuperAdminDashboard() {
@@ -42,6 +42,7 @@ export default function SuperAdminDashboard() {
   const [supportTickets, setSupportTickets] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [growthPeriod, setGrowthPeriod] = useState('6M');
 
   useEffect(() => {
     loadSuperAdminData();
@@ -107,14 +108,48 @@ export default function SuperAdminDashboard() {
 
   const metrics = calculateMetrics();
 
-  const chartData = [
-    { month: 'Jan', aum: 1200000, users: 45 },
-    { month: 'Feb', aum: 1350000, users: 52 },
-    { month: 'Mar', aum: 1480000, users: 61 },
-    { month: 'Apr', aum: 1620000, users: 68 },
-    { month: 'May', aum: 1750000, users: 74 },
-    { month: 'Jun', aum: 1890000, users: 82 },
-  ];
+  // Build real chart data from investments and users, respecting growthPeriod
+  const activeInvestments = investments.filter(inv => inv.status === 'active');
+
+  const chartData = (() => {
+    let monthCount;
+    if (growthPeriod === '3M') monthCount = 3;
+    else if (growthPeriod === '6M') monthCount = 6;
+    else if (growthPeriod === '1Y') monthCount = 12;
+    else {
+      // 'All' — span from earliest purchase_date or created_date to now
+      const invDates = activeInvestments
+        .filter(inv => inv.purchase_date)
+        .map(inv => new Date(inv.purchase_date));
+      const userDates = users
+        .filter(u => u.created_date)
+        .map(u => new Date(u.created_date));
+      const allDates = [...invDates, ...userDates];
+      if (allDates.length === 0) monthCount = 6;
+      else {
+        const earliest = new Date(Math.min(...allDates));
+        const now = new Date();
+        monthCount = Math.max(1, Math.ceil((now - earliest) / (1000 * 60 * 60 * 24 * 30)));
+      }
+    }
+
+    const now = new Date();
+    return Array.from({ length: monthCount + 1 }, (_, i) => {
+      const monthDate = subMonths(now, monthCount - i);
+      const cutoff = endOfMonth(monthDate);
+      const label = format(monthDate, 'MMM yy');
+
+      const aum = activeInvestments
+        .filter(inv => !inv.purchase_date || new Date(inv.purchase_date) <= cutoff)
+        .reduce((sum, inv) => sum + (parseFloat(inv.invested_amount) || 0), 0);
+
+      const userCount = users.filter(u =>
+        !u.created_date || new Date(u.created_date) <= cutoff
+      ).length;
+
+      return { month: label, aum, users: userCount };
+    });
+  })();
 
   if (loading) {
     return <LoadingSpinner message="Loading super admin dashboard..." />;
@@ -202,39 +237,48 @@ export default function SuperAdminDashboard() {
           {/* Growth Chart */}
           <Card className="bg-card border border-[#ccab6c]/30">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                Platform Growth
-              </CardTitle>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Platform Growth
+                </CardTitle>
+                <div className="flex gap-1 bg-muted rounded-lg p-1">
+                  {['3M', '6M', '1Y', 'All'].map(p => (
+                    <button
+                      key={p}
+                      onClick={() => setGrowthPeriod(p)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                        growthPeriod === p
+                          ? 'bg-[#fedea0] text-black'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="month" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#fff'
-                      }}
+                  <LineChart data={chartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
+                    <YAxis yAxisId="aum" stroke="#6b7280" tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                      tickFormatter={v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${(v/1000).toFixed(0)}K` : `$${v}`}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="aum" 
-                      stroke="#FFD700" 
-                      strokeWidth={3}
-                      name="AUM ($)"
+                    <YAxis yAxisId="users" orientation="right" stroke="#6b7280" tick={{ fontSize: 11, fill: '#9CA3AF' }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ccab6c50', borderRadius: '8px', color: '#fff', fontSize: 13 }}
+                      formatter={(value, name) => name === 'aum' ? [`$${Number(value).toLocaleString()}`, 'AUM'] : [value, 'Users']}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="users" 
-                      stroke="#10B981" 
-                      strokeWidth={3}
-                      name="Users"
+                    <Legend formatter={v => <span style={{ color: '#9CA3AF', fontSize: 12 }}>{v === 'aum' ? 'AUM' : 'Users'}</span>} />
+                    <Line yAxisId="aum" type="monotone" dataKey="aum" stroke="#FFD700" strokeWidth={2.5}
+                      dot={{ fill: '#FFD700', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} name="aum"
+                    />
+                    <Line yAxisId="users" type="monotone" dataKey="users" stroke="#10B981" strokeWidth={2.5}
+                      dot={{ fill: '#10B981', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} name="users"
                     />
                   </LineChart>
                 </ResponsiveContainer>

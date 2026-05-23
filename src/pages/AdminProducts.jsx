@@ -31,6 +31,7 @@ const ProductForm = ({ product, onSave }) => {
   const [formData, setFormData] = useState(product || {
     name: '',
     description: '',
+    strategy: '',
     minimum_ticket: 0,
     lock_in_months: 0,
     management_fee_percent: 0,
@@ -69,6 +70,7 @@ const ProductForm = ({ product, onSave }) => {
         </div>
       </div>
       <div><Label>Description</Label><Textarea value={formData.description} onChange={e => handleChange('description', e.target.value)} /></div>
+      <div><Label>Strategy</Label><Input value={formData.strategy || ''} onChange={e => handleChange('strategy', e.target.value)} placeholder="e.g. Multi-strategy — crypto, commodities, structured products" /></div>
       <div className="grid grid-cols-2 gap-4">
         <div><Label>Minimum Ticket ($)</Label><Input type="number" value={formData.minimum_ticket} onChange={e => handleChange('minimum_ticket', parseFloat(e.target.value))} required /></div>
         <div><Label>Lock-in (Months)</Label><Input type="number" value={formData.lock_in_months} onChange={e => handleChange('lock_in_months', parseInt(e.target.value))} required /></div>
@@ -81,6 +83,7 @@ const ProductForm = ({ product, onSave }) => {
             <SelectContent>
               <SelectItem value="low">Low</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="medium_high">Medium-High</SelectItem>
               <SelectItem value="high">High</SelectItem>
               <SelectItem value="very_high">Very High</SelectItem>
             </SelectContent>
@@ -158,13 +161,15 @@ export default function AdminProducts() {
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("Are you sure you want to delete this product? This will also delete all related investments, NAV records, and transactions.")) {
       try {
         await Product.delete(productId);
         loadData();
         toast.success('Product deleted.');
       } catch (error) {
         console.error("Error deleting product:", error);
+        const msg = error?.message || error?.details || JSON.stringify(error);
+        alert(`Failed to delete product:\n${msg}`);
         toast.error('Error deleting product.');
       }
     }
@@ -227,14 +232,16 @@ export default function AdminProducts() {
                       <TableCell className="text-foreground/80">{product.performance_fee_percent || 0}%</TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                          <Badge variant={product.status === 'active' ? 'default' : 'secondary'}
+                            className={
+                              product.status === 'suspended' ? 'bg-orange-900/60 text-orange-300' :
+                              product.status === 'closed' ? 'bg-red-900/60 text-red-300' : ''
+                            }>
                             {product.status}
                           </Badge>
-                          {isSuperAdmin && (
-                            <span className={`inline-flex items-center gap-1 text-xs ${product.is_public ? 'text-green-400' : 'text-muted-foreground'}`}>
-                              {product.is_public ? <><Globe className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Private</>}
-                            </span>
-                          )}
+                          <span className={`inline-flex items-center gap-1 text-xs ${product.is_public ? 'text-green-400' : 'text-muted-foreground'}`}>
+                            {product.is_public ? <><Globe className="w-3 h-3" /> Public</> : <><Lock className="w-3 h-3" /> Private</>}
+                          </span>
                         </div>
                       </TableCell>
                       {isSuperAdmin && (

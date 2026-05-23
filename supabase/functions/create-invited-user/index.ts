@@ -148,6 +148,17 @@ Deno.serve(async (req) => {
         notes: `Auto-created on account activation (invited by ${invitation.invited_by})`,
       });
 
+      // Grant investor access to this product so it appears on their /products page
+      await admin.from("product_access").upsert(
+        {
+          investor_email: invitation.email,
+          product_id: invitation.product_id,
+          granted_by: invitation.invited_by ?? "system",
+          granted_date: today,
+        },
+        { onConflict: "investor_email,product_id" }
+      );
+
       // Audit log
       await admin.from("audit_logs").insert({
         user_email: invitation.invited_by ?? "system",
