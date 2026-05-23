@@ -30,11 +30,11 @@ export default function InvestorAuth() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single();
       const role = profile?.role ?? "investor";
       if (role === "super_admin") {
-        navigate("/SuperAdminDashboard");
+        navigate("/superadmindashboard");
       } else if (role === "admin") {
-        navigate("/AdminDashboard");
+        navigate("/admindashboard");
       } else {
-        navigate("/Dashboard");
+        navigate("/dashboard");
       }
     } catch {
       /* not signed in */
@@ -74,11 +74,11 @@ export default function InvestorAuth() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", u.id).single();
       const role = profile?.role ?? "investor";
       if (role === "super_admin") {
-        navigate("/SuperAdminDashboard");
+        navigate("/superadmindashboard");
       } else if (role === "admin") {
-        navigate("/AdminDashboard");
+        navigate("/admindashboard");
       } else {
-        navigate("/Dashboard");
+        navigate("/dashboard");
       }
     } catch (err) {
       console.error("Login error:", err);
