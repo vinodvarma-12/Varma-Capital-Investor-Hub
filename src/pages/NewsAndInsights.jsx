@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MarketingMaterial } from "@/entities/MarketingMaterial";
+import { fetchNewsData } from "@/functions/fetchNewsData";
 import {
   Card,
   CardContent,
@@ -13,7 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, Rss, Download, FileText, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-const FINNHUB_KEY = import.meta.env.VITE_FINHUB_NEWS_API;
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const getCached = (category) => {
@@ -38,11 +38,9 @@ const setCache = (category, data) => {
 };
 
 const fetchFinnhubNews = async (category) => {
-  const res = await fetch(
-    `https://finnhub.io/api/v1/news?category=${category}&token=${FINNHUB_KEY}`,
-  );
-  if (!res.ok) throw new Error(`Finnhub error: ${res.status}`);
-  return res.json();
+  const { data } = await fetchNewsData(category);
+  if (!data?.data) throw new Error("No data returned from news function");
+  return data.data;
 };
 
 const NewsArticleCard = ({ article }) => (
@@ -153,12 +151,9 @@ const NewsSection = ({ category }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchFinnhubNews(category);
-      const filtered = (data || [])
-        .filter((a) => a.headline && a.url)
-        .slice(0, 18);
-      setCache(category, filtered);
-      setArticles(filtered);
+      const articles = await fetchFinnhubNews(category);
+      setCache(category, articles);
+      setArticles(articles);
       setCachedAt(Date.now());
     } catch (e) {
       console.error(`Finnhub fetch error (${category}):`, e);
