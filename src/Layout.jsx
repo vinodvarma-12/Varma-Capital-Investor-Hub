@@ -68,7 +68,9 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem('theme') !== 'light'
+  );
   const [showCompliancePopup, setShowCompliancePopup] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const currentPageNameRef = useRef(currentPageName);
@@ -148,7 +150,7 @@ export default function Layout({ children, currentPageName }) {
         const userData = await User.me();
         if (cancelled) return;
         setUser(userData);
-        setDarkMode(userData.preferences?.dark_mode ?? true);
+        // Theme is stored in localStorage, not the DB — don't override it here
 
         const allowedRoles = ['investor', 'admin', 'super_admin'];
         if (!allowedRoles.includes(userData.role)) {
@@ -183,14 +185,10 @@ export default function Layout({ children, currentPageName }) {
     navigate(getDashboardByRole(user.role));
   }, [user, currentPageName, navigate]);
 
-  const toggleDarkMode = async () => {
+  const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
-    if (user) {
-      await User.updateMyUserData({
-        preferences: { ...user.preferences, dark_mode: newDarkMode }
-      });
-    }
+    localStorage.setItem('theme', newDarkMode ? 'dark' : 'light');
   };
 
   const handleLogout = async () => {

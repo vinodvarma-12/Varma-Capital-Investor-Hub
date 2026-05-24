@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { MarketingMaterial } from "@/entities/MarketingMaterial";
 import { fetchNewsData } from "@/functions/fetchNewsData";
+import { fetchGHLMaterials } from "@/functions/fetchGHLMaterials";
 import {
   Card,
   CardContent,
@@ -93,42 +93,66 @@ const NewsArticleCard = ({ article }) => (
   </Card>
 );
 
-const MarketingMaterialCard = ({ material }) => (
-  <Card className="bg-card border border-[#ccab6c]/30 flex flex-col h-full hover:border-[#b38922]/50 transition-colors duration-200">
-    {material.thumbnail_url && (
-      <img
-        src={material.thumbnail_url}
-        alt={material.title}
-        className="rounded-t-lg h-40 object-cover"
-      />
-    )}
-    <CardHeader>
-      <CardTitle className="text-foreground text-lg leading-snug">
-        {material.title}
-      </CardTitle>
-      <Badge variant="outline" className="w-fit mt-2 capitalize">
-        {material.category.replace("_", " ")}
-      </Badge>
-    </CardHeader>
-    <CardContent className="flex-grow">
-      <p className="text-gold/90 text-sm line-clamp-3">
-        {material.description}
-      </p>
-    </CardContent>
-    <CardFooter>
-      <Button
-        asChild
-        variant="outline"
-        className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
-      >
-        <a href={material.file_url} target="_blank" rel="noopener noreferrer">
-          {material.file_url ? "Download" : "Read More"}{" "}
-          <Download className="w-3 h-3 ml-2" />
-        </a>
-      </Button>
-    </CardFooter>
-  </Card>
-);
+const IMAGE_EXTS = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
+
+const GHLMaterialCard = ({ file }) => {
+  const ext = String(file.name ?? "").split(".").pop()?.toLowerCase() ?? "";
+  const isPdf = ext === "pdf" || String(file.type ?? "").toLowerCase().includes("pdf");
+  const isImage = IMAGE_EXTS.includes(ext) || String(file.type ?? "").toLowerCase().includes("image");
+  const extLabel = ext.toUpperCase();
+
+  return (
+    <Card className="bg-card border border-[#ccab6c]/30 flex flex-col h-full hover:border-[#b38922]/50 transition-colors duration-200">
+      {isImage && file.url ? (
+        <img
+          src={file.url}
+          alt={file.name}
+          className="rounded-t-lg h-40 w-full object-cover"
+          onError={(e) => { e.target.style.display = "none"; }}
+        />
+      ) : file.thumbnail ? (
+        <img
+          src={file.thumbnail}
+          alt={file.name}
+          className="rounded-t-lg h-40 w-full object-cover"
+          onError={(e) => { e.target.style.display = "none"; }}
+        />
+      ) : (
+        <div className="rounded-t-lg h-40 w-full bg-muted flex items-center justify-center">
+          <FileText className="w-10 h-10 text-gold/40" />
+        </div>
+      )}
+      <CardHeader>
+        <CardTitle className="text-foreground text-base leading-snug line-clamp-2">
+          {file.name}
+        </CardTitle>
+        {extLabel && (
+          <Badge variant="outline" className="w-fit mt-1 text-xs text-muted-foreground">
+            {extLabel}
+          </Badge>
+        )}
+      </CardHeader>
+      <CardContent className="flex-grow">
+        {file.created_at && (
+          <p className="text-xs text-muted-foreground">
+            Added {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
+          </p>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button
+          asChild
+          variant="outline"
+          className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
+        >
+          <a href={file.url} target="_blank" rel="noopener noreferrer">
+            {isPdf ? "Download" : "View"} <Download className="w-3 h-3 ml-2" />
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
 
 const NewsSection = ({ category }) => {
   const cached = getCached(category);
@@ -235,46 +259,74 @@ const NewsSection = ({ category }) => {
 };
 
 const VarmaSection = () => {
-  const [materials, setMaterials] = useState([]);
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const data = await MarketingMaterial.list("-created_date");
-        setMaterials(data);
-      } catch (e) {
-        console.error("Could not fetch marketing materials", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await fetchGHLMaterials();
+      setFiles(data?.data ?? []);
+    } catch (e) {
+      console.error("Could not fetch GHL materials", e);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
 
   if (loading) {
     return (
-      <div className="text-center py-16 text-gold/90">Loading materials...</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} className="bg-card border border-[#ccab6c]/20 animate-pulse">
+            <div className="h-40 bg-muted rounded-t-lg" />
+            <CardHeader>
+              <div className="h-4 bg-muted rounded w-3/4" />
+              <div className="h-3 bg-muted rounded w-1/4 mt-2" />
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
     );
   }
 
-  if (materials.length === 0) {
+  if (error || files.length === 0) {
     return (
-      <div className="col-span-full text-center py-16">
+      <div className="text-center py-16">
         <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <p className="text-lg text-gold/90">
-          No materials available at this time.
+          {error ? "Could not load materials." : "No materials available at this time."}
         </p>
+        {error && (
+          <p className="text-sm text-muted-foreground mt-2">{error}</p>
+        )}
+        {error && (
+          <Button variant="outline" size="sm" className="mt-4" onClick={load}>
+            <RefreshCw className="w-3 h-3 mr-2" /> Try Again
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {materials.map((material) => (
-        <MarketingMaterialCard key={material.id} material={material} />
-      ))}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{files.length} files from Varma Capital</p>
+        <Button variant="ghost" size="sm" onClick={load} className="text-gold/70 hover:text-gold-bright">
+          <RefreshCw className="w-3 h-3 mr-1.5" /> Refresh
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {files.map((file) => (
+          <GHLMaterialCard key={file.url ?? file.name} file={file} />
+        ))}
+      </div>
     </div>
   );
 };
