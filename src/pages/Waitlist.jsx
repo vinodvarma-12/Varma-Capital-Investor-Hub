@@ -54,9 +54,14 @@ export default function WaitlistPage() {
         amount_interested: formData.amount_interested || null
       };
 
-      // await Waitlist.create(submissionData);
       const { error } = await supabase.from("waitlist_entries").insert(submissionData);
       if (error) throw error;
+
+      // Send confirmation email via GHL — fire and forget (don't block on email failure)
+      supabase.functions.invoke("send-waitlist-email", {
+        body: { email: formData.email, full_name: formData.full_name },
+      }).catch((err) => console.error("Waitlist email failed:", err));
+
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting waitlist form:", error);
