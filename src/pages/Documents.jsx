@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Download, FileText, Search, Filter, Eye, Calendar, Plus, Upload, ChevronDown, ChevronRight, Users, Archive, Loader2 } from "lucide-react";
+import { Download, FileText, Search, Filter, Eye, Calendar, Plus, Upload, ChevronDown, ChevronRight, Users, Archive, Loader2, BarChart2, ClipboardList, FileSignature, Lock, Megaphone } from "lucide-react";
 import JSZip from "jszip";
 import { UploadFile } from "@/integrations/Core";
 import { format } from "date-fns";
@@ -153,13 +153,13 @@ export default function Documents() {
 
   const getDocumentIcon = (type) => {
     const icons = {
-      statement: "📊",
-      tax_document: "📋",
-      agreement: "📝",
-      compliance: "🔒",
-      notice: "📢"
+      statement: <BarChart2 className="w-5 h-5" />,
+      tax_document: <ClipboardList className="w-5 h-5" />,
+      agreement: <FileSignature className="w-5 h-5" />,
+      compliance: <Lock className="w-5 h-5" />,
+      notice: <Megaphone className="w-5 h-5" />,
     };
-    return icons[type] || "📄";
+    return icons[type] || <FileText className="w-5 h-5" />;
   };
 
   const getTypeBadgeColor = (type) => {
@@ -502,35 +502,35 @@ export default function Documents() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-lg">📊</span>
+                <BarChart2 className="w-5 h-5 text-gold/70" />
                 <div>
                   <p className="text-foreground font-medium">Statements</p>
                   <p className="text-xs text-gold/90">Monthly/quarterly performance reports</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📋</span>
+                <ClipboardList className="w-5 h-5 text-gold/70" />
                 <div>
                   <p className="text-foreground font-medium">Tax Documents</p>
                   <p className="text-xs text-gold/90">Annual tax forms and certificates</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📝</span>
+                <FileSignature className="w-5 h-5 text-gold/70" />
                 <div>
                   <p className="text-foreground font-medium">Agreements</p>
                   <p className="text-xs text-gold/90">Investment agreements and contracts</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg">🔒</span>
+                <Lock className="w-5 h-5 text-gold/70" />
                 <div>
                   <p className="text-foreground font-medium">Compliance</p>
                   <p className="text-xs text-gold/90">KYC documents and compliance forms</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📢</span>
+                <Megaphone className="w-5 h-5 text-gold/70" />
                 <div>
                   <p className="text-foreground font-medium">Notices</p>
                   <p className="text-xs text-gold/90">Important announcements and updates</p>

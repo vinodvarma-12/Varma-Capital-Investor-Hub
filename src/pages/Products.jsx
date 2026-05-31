@@ -118,6 +118,18 @@ export default function Products() {
           {products.map((product) => (
             <Card key={product.id} className={`bg-card border border-[#ccab6c]/30 relative overflow-hidden ${!product.is_public ? 'opacity-80' : ''}`}>
 
+              {/* Product image */}
+              {product.image_url && (
+                <div className="w-full h-48 overflow-hidden">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                  />
+                </div>
+              )}
+
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -132,7 +144,7 @@ export default function Products() {
                       {product.risk_band?.replace(/_/g, '-').toUpperCase()} RISK
                     </Badge>
                   </div>
-                  <Package className="w-8 h-8 text-gold-bright" />
+                  {!product.image_url && <Package className="w-8 h-8 text-gold-bright" />}
                 </div>
               </CardHeader>
               

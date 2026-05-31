@@ -59,6 +59,7 @@ import {
   Download,
   PlusCircle,
   Package,
+  AlertCircle,
 } from "lucide-react";
 import {
   EditAmountModal,
@@ -218,15 +219,7 @@ const AuditChanges = ({ changes }) => {
 
 const OverviewTab = ({ investor, investments, products, navs, fabricatedReturns = [], onDataChange }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    totalInvested: 0,
-    currentValue: 0,
-    pnlPercent: 0,
-    nextLockInDate: ''
-  });
-  const [reason, setReason] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({ totalInvested: 0, currentValue: 0, pnlPercent: 0, nextLockInDate: '' });
 
   useEffect(() => {
     const loadUser = async () => {
@@ -259,69 +252,6 @@ const OverviewTab = ({ investor, investments, products, navs, fabricatedReturns 
     });
   }, [investments, navs]);
 
-  const isSuperAdmin = currentUser?.role === 'super_admin';
-
-  const handleSave = async () => {
-    if (!reason.trim()) {
-      alert('Please provide a reason for the change');
-      return;
-    }
-
-    setSaving(true);
-    try {
-      if (investments.length === 1) {
-        const inv = investments[0];
-        await Investment.update(inv.id, {
-          invested_amount: parseFloat(formData.totalInvested),
-          lock_in_end_date: formData.nextLockInDate || inv.lock_in_end_date
-        });
-      } else if (investments.length > 1) {
-        const oldTotal = investments.reduce((sum, i) => sum + (i.invested_amount || 0), 0);
-        const ratio = oldTotal > 0 ? parseFloat(formData.totalInvested) / oldTotal : 1;
-
-        for (const inv of investments) {
-          await Investment.update(inv.id, {
-            invested_amount: (inv.invested_amount || 0) * ratio
-          });
-        }
-
-        if (formData.nextLockInDate) {
-          const sortedInv = [...investments]
-            .filter(i => i.lock_in_end_date)
-            .sort((a, b) => new Date(a.lock_in_end_date) - new Date(b.lock_in_end_date));
-          if (sortedInv.length > 0) {
-            await Investment.update(sortedInv[0].id, {
-              lock_in_end_date: formData.nextLockInDate
-            });
-          }
-        }
-      }
-
-      await AuditLog.create({
-        user_email: currentUser.email,
-        action: 'update',
-        entity_type: 'InvestorMetrics',
-        entity_id: investor.id,
-        changes: {
-          investor_email: investor.email,
-          totalInvested: formData.totalInvested,
-          currentValue: formData.currentValue,
-          pnlPercent: formData.pnlPercent,
-          nextLockInDate: formData.nextLockInDate,
-          reason
-        }
-      });
-
-      setIsEditing(false);
-      setReason('');
-      onDataChange();
-    } catch (error) {
-      console.error('Error saving metrics:', error);
-      alert('Error saving changes');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const statCards = [
     { label: 'Total Invested', value: formatCurrency(formData.totalInvested), icon: DollarSign },
@@ -343,75 +273,9 @@ const OverviewTab = ({ investor, investments, products, navs, fabricatedReturns 
     <TabCard
       title="Portfolio Overview"
       icon={DollarSign}
-      actions={isSuperAdmin && !isEditing && (
-        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-          <Edit className="w-3 h-3 mr-1" /> Edit Metrics
-        </Button>
-      )}
+      actions={null}
     >
-      {isEditing ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label>Total Invested ($)</Label>
-              <Input
-                type="number"
-                value={formData.totalInvested}
-                onChange={e => setFormData({ ...formData, totalInvested: e.target.value })}
-                className="bg-muted border-[#ccab6c]/20"
-              />
-            </div>
-            <div>
-              <Label>Current Value ($)</Label>
-              <Input
-                type="number"
-                value={formData.currentValue}
-                onChange={e => setFormData({ ...formData, currentValue: e.target.value })}
-                className="bg-muted border-[#ccab6c]/20"
-              />
-            </div>
-            <div>
-              <Label>P&L (%)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={formData.pnlPercent}
-                onChange={e => setFormData({ ...formData, pnlPercent: e.target.value })}
-                className="bg-muted border-[#ccab6c]/20"
-              />
-            </div>
-            <div>
-              <Label>Next Lock-in Expiry</Label>
-              <Input
-                type="date"
-                value={formData.nextLockInDate}
-                onChange={e => setFormData({ ...formData, nextLockInDate: e.target.value })}
-                className="bg-muted border-[#ccab6c]/20"
-              />
-            </div>
-          </div>
-          <div>
-            <Label>Reason for Change (required)</Label>
-            <Textarea
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              placeholder="Explain why these values are being changed..."
-              className="bg-muted border-[#ccab6c]/20"
-            />
-          </div>
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || !reason.trim()}
-              className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {statCards.map(({ label, value, icon: Icon, valueClass }) => (
               <div
@@ -459,7 +323,6 @@ const OverviewTab = ({ investor, investments, products, navs, fabricatedReturns 
             </div>
           </div>
         </div>
-      )}
     </TabCard>
   );
 };
@@ -967,9 +830,10 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
                 if (!prod?.minimum_ticket) return null;
                 const belowMin = amt < prod.minimum_ticket;
                 return (
-                  <p className={`text-xs mt-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                    {belowMin && <AlertCircle className="w-3 h-3 flex-shrink-0" />}
                     {belowMin
-                      ? `⚠ Below minimum of $${prod.minimum_ticket.toLocaleString()}`
+                      ? `Below minimum of $${prod.minimum_ticket.toLocaleString()}`
                       : `Min: $${prod.minimum_ticket.toLocaleString()}`}
                   </p>
                 );

@@ -45,6 +45,8 @@ import {
   FileSpreadsheet,
   AlertCircle,
   CheckCircle,
+  Pin,
+  BarChart2,
 } from "lucide-react";
 import { format } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -132,10 +134,10 @@ const NAVForm = ({ products, navRecords, onSave, onCancel }) => {
             : "border-[#ccab6c]/20 bg-muted text-foreground/80"
         }`}>
           {isInception ? (
-            <span>📌 No previous NAV — this will be the <strong className="text-gold">inception record</strong>. Use $100.00.</span>
+            <span className="flex items-center gap-1.5"><Pin className="w-3.5 h-3.5 flex-shrink-0" /> No previous NAV — this will be the <strong className="text-gold">inception record</strong>. Use $100.00.</span>
           ) : (
-            <span>
-              📊 Previous NAV: <strong className="text-foreground">${prevNav.nav_per_unit.toFixed(2)}</strong>
+            <span className="flex items-center gap-1.5">
+              <BarChart2 className="w-3.5 h-3.5 flex-shrink-0" /> Previous NAV: <strong className="text-foreground">${prevNav.nav_per_unit.toFixed(2)}</strong>
               <span className="text-muted-foreground ml-2 text-xs">({format(new Date(prevNav.date), "dd MMM yyyy")})</span>
             </span>
           )}
@@ -275,7 +277,7 @@ const OverrideForm = ({ products, investors, investments, navRecords, existing, 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="rounded-lg border border-[#b38922]/30 bg-[#b38922]/5 px-4 py-3 text-sm text-gold/80">
-        ⚠️ <strong>Exceptional use only.</strong> Mid-month join proration is now <em>automatic</em> — you don't need an override for that. Use this only when a specific investor needs a <em>different</em> return than the standard NAV (e.g. a special fee arrangement or correcting a data error).
+        <span className="flex items-start gap-1.5"><AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" /><span><strong>Exceptional use only.</strong> Mid-month join proration is now <em>automatic</em> — you don't need an override for that. Use this only when a specific investor needs a <em>different</em> return than the standard NAV (e.g. a special fee arrangement or correcting a data error).</span></span>
       </div>
 
       {/* Fund */}

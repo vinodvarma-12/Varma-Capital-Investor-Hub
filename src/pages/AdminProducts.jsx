@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { User } from "@/entities/User";
 import { Product } from "@/entities/Product";
+import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,44 +10,68 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Edit, Trash2, Globe, Lock } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Globe, Lock, ImagePlus, X, Loader2 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const ProductForm = ({ product, onSave }) => {
   const [formData, setFormData] = useState(product || {
-    name: '',
-    description: '',
-    strategy: '',
-    minimum_ticket: 0,
-    lock_in_months: 0,
-    management_fee_percent: 0,
-    performance_fee_percent: 0,
-    redemption_penalty_percent: 0,
-    redemption_penalty_amount: 0,
-    risk_band: 'medium',
-    status: 'active',
-    high_water_mark: false,
-    hurdle_rate: 0,
-    is_public: false,
+    name: '', description: '', strategy: '',
+    minimum_ticket: 0, lock_in_months: 0,
+    management_fee_percent: 0, performance_fee_percent: 0,
+    redemption_penalty_percent: 0, redemption_penalty_amount: 0,
+    risk_band: 'medium', status: 'active',
+    high_water_mark: false, hurdle_rate: 0,
+    is_public: false, image_url: '',
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState(product?.image_url || '');
+  const imageInputRef = useRef(null);
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${Date.now()}.${ext}`;
+      // Remove old image if exists
+      if (formData.image_url) {
+        const oldPath = formData.image_url.split('/product-images/')[1]?.split('?')[0];
+        if (oldPath) await supabase.storage.from('product-images').remove([oldPath]);
+      }
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images').getPublicUrl(path);
+      const url = `${publicUrl}?t=${Date.now()}`;
+      setFormData(prev => ({ ...prev, image_url: url }));
+      setImagePreview(url);
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      toast.error('Failed to upload image.');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (formData.image_url) {
+      const path = formData.image_url.split('/product-images/')[1]?.split('?')[0];
+      if (path) await supabase.storage.from('product-images').remove([path]);
+    }
+    setFormData(prev => ({ ...prev, image_url: '' }));
+    setImagePreview('');
   };
 
   const handleSubmit = (e) => {
@@ -56,6 +81,44 @@ const ProductForm = ({ product, onSave }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto p-2">
+
+      {/* Product Image */}
+      <div className="space-y-2">
+        <Label>Product Image</Label>
+        {imagePreview ? (
+          <div className="relative w-full h-40 rounded-lg overflow-hidden border border-[#ccab6c]/30">
+            <img src={imagePreview} alt="Product" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div
+            onClick={() => imageInputRef.current?.click()}
+            className="w-full h-32 rounded-lg border-2 border-dashed border-[#ccab6c]/30 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#b38922]/60 transition-colors bg-muted/30"
+          >
+            {uploadingImage
+              ? <Loader2 className="w-6 h-6 text-gold/60 animate-spin" />
+              : <>
+                  <ImagePlus className="w-6 h-6 text-gold/60" />
+                  <span className="text-xs text-muted-foreground">Click to upload product image</span>
+                </>
+            }
+          </div>
+        )}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div><Label>Name</Label><Input value={formData.name} onChange={e => handleChange('name', e.target.value)} required /></div>
         <div><Label>Status</Label>
@@ -112,9 +175,7 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -149,16 +210,8 @@ export default function AdminProducts() {
     }
   };
 
-
-  const openFormForEdit = (product) => {
-    setEditingProduct(product);
-    setIsFormOpen(true);
-  };
-
-  const openFormForNew = () => {
-    setEditingProduct(null);
-    setIsFormOpen(true);
-  };
+  const openFormForEdit = (product) => { setEditingProduct(product); setIsFormOpen(true); };
+  const openFormForNew = () => { setEditingProduct(null); setIsFormOpen(true); };
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product? This will also delete all related investments, NAV records, and transactions.")) {
@@ -168,9 +221,7 @@ export default function AdminProducts() {
         toast.success('Product deleted.');
       } catch (error) {
         console.error("Error deleting product:", error);
-        const msg = error?.message || error?.details || JSON.stringify(error);
-        alert(`Failed to delete product:\n${msg}`);
-        toast.error('Error deleting product.');
+        toast.error(`Failed to delete product: ${error?.message || ''}`);
       }
     }
   };
@@ -190,15 +241,14 @@ export default function AdminProducts() {
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
               <DialogTrigger asChild>
                 <Button onClick={openFormForNew} className="bg-[#fedea0] text-black hover:bg-[#ccab6c]">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  New Product
+                  <PlusCircle className="w-4 h-4 mr-2" /> New Product
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground">
+              <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
                 </DialogHeader>
-                <ProductForm product={editingProduct} onSave={handleSaveProduct} />
+                <ProductForm key={editingProduct?.id ?? 'new'} product={editingProduct} onSave={handleSaveProduct} />
               </DialogContent>
             </Dialog>
           )}
@@ -211,6 +261,7 @@ export default function AdminProducts() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#ccab6c]/25">
+                    <TableHead className="text-gold/90">Image</TableHead>
                     <TableHead className="text-gold/90">Name</TableHead>
                     <TableHead className="text-gold/90">Risk Band</TableHead>
                     <TableHead className="text-gold/90">Min. Ticket</TableHead>
@@ -224,6 +275,12 @@ export default function AdminProducts() {
                 <TableBody>
                   {visibleProducts.map(product => (
                     <TableRow key={product.id} className="border-[#ccab6c]/25">
+                      <TableCell>
+                        {product.image_url
+                          ? <img src={product.image_url} alt={product.name} className="w-12 h-10 object-cover rounded-md border border-[#ccab6c]/20" />
+                          : <div className="w-12 h-10 rounded-md bg-muted flex items-center justify-center"><ImagePlus className="w-4 h-4 text-muted-foreground" /></div>
+                        }
+                      </TableCell>
                       <TableCell className="font-medium text-foreground">{product.name}</TableCell>
                       <TableCell className="capitalize text-foreground/80">{product.risk_band}</TableCell>
                       <TableCell className="text-foreground/80">${product.minimum_ticket?.toLocaleString()}</TableCell>

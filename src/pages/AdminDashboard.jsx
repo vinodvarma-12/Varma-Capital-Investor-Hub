@@ -630,9 +630,10 @@ export default function AdminDashboard() {
                 if (!prod) return null;
                 const belowMin = amt < prod.minimum_ticket;
                 return (
-                  <p className={`text-xs mt-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${belowMin ? 'text-red-400' : 'text-muted-foreground'}`}>
+                    {belowMin && <AlertCircle className="w-3 h-3 flex-shrink-0" />}
                     {belowMin
-                      ? `⚠ Below minimum ticket of $${prod.minimum_ticket.toLocaleString()}`
+                      ? `Below minimum ticket of $${prod.minimum_ticket.toLocaleString()}`
                       : `Minimum ticket: $${prod.minimum_ticket.toLocaleString()}`}
                   </p>
                 );
