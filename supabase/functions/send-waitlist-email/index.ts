@@ -8,11 +8,10 @@ const cors = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
-  const GHL_API_KEY = Deno.env.get("GHL_API_KEY");
-  const GHL_LOCATION_ID = Deno.env.get("GHL_LOCATION_ID");
+  const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
 
-  if (!GHL_API_KEY || !GHL_LOCATION_ID) {
-    return Response.json({ success: false, error: "GHL credentials not configured" }, { status: 500, headers: cors });
+  if (!SENDGRID_API_KEY) {
+    return Response.json({ success: false, error: "Email service not configured" }, { status: 500, headers: cors });
   }
 
   try {
@@ -24,36 +23,7 @@ Deno.serve(async (req) => {
 
     const firstName = full_name.split(" ")[0];
 
-    // Upsert contact in GHL
-    const contactRes = await fetch("https://services.leadconnectorhq.com/contacts/upsert", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GHL_API_KEY}`,
-        "Content-Type": "application/json",
-        Version: "2021-07-28",
-      },
-      body: JSON.stringify({
-        locationId: GHL_LOCATION_ID,
-        email,
-        name: full_name,
-        firstName: full_name.split(" ")[0],
-        lastName: full_name.split(" ").slice(1).join(" ") || "",
-        tags: ["waitlist"],
-      }),
-    });
-
-    let contactId: string | undefined;
-    if (contactRes.ok) {
-      const contactData = await contactRes.json();
-      contactId = contactData?.contact?.id;
-    }
-
-    if (!contactId) {
-      console.error("Could not upsert GHL contact for", email);
-      return Response.json({ success: false, error: "Failed to create GHL contact" }, { status: 500, headers: cors });
-    }
-
-    // Send confirmation email via GHL
+    // Send confirmation email via SendGrid
     const emailHtml = `
       <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; background: #0c0c0c; color: #fafafa; padding: 40px 32px; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 32px;">
@@ -92,26 +62,22 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const emailRes = await fetch("https://services.leadconnectorhq.com/conversations/messages", {
+    const emailRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GHL_API_KEY}`,
+        Authorization: `Bearer ${SENDGRID_API_KEY}`,
         "Content-Type": "application/json",
-        Version: "2021-07-28",
       },
       body: JSON.stringify({
-        type: "Email",
-        locationId: GHL_LOCATION_ID,
-        contactId,
+        from: { email: "support@varmacapital.io", name: "Varma Capital" },
+        to: [{ email, name: full_name }],
         subject: "You're on the Varma Capital Waitlist",
-        html: emailHtml,
-        emailFrom: "Varma Capital <support@varmacapital.io>",
+        content: [{ type: "text/html", value: emailHtml }],
       }),
     });
 
     if (!emailRes.ok) {
       const errText = await emailRes.text();
-      console.error("GHL email error:", errText);
       return Response.json({ success: false, error: "Email delivery failed", details: errText }, { status: 500, headers: cors });
     }
 

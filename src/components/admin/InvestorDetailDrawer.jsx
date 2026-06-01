@@ -4,6 +4,7 @@ import { Investment } from "@/entities/Investment";
 import { LockInOverrides } from "@/entities/LockInOverrides";
 import { AuditLog } from "@/entities/AuditLog";
 import { Transaction } from "@/entities/Transaction";
+import { NAV } from "@/entities/NAV";
 import { Document } from "@/entities/Document";
 import { ProductAccess } from "@/entities/ProductAccess";
 import { SupportTicket } from "@/entities/SupportTicket";
@@ -621,6 +622,23 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
         payment_confirmed: holdingForm.payment_confirmed,
       });
 
+      // Auto-create a subscription transaction to match the holding
+      await Transaction.create({
+        investor_email: investorEmail,
+        product_id: holdingForm.product_id,
+        type: 'subscription',
+        amount: parseFloat(holdingForm.invested_amount),
+        units: holdingForm.current_units ? parseFloat(holdingForm.current_units) : null,
+        nav_per_unit: holdingForm.cost_basis && holdingForm.current_units
+          ? parseFloat(holdingForm.cost_basis) / parseFloat(holdingForm.current_units)
+          : null,
+        lock_in_months: holdingForm.lock_in_months && holdingForm.lock_in_months !== 'none'
+          ? parseInt(holdingForm.lock_in_months) : null,
+        transaction_date: holdingForm.purchase_date || new Date().toISOString().split('T')[0],
+        status: holdingForm.payment_confirmed ? 'completed' : 'pending',
+        notes: 'Auto-created from holding',
+      });
+
       // Grant investor access to this product so it appears on their /products page
       await ProductAccess.grant({
         investor_email: investorEmail,
@@ -1138,6 +1156,7 @@ const EMPTY_TX_FORM = {
   amount: '',
   units: '',
   nav_per_unit: '',
+  lock_in_months: '',
   transaction_date: new Date().toISOString().split('T')[0],
   status: 'completed',
   notes: '',
@@ -1149,6 +1168,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_TX_FORM);
   const [saving, setSaving] = useState(false);
+  const [loadingNav, setLoadingNav] = useState(false);
 
   const loadTransactions = async () => {
     setLoading(true);
@@ -1162,19 +1182,49 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
     }
   };
 
-  useEffect(() => {
-    loadTransactions();
-  }, [investor.email]);
+  useEffect(() => { loadTransactions(); }, [investor.email]);
+
+  // Fetch latest NAV when product changes
+  const fetchLatestNav = async (productId) => {
+    if (!productId) return;
+    setLoadingNav(true);
+    try {
+      const navs = await NAV.filter({ product_id: productId }, '-date', 1);
+      if (navs.length > 0) {
+        const latestNav = navs[0].nav_per_unit;
+        setForm(prev => {
+          const amount = parseFloat(prev.amount) || 0;
+          const units = latestNav > 0 && amount > 0 ? (amount / latestNav).toFixed(4) : prev.units;
+          return { ...prev, nav_per_unit: String(latestNav), units };
+        });
+      }
+    } catch (e) {
+      console.error('Failed to fetch NAV:', e);
+    } finally {
+      setLoadingNav(false);
+    }
+  };
 
   const handleOpenAdd = () => {
-    // Pre-select the investor's first product if available
     const firstProductId = investments?.[0]?.product_id ?? '';
     setForm({ ...EMPTY_TX_FORM, product_id: firstProductId });
     setAddOpen(true);
+    if (firstProductId) fetchLatestNav(firstProductId);
   };
 
   const handleFormChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm(prev => {
+      const updated = { ...prev, [field]: value };
+      // Auto-calculate units when amount or nav_per_unit changes
+      const amount = parseFloat(field === 'amount' ? value : prev.amount) || 0;
+      const nav = parseFloat(field === 'nav_per_unit' ? value : prev.nav_per_unit) || 0;
+      if (nav > 0 && amount > 0) {
+        updated.units = (amount / nav).toFixed(4);
+      }
+      return updated;
+    });
+    // Fetch NAV from DB when product changes
+    if (field === 'product_id') fetchLatestNav(value);
   };
 
   const handleSave = async () => {
@@ -1185,7 +1235,6 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
     setSaving(true);
     try {
       const currentUser = await User.me();
-
       await Transaction.create({
         investor_email: investor.email,
         product_id: form.product_id,
@@ -1193,10 +1242,38 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
         amount: parseFloat(form.amount),
         units: form.units ? parseFloat(form.units) : null,
         nav_per_unit: form.nav_per_unit ? parseFloat(form.nav_per_unit) : null,
+        lock_in_months: form.lock_in_months ? parseInt(form.lock_in_months) : null,
         transaction_date: form.transaction_date,
         status: form.status,
         notes: form.notes || null,
       });
+
+      // Update the matching investment record so Holdings & Overview reflect the change
+      if (form.status === 'completed') {
+        const matchingInvestment = investments?.find(i => i.product_id === form.product_id);
+        if (matchingInvestment) {
+          const txAmount = parseFloat(form.amount);
+          const txUnits = form.units ? parseFloat(form.units) : 0;
+          let newAmount = parseFloat(matchingInvestment.invested_amount) || 0;
+          let newUnits = parseFloat(matchingInvestment.current_units) || 0;
+
+          if (form.type === 'subscription') {
+            newAmount += txAmount;
+            newUnits += txUnits;
+          } else if (form.type === 'redemption') {
+            newAmount -= txAmount;
+            newUnits -= txUnits;
+          } else if (form.type === 'fee' || form.type === 'penalty') {
+            newAmount -= txAmount;
+          }
+          // dividend = cash payout to investor, does not affect invested_amount or units
+
+          await Investment.update(matchingInvestment.id, {
+            invested_amount: Math.max(0, newAmount),
+            current_units: Math.max(0, newUnits),
+          });
+        }
+      }
 
       await AuditLog.create({
         user_email: currentUser.email,
@@ -1212,7 +1289,6 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
           transaction_date: form.transaction_date,
         },
       });
-
       setAddOpen(false);
       setForm(EMPTY_TX_FORM);
       await loadTransactions();
@@ -1225,10 +1301,13 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
     }
   };
 
-  // Products available to this investor (their holdings), falling back to all products
-  const availableProducts = investments && investments.length > 0
-    ? products.filter(p => investments.some(i => i.product_id === p.id))
-    : products;
+  // products prop is already filtered to active-only by the parent
+  const activeProducts = products;
+
+  // Selected product's investment (for lock-in info)
+  const selectedInvestment = form.product_id
+    ? investments?.find(i => i.product_id === form.product_id)
+    : null;
 
   return (
     <>
@@ -1256,64 +1335,83 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
                   <TableHead className={TABLE_HEAD_CLASS}>Units</TableHead>
                   <TableHead className={TABLE_HEAD_CLASS}>NAV / Unit</TableHead>
                   <TableHead className={TABLE_HEAD_CLASS}>Amount</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Lock-in</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Expiry Date</TableHead>
+                  <TableHead className={TABLE_HEAD_CLASS}>Days Left</TableHead>
                   <TableHead className={TABLE_HEAD_CLASS}>Status</TableHead>
                   <TableHead className={TABLE_HEAD_CLASS}>Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map(tx => (
-                  <TableRow key={tx.id} className={TABLE_ROW_CLASS}>
-                    <TableCell className="text-foreground/80 whitespace-nowrap">
-                      {tx.transaction_date ? format(new Date(tx.transaction_date), 'MMM dd, yyyy') : '—'}
-                    </TableCell>
-                    <TableCell className="text-foreground/80">{getProductName(products, tx.product_id)}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`capitalize ${
+                {transactions.map(tx => {
+                  // Calculate expiry date from transaction_date + lock_in_months
+                  let expiryDate = null;
+                  if (tx.lock_in_months && tx.transaction_date) {
+                    expiryDate = new Date(tx.transaction_date);
+                    expiryDate.setMonth(expiryDate.getMonth() + tx.lock_in_months);
+                  }
+                  const daysLeft = expiryDate ? differenceInDays(expiryDate, new Date()) : null;
+
+                  return (
+                    <TableRow key={tx.id} className={TABLE_ROW_CLASS}>
+                      <TableCell className="text-foreground/80 whitespace-nowrap">
+                        {tx.transaction_date ? format(new Date(tx.transaction_date), 'MMM dd, yyyy') : '—'}
+                      </TableCell>
+                      <TableCell className="text-foreground/80">{getProductName(products, tx.product_id)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`capitalize ${
                           tx.type === 'subscription' ? 'border-green-400 text-green-400' :
                           tx.type === 'redemption' ? 'border-red-400 text-red-400' :
                           tx.type === 'dividend' ? 'border-blue-400 text-blue-400' :
                           tx.type === 'fee' ? 'border-orange-400 text-orange-400' :
                           'border-[#ccab6c]/45 text-gold/90'
-                        }`}
-                      >
-                        {tx.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-foreground/80">
-                      {tx.units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '—'}
-                    </TableCell>
-                    <TableCell className="text-foreground/80">
-                      {tx.nav_per_unit ? formatCurrency(tx.nav_per_unit) : '—'}
-                    </TableCell>
-                    <TableCell className={`font-medium ${
-                      tx.type === 'subscription' || tx.type === 'dividend' ? 'text-green-400' :
-                      tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty' ? 'text-red-400' :
-                      'text-foreground/80'
-                    }`}>
-                      {(tx.type === 'subscription' || tx.type === 'dividend') ? '+' :
-                       (tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty') ? '-' : ''}
-                      {formatCurrency(tx.amount)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
+                        }`}>
+                          {tx.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-foreground/80">
+                        {tx.units?.toLocaleString(undefined, { maximumFractionDigits: 4 }) || '—'}
+                      </TableCell>
+                      <TableCell className="text-foreground/80">
+                        {tx.nav_per_unit ? formatCurrency(tx.nav_per_unit) : '—'}
+                      </TableCell>
+                      <TableCell className={`font-medium ${
+                        tx.type === 'subscription' || tx.type === 'dividend' ? 'text-green-400' :
+                        tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty' ? 'text-red-400' :
+                        'text-foreground/80'
+                      }`}>
+                        {(tx.type === 'subscription' || tx.type === 'dividend') ? '+' :
+                         (tx.type === 'redemption' || tx.type === 'fee' || tx.type === 'penalty') ? '-' : ''}
+                        {formatCurrency(tx.amount)}
+                      </TableCell>
+                      <TableCell className="text-foreground/80 whitespace-nowrap">
+                        {tx.lock_in_months ? `${tx.lock_in_months} months` : '—'}
+                      </TableCell>
+                      <TableCell className="text-foreground/80 whitespace-nowrap">
+                        {expiryDate ? format(expiryDate, 'MMM dd, yyyy') : '—'}
+                      </TableCell>
+                      <TableCell className={`whitespace-nowrap font-medium ${
+                        daysLeft == null ? 'text-muted-foreground' :
+                        daysLeft > 0 ? 'text-red-400' : 'text-green-400'
+                      }`}>
+                        {daysLeft == null ? '—' : daysLeft > 0 ? `${daysLeft} days` : 'Expired'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
                           tx.status === 'completed' ? 'bg-green-900 text-green-400 border-green-700' :
                           tx.status === 'pending' ? 'bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45' :
                           tx.status === 'failed' ? 'bg-red-900 text-red-400 border-red-700' :
                           'bg-muted text-gold/90'
-                        }
-                      >
-                        {tx.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm max-w-[160px] truncate">
-                      {tx.notes || '—'}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        }>
+                          {tx.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm max-w-[160px] truncate">
+                        {tx.notes || '—'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableShell>
@@ -1329,43 +1427,82 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+
             {/* Product */}
             <div>
               <Label className="text-gold/90">Product <span className="text-red-400">*</span></Label>
               <Select value={form.product_id} onValueChange={v => handleFormChange('product_id', v)}>
                 <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
-                  <SelectValue placeholder="Select product" />
+                  <SelectValue placeholder="Select active product" />
                 </SelectTrigger>
                 <SelectContent className="bg-muted border-[#ccab6c]/20">
-                  {availableProducts.map(p => (
+                  {activeProducts.map(p => (
                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                   ))}
-                  {/* Show remaining products not in holdings */}
-                  {investments && investments.length > 0 &&
-                    products
-                      .filter(p => !investments.some(i => i.product_id === p.id))
-                      .map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-muted-foreground">{p.name} (not held)</SelectItem>
-                      ))
-                  }
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Type & Date */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Lock-in preview — recalculates live from form values */}
+            {(form.lock_in_months || selectedInvestment) && (() => {
+              // Use form lock_in_months + transaction_date for live preview
+              let expiryDate = null;
+              if (form.lock_in_months && form.transaction_date) {
+                expiryDate = new Date(form.transaction_date);
+                expiryDate.setMonth(expiryDate.getMonth() + parseInt(form.lock_in_months));
+              } else if (selectedInvestment?.lock_in_end_date) {
+                expiryDate = new Date(selectedInvestment.lock_in_end_date);
+              }
+              const lockInMonths = form.lock_in_months || selectedInvestment?.lock_in_months;
+              const daysLeft = expiryDate ? differenceInDays(expiryDate, new Date()) : null;
+              return (
+                <div className="rounded-lg bg-muted/50 border border-[#ccab6c]/20 px-3 py-2.5 grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <p className="text-gold/70">Lock-in Period</p>
+                    <p className="text-foreground font-medium mt-0.5">
+                      {lockInMonths ? `${lockInMonths} months` : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gold/70">Expiry Date</p>
+                    <p className="text-foreground font-medium mt-0.5">
+                      {expiryDate ? format(expiryDate, 'dd MMM yyyy') : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gold/70">Days Remaining</p>
+                    <p className={`font-medium mt-0.5 ${daysLeft == null ? 'text-muted-foreground' : daysLeft > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                      {daysLeft == null ? '—' : daysLeft > 0 ? `${daysLeft} days` : 'Expired'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Type, Lock-in & Date */}
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label className="text-gold/90">Type <span className="text-red-400">*</span></Label>
                 <Select value={form.type} onValueChange={v => handleFormChange('type', v)}>
-                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-muted border-[#ccab6c]/20">
                     <SelectItem value="subscription">Subscription</SelectItem>
                     <SelectItem value="redemption">Redemption</SelectItem>
                     <SelectItem value="dividend">Dividend</SelectItem>
                     <SelectItem value="fee">Fee</SelectItem>
                     <SelectItem value="penalty">Penalty</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-gold/90">Lock-in Months</Label>
+                <Select value={form.lock_in_months || 'none'} onValueChange={v => handleFormChange('lock_in_months', v === 'none' ? '' : v)}>
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1"><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent className="bg-muted border-[#ccab6c]/20">
+                    <SelectItem value="none">None</SelectItem>
+                    {[6,12,18,24,36].map(m => (
+                      <SelectItem key={m} value={String(m)}>{m} months</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1385,10 +1522,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
               <div>
                 <Label className="text-gold/90">Amount ($) <span className="text-red-400">*</span></Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
+                  type="number" min="0" step="0.01" placeholder="0.00"
                   value={form.amount}
                   onChange={e => handleFormChange('amount', e.target.value)}
                   className="bg-muted border-[#ccab6c]/20 mt-1"
@@ -1397,9 +1531,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
               <div>
                 <Label className="text-gold/90">Status</Label>
                 <Select value={form.status} onValueChange={v => handleFormChange('status', v)}>
-                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-muted border-[#ccab6c]/20">
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
@@ -1410,29 +1542,30 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
               </div>
             </div>
 
-            {/* Units & NAV */}
+            {/* NAV & Units — auto-filled */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-gold/90">Units <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Label className="text-gold/90 flex items-center gap-1">
+                  NAV / Unit
+                  {loadingNav && <span className="text-xs text-muted-foreground">(loading…)</span>}
+                  {!loadingNav && form.nav_per_unit && <span className="text-xs text-green-400">(from DB)</span>}
+                </Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  placeholder="e.g. 100.5"
-                  value={form.units}
-                  onChange={e => handleFormChange('units', e.target.value)}
+                  type="number" min="0" step="0.0001" placeholder="e.g. 105.25"
+                  value={form.nav_per_unit}
+                  onChange={e => handleFormChange('nav_per_unit', e.target.value)}
                   className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
               <div>
-                <Label className="text-gold/90">NAV / Unit <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Label className="text-gold/90 flex items-center gap-1">
+                  Units
+                  {form.units && form.nav_per_unit && <span className="text-xs text-green-400">(auto)</span>}
+                </Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.0001"
-                  placeholder="e.g. 105.25"
-                  value={form.nav_per_unit}
-                  onChange={e => handleFormChange('nav_per_unit', e.target.value)}
+                  type="number" min="0" step="0.0001" placeholder="auto-calculated"
+                  value={form.units}
+                  onChange={e => handleFormChange('units', e.target.value)}
                   className="bg-muted border-[#ccab6c]/20 mt-1"
                 />
               </div>
@@ -1767,7 +1900,7 @@ export default function InvestorDetailDrawer({
             <LockInsTab investor={investor} investments={investments} products={products} />
           </TabsContent>
           <TabsContent value="transactions" className="mt-0">
-            <TransactionsTab investor={investor} products={products} investments={investments} onDataChange={onDataChange} />
+            <TransactionsTab investor={investor} products={products.filter(p => p.status === 'active' && p.is_public)} investments={investments} onDataChange={onDataChange} />
           </TabsContent>
           <TabsContent value="documents" className="mt-0">
             <DocumentsTab investor={investor} />

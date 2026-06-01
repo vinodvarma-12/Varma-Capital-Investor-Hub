@@ -34,6 +34,13 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: "Email and Full Name required" }, { status: 400, headers: cors });
     }
 
+    // Role — only super_admin can invite admins
+    const allowedRoles = ["investor", "admin"];
+    const inviteeRole = allowedRoles.includes(body?.role) ? body.role : "investor";
+    if (inviteeRole === "admin" && profile.role !== "super_admin") {
+      return Response.json({ success: false, error: "Only super admins can invite admins" }, { status: 403, headers: cors });
+    }
+
     // Optional onboarding fields
     const phone = body?.phone ? String(body.phone).trim() : null;
     const country = body?.country ? String(body.country).trim() : null;
@@ -49,6 +56,7 @@ Deno.serve(async (req) => {
       full_name: fullName,
       invitation_token: token,
       invited_by: profile.email,
+      role: inviteeRole,
       status: "pending",
       phone,
       country,
@@ -64,53 +72,56 @@ Deno.serve(async (req) => {
     }
 
     const invitationLink = `${baseUrl}/AcceptInvitation?token=${token}`;
+    const isAdmin = inviteeRole === "admin";
+    const emailSubject = isAdmin
+      ? "You've been added as an Admin — Varma Capital"
+      : "Welcome to Varma Capital - Activate Your Account";
     const emailBody = `
-      <p>You have been invited by <strong>${profile.full_name || profile.email}</strong> to Varma Capital.</p>
-      <p><a href="${invitationLink}">Activate your account</a></p>
+      <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; background: #0c0c0c; color: #fafafa; padding: 40px 32px; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="color: #ccab6c; font-size: 24px; margin: 0;">Varma Capital</h1>
+        </div>
+        <p style="font-size: 16px;">Dear ${fullName},</p>
+        <p style="font-size: 15px; color: #d4cfc9; line-height: 1.7;">
+          ${isAdmin
+            ? `You have been granted <strong style="color:#fedea0">Admin access</strong> to the Varma Capital Investor Hub by <strong>${profile.full_name || profile.email}</strong>.`
+            : `You have been invited by <strong>${profile.full_name || profile.email}</strong> to join the Varma Capital Investor Hub.`
+          }
+        </p>
+        <p style="font-size: 15px; color: #d4cfc9; line-height: 1.7;">
+          Click the button below to set your password and activate your account.
+        </p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${invitationLink}" style="background: #ccab6c; color: #000; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px;">
+            Activate Account
+          </a>
+        </div>
+        <p style="font-size: 12px; color: #6b6b6b; text-align: center;">
+          If the button doesn't work, copy this link: ${invitationLink}
+        </p>
+        <hr style="border: none; border-top: 1px solid #2a2a2a; margin: 32px 0;" />
+        <p style="font-size: 11px; color: #6b6b6b; text-align: center; margin: 0;">
+          © Varma Capital
+        </p>
+      </div>
     `;
 
-    const GHL_API_KEY = Deno.env.get("GHL_API_KEY");
-    const GHL_LOCATION_ID = Deno.env.get("GHL_LOCATION_ID");
-    if (!GHL_API_KEY || !GHL_LOCATION_ID) {
+    const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+    if (!SENDGRID_API_KEY) {
       return Response.json({ success: false, error: "Email service not configured" }, { status: 500, headers: cors });
     }
 
-    const contactResponse = await fetch("https://services.leadconnectorhq.com/contacts/upsert", {
+    const emailResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GHL_API_KEY}`,
+        Authorization: `Bearer ${SENDGRID_API_KEY}`,
         "Content-Type": "application/json",
-        Version: "2021-07-28",
       },
       body: JSON.stringify({
-        locationId: GHL_LOCATION_ID,
-        email: inviteeEmail,
-        name: fullName,
-        firstName: fullName.split(" ")[0],
-        lastName: fullName.split(" ").slice(1).join(" ") || "",
-      }),
-    });
-
-    let contactId: string | undefined;
-    if (contactResponse.ok) {
-      const contactData = await contactResponse.json();
-      contactId = contactData?.contact?.id;
-    }
-
-    const emailResponse = await fetch("https://services.leadconnectorhq.com/conversations/messages", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GHL_API_KEY}`,
-        "Content-Type": "application/json",
-        Version: "2021-07-28",
-      },
-      body: JSON.stringify({
-        type: "Email",
-        locationId: GHL_LOCATION_ID,
-        contactId,
-        subject: "Welcome to Varma Capital - Activate Your Account",
-        html: emailBody,
-        emailFrom: "Varma Capital <support@varmacapital.io>",
+        from: { email: "support@varmacapital.io", name: "Varma Capital" },
+        to: [{ email: inviteeEmail, name: fullName }],
+        subject: emailSubject,
+        content: [{ type: "text/html", value: emailBody }],
       }),
     });
 
@@ -119,7 +130,7 @@ Deno.serve(async (req) => {
       return Response.json({
         success: false,
         error: "Email delivery failed",
-        details: `GoHighLevel returned ${emailResponse.status}: ${errorText}`,
+        details: `SendGrid returned ${emailResponse.status}: ${errorText}`,
       }, { status: 500, headers: cors });
     }
 

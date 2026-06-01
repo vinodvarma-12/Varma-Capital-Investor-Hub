@@ -22,7 +22,8 @@ import {
   History,
   Lightbulb,
   UserPlus,
-  RefreshCw
+  RefreshCw,
+  UserCog
 } from "lucide-react";
 import {
   Sidebar,
@@ -226,6 +227,7 @@ export default function Layout({ children, currentPageName }) {
   // Super Admin-only features (in addition to investor + admin features)
   const superAdminOnlyItems = [
     { title: "Super Admin Dashboard", url: createPageUrl("SuperAdminDashboard"), icon: Shield, divider: true },
+    { title: "Manage Admins", url: createPageUrl("ManageAdmins"), icon: UserCog },
     { title: "Lock-in Management", url: createPageUrl("AdminLockIns"), icon: Lock },
     { title: "Insights & Content", url: createPageUrl("AdminInsights"), icon: Lightbulb },
     { title: "System Settings", url: createPageUrl("AdminSettings"), icon: Settings },

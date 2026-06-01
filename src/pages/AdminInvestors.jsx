@@ -154,8 +154,8 @@ export default function AdminInvestors() {
     loadCrmData();
   }, []);
 
-  const loadCrmData = async () => {
-    setLoading(true);
+  const loadCrmData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [allUsers, allInvestments, productsData, navData, fabricatedData] = await Promise.all([
         User.list(),
@@ -173,7 +173,7 @@ export default function AdminInvestors() {
     } catch (error) {
       console.error("Error loading CRM data:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -410,7 +410,7 @@ export default function AdminInvestors() {
                   products={products}
                   navs={navs}
                   fabricatedReturns={fabricatedReturns.filter(fr => fr.investor_email === selectedInvestor.email)}
-                  onDataChange={loadCrmData}
+                  onDataChange={() => loadCrmData(true)}
                   additionalTabs={[
                     {
                       id: "otp",

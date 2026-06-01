@@ -24,35 +24,143 @@ Deno.serve(async (req) => {
     return Response.json({ error: "GHL credentials not configured" }, { status: 500, headers: cors });
   }
 
-  try {
-    const res = await fetch(
-      `https://services.leadconnectorhq.com/medias/files?locationId=${locationId}&type=file`,
-      {
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Version": "2021-07-28",
-          "Accept": "application/json",
-        },
-      }
-    );
+  const ghlHeaders = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Version": "2021-07-28",
+    "Accept": "application/json",
+  };
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`GHL API error ${res.status}: ${text}`);
+  // Blogs API requires version 2023-02-21
+  const ghlHeadersV2 = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Version": "2023-02-21",
+    "Accept": "application/json",
+  };
+
+  try {
+    const files: Record<string, unknown>[] = [];
+    const seenIds = new Set<string>();
+
+    const addMediaFiles = (rawMedia: Record<string, unknown>[]) => {
+      for (const f of rawMedia) {
+        const id = String(f._id ?? f.id ?? f.url ?? "");
+        if (seenIds.has(id)) continue;
+        seenIds.add(id);
+        files.push({
+          id,
+          name: f.name,
+          url: f.url,
+          type: f.fileType ?? f.type ?? "file",
+          size: f.size ?? null,
+          created_at: f.createdAt ?? null,
+          thumbnail: f.thumbnailUrl ?? null,
+          source: "media",
+        });
+      }
+    };
+
+    // Step 1: Fetch root-level files and folders together
+    const [rootFilesRes, foldersRes, docsRes] = await Promise.all([
+      fetch(`https://services.leadconnectorhq.com/medias/files?locationId=${locationId}&type=file`, { headers: ghlHeaders }),
+      fetch(`https://services.leadconnectorhq.com/medias/files?locationId=${locationId}&type=folder`, { headers: ghlHeaders }),
+      fetch(`https://services.leadconnectorhq.com/proposals/document?locationId=${locationId}`, { headers: ghlHeaders }),
+    ]);
+
+    // Root-level files
+    if (rootFilesRes.ok) {
+      const json = await rootFilesRes.json();
+      addMediaFiles(json.files ?? json.medias ?? json.data ?? []);
     }
 
-    const json = await res.json();
-    const rawFiles = json.files ?? json.medias ?? json.data ?? [];
+    // Step 2: For each folder, fetch its files
+    if (foldersRes.ok) {
+      const foldersJson = await foldersRes.json();
+      const folders = foldersJson.files ?? foldersJson.medias ?? foldersJson.data ?? [];
 
-    const files = rawFiles.map((f: Record<string, unknown>) => ({
-      id: f._id ?? f.id ?? f.url,  // GHL uses _id in some versions
-      name: f.name,
-      url: f.url,
-      type: f.fileType ?? f.type,
-      size: f.size,
-      created_at: f.createdAt,
-      thumbnail: f.thumbnailUrl ?? null,
-    }));
+      const folderFileResults = await Promise.allSettled(
+        (folders as Record<string, unknown>[]).map(folder => {
+          const folderId = folder._id ?? folder.id;
+          return fetch(
+            `https://services.leadconnectorhq.com/medias/files?locationId=${locationId}&type=file&parentId=${folderId}`,
+            { headers: ghlHeaders }
+          ).then(r => r.ok ? r.json() : null);
+        })
+      );
+
+      for (const result of folderFileResults) {
+        if (result.status !== "fulfilled" || !result.value) continue;
+        const json = result.value;
+        addMediaFiles(json.files ?? json.medias ?? json.data ?? []);
+      }
+    }
+
+    // Documents & Contracts
+    if (docsRes.ok) {
+      const docsJson = await docsRes.json();
+      const rawDocs = docsJson.documents ?? docsJson.data ?? [];
+      for (const d of rawDocs as Record<string, unknown>[]) {
+        const docUrl = d.viewUrl ?? d.url ?? d.previewUrl ?? null;
+        if (!docUrl) continue;
+        files.push({
+          id: d._id ?? d.id,
+          name: d.title ?? d.name ?? "Untitled Document",
+          url: docUrl,
+          type: "document",
+          size: null,
+          created_at: d.createdAt ?? d.dateCreated ?? null,
+          thumbnail: d.previewUrl ?? null,
+          source: "documents",
+        });
+      }
+    }
+
+    // Blog posts — first get all blogs for this location, then fetch posts per blog
+    const blogsRes = await fetch(
+      `https://services.leadconnectorhq.com/blogs/site/all?locationId=${locationId}&limit=20&skip=0`,
+      { headers: ghlHeadersV2 }
+    );
+
+    if (blogsRes.ok) {
+      const blogsJson = await blogsRes.json();
+      const blogs = blogsJson.blogs ?? blogsJson.data ?? blogsJson.sites ?? blogsJson.results ?? [];
+
+      // Fetch posts for all blogs in parallel using correct endpoint
+      const postsResults = await Promise.allSettled(
+        (blogs as Record<string, unknown>[]).map((blog) => {
+          const blogId = blog._id ?? blog.id;
+          return fetch(
+            `https://services.leadconnectorhq.com/blogs/posts/all?locationId=${locationId}&blogId=${blogId}&limit=50&skip=0&status=PUBLISHED`,
+            { headers: ghlHeadersV2 }
+          ).then(r => r.ok ? r.json() : null);
+        })
+      );
+
+      for (const result of postsResults) {
+        if (result.status !== "fulfilled" || !result.value) continue;
+        const json = result.value;
+        const posts = json.posts ?? json.data ?? [];
+        for (const p of posts as Record<string, unknown>[]) {
+          // Only include published posts
+          if (p.status && p.status !== "PUBLISHED") continue;
+          const postUrl = p.url ?? p.canonicalLink ?? null;
+          if (!postUrl) continue;
+          const id = String(p._id ?? p.id ?? "");
+          if (seenIds.has(id)) continue;
+          seenIds.add(id);
+          files.push({
+            id,
+            name: p.title ?? "Untitled Post",
+            url: postUrl,
+            type: "blog",
+            size: null,
+            created_at: p.publishedAt ?? p.createdAt ?? null,
+            thumbnail: p.imageUrl ?? p.featuredImage ?? null,
+            description: p.description ?? p.excerpt ?? null,
+            source: "blog",
+          });
+        }
+      }
+    }
 
     return Response.json({ success: true, data: files }, { headers: cors });
   } catch (e) {

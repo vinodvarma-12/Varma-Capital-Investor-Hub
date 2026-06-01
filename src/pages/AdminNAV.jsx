@@ -6,7 +6,6 @@ import { Investment } from "@/entities/Investment";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@/entities/User";
 import { AuditLog } from "@/entities/AuditLog";
-import { ExtractDataFromUploadedFile, UploadFile } from "@/integrations/Core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -401,95 +400,122 @@ const OverrideForm = ({ products, investors, investments, navRecords, existing, 
   );
 };
 
+const parseQuarterlyReturn = (val) => {
+  if (!val) return null;
+  const s = String(val).trim();
+  if (s === "Inception" || s === "Current" || s === "") return null;
+  const n = parseFloat(s.replace(/[+%]/g, ""));
+  return isNaN(n) ? null : n;
+};
+
+const parseCSV = (text) => {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((line) => {
+    // Split respecting quoted fields
+    const cols = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|(?<=,)$|^(?=,))/g) || line.split(",");
+    const row = {};
+    headers.forEach((h, i) => {
+      row[h] = cols[i] ? String(cols[i]).replace(/^"|"$/g, "").trim() : "";
+    });
+    return row;
+  });
+};
+
 const CSVUploadForm = ({ products, onUpload, onCancel }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [productId, setProductId] = useState("");
+  const [preview, setPreview] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleUpload = async () => {
-    if (!selectedFile || !productId) return;
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    setError("");
+    setPreview([]);
+    if (!file) return;
 
-    setUploading(true);
-    try {
-      // Upload file first
-      const { file_url } = await UploadFile({ file: selectedFile });
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const rows = parseCSV(ev.target.result);
+        const records = rows
+          .filter((r) => r.date && r.nav_per_unit)
+          .map((r) => ({
+            date: r.date,
+            nav_per_unit: parseFloat(r.nav_per_unit),
+            return_percent: parseQuarterlyReturn(r.quarterly_return ?? r.return_percent ?? null),
+            admin_notes: r.notes ?? r.admin_notes ?? null,
+          }))
+          .filter((r) => !isNaN(r.nav_per_unit));
 
-      // Extract data from CSV
-      const result = await ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: {
-          type: "object",
-          properties: {
-            records: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  date: { type: "string" },
-                  nav_per_unit: { type: "number" },
-                  return_percent: { type: "number" },
-                  investor_email: { type: "string" },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (result.status === "success") {
-        onUpload(result.output.records, productId);
-      } else {
-        alert("Error processing CSV: " + result.details);
+        if (records.length === 0) {
+          setError("No valid rows found. Make sure the file has date and nav_per_unit columns.");
+          return;
+        }
+        setPreview(records);
+      } catch (err) {
+        setError("Failed to parse CSV: " + err.message);
       }
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert("Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleUpload = () => {
+    if (!preview.length || !productId) return;
+    setUploading(true);
+    onUpload(preview, productId);
   };
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Product</Label>
+      <div className="space-y-1.5">
+        <Label className="text-foreground/80">Fund <span className="text-red-400">*</span></Label>
         <Select value={productId} onValueChange={setProductId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select product" />
+          <SelectTrigger className={inputCls}>
+            <SelectValue placeholder="Select fund…" />
           </SelectTrigger>
           <SelectContent>
             {products.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.name}
-              </SelectItem>
+              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <Label>CSV File</Label>
-        <Input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setSelectedFile(e.target.files[0])}
-        />
-        <p className="text-xs text-gold/90 mt-1">
-          Expected columns: date, nav_per_unit, return_percent, investor_email
-          (optional)
+      <div className="space-y-1.5">
+        <Label className="text-foreground/80">CSV File</Label>
+        <Input type="file" accept=".csv" onChange={handleFileChange} className={inputCls} />
+        <p className="text-xs text-muted-foreground mt-1">
+          Expected columns: <code>date, nav_per_unit, quarterly_return, notes</code>
         </p>
       </div>
 
+      {error && (
+        <div className="rounded-lg border border-red-500/30 bg-red-900/10 px-4 py-3 text-sm text-red-400 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+        </div>
+      )}
+
+      {preview.length > 0 && (
+        <div className="rounded-lg border border-[#ccab6c]/20 bg-muted px-4 py-3 text-sm text-foreground/80">
+          <CheckCircle className="w-4 h-4 inline mr-1.5 text-green-400" />
+          <strong>{preview.length} rows</strong> ready to import &mdash; first record: {preview[0].date}, NAV ${preview[0].nav_per_unit}
+        </div>
+      )}
+
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" className="border-border text-foreground/80" onClick={onCancel}>
           Cancel
         </Button>
         <Button
           onClick={handleUpload}
-          disabled={!selectedFile || !productId || uploading}
-          className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+          disabled={!selectedFile || !productId || !preview.length || uploading}
+          className="bg-[#fedea0] text-black hover:bg-[#ccab6c] font-semibold"
         >
-          {uploading ? "Processing..." : "Upload & Process"}
+          {uploading ? "Importing..." : `Import ${preview.length || ""} Records`}
         </Button>
       </div>
     </div>
@@ -649,24 +675,24 @@ export default function AdminNAV() {
       const user = await User.me();
 
       for (const record of records) {
-        await FabricatedReturns.create({
-          investor_email: record.investor_email || null,
-          product_id: productId,
-          period: format(new Date(record.date), "yyyy-MM"),
-          return_percent: record.return_percent || 0,
-          nav_per_unit: record.nav_per_unit,
-          override_calculated: true,
-          admin_notes: "Uploaded via CSV",
-          effective_date: record.date,
-        });
-
-        // Also create NAV record
-        await NAV.create({
-          product_id: productId,
-          date: record.date,
-          nav_per_unit: record.nav_per_unit,
-          is_official: true,
-        });
+        const existing = navRecords.find(
+          (n) => n.product_id === productId && n.date === record.date
+        );
+        if (existing) {
+          await NAV.update(existing.id, {
+            nav_per_unit: record.nav_per_unit,
+            admin_notes: record.admin_notes || "Uploaded via CSV",
+            is_official: true,
+          });
+        } else {
+          await NAV.create({
+            product_id: productId,
+            date: record.date,
+            nav_per_unit: record.nav_per_unit,
+            admin_notes: record.admin_notes || "Uploaded via CSV",
+            is_official: true,
+          });
+        }
       }
 
       await AuditLog.create({
@@ -679,10 +705,10 @@ export default function AdminNAV() {
 
       setShowCSVUpload(false);
       loadData();
-      alert(`Successfully uploaded ${records.length} NAV records`);
+      alert(`Successfully imported ${records.length} NAV records`);
     } catch (error) {
       console.error("Error processing CSV upload:", error);
-      alert("Error processing CSV upload");
+      alert("Error processing CSV upload: " + error.message);
     }
   };
 

@@ -99,7 +99,9 @@ const GHLMaterialCard = ({ file }) => {
   const ext = String(file.name ?? "").split(".").pop()?.toLowerCase() ?? "";
   const isPdf = ext === "pdf" || String(file.type ?? "").toLowerCase().includes("pdf");
   const isImage = IMAGE_EXTS.includes(ext) || String(file.type ?? "").toLowerCase().includes("image");
-  const extLabel = ext.toUpperCase();
+  const isDoc = file.source === "documents" || file.type === "document";
+  const isBlog = file.source === "blog" || file.type === "blog";
+  const extLabel = isDoc ? "DOC" : isBlog ? "BLOG" : ext.toUpperCase();
 
   return (
     <Card className="bg-card border border-[#ccab6c]/30 flex flex-col h-full hover:border-[#b38922]/50 transition-colors duration-200">
@@ -118,8 +120,10 @@ const GHLMaterialCard = ({ file }) => {
           onError={(e) => { e.target.style.display = "none"; }}
         />
       ) : (
-        <div className="rounded-t-lg h-40 w-full bg-muted flex items-center justify-center">
+        <div className="rounded-t-lg h-40 w-full bg-muted flex flex-col items-center justify-center gap-2">
           <FileText className="w-10 h-10 text-gold/40" />
+          {isDoc && <span className="text-xs text-gold/60 font-medium">Document</span>}
+          {isBlog && <span className="text-xs text-gold/60 font-medium">Blog Post</span>}
         </div>
       )}
       <CardHeader>
@@ -133,9 +137,12 @@ const GHLMaterialCard = ({ file }) => {
         )}
       </CardHeader>
       <CardContent className="flex-grow">
+        {file.description && (
+          <p className="text-sm text-gold/80 line-clamp-2 mb-2">{file.description}</p>
+        )}
         {file.created_at && (
           <p className="text-xs text-muted-foreground">
-            Added {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
+            {isBlog ? 'Published' : 'Added'} {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
           </p>
         )}
       </CardContent>
@@ -146,7 +153,7 @@ const GHLMaterialCard = ({ file }) => {
           className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
         >
           <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {isPdf ? "Download" : "View"} <Download className="w-3 h-3 ml-2" />
+            {isPdf ? "Download" : isBlog ? "Read Post" : "View"} <Download className="w-3 h-3 ml-2" />
           </a>
         </Button>
       </CardFooter>

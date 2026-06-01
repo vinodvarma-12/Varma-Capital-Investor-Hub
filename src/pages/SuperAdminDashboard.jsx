@@ -16,11 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Users, 
-  Package, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Users,
+  Package,
+  DollarSign,
+  TrendingUp,
   Clock,
   CheckCircle,
   XCircle,
@@ -28,7 +28,7 @@ import {
   Shield,
   Activity,
   UserCheck,
-  FileText
+  FileText,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, subMonths, endOfMonth } from "date-fns";
@@ -166,6 +166,8 @@ export default function SuperAdminDashboard() {
           </h1>
           <p className="text-gold/90">Complete system overview and administrative controls</p>
         </div>
+
+        <div>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -410,6 +412,7 @@ export default function SuperAdminDashboard() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
     </div>

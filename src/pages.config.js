@@ -22,6 +22,7 @@ import Waitlist from './pages/Waitlist';
 import AdminWaitlist from './pages/AdminWaitlist';
 import InvestorAuth from './pages/InvestorAuth';
 import Legal from './pages/Legal';
+import ManageAdmins from './pages/ManageAdmins';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "AdminWaitlist": AdminWaitlist,
     "InvestorAuth": InvestorAuth,
     "Legal": Legal,
+    "ManageAdmins": ManageAdmins,
 }
 
 export const pagesConfig = {
