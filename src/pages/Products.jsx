@@ -116,11 +116,11 @@ export default function Products() {
         {/* Products Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <Card key={product.id} className={`bg-card border border-[#ccab6c]/30 relative overflow-hidden ${!product.is_public ? 'opacity-80' : ''}`}>
+            <Card key={product.id} className={`bg-card border border-[#ccab6c]/30 relative overflow-hidden ${product.image_url ? 'pt-0' : ''} ${!product.is_public ? 'opacity-80' : ''}`}>
 
               {/* Product image */}
               {product.image_url && (
-                <div className="w-full h-48 overflow-hidden">
+                <div className="w-full overflow-hidden rounded-t-xl" style={{ height: '220px' }}>
                   <img
                     src={product.image_url}
                     alt={product.name}

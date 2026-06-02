@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Blog posts — first get all blogs for this location, then fetch posts per blog
+    // Blog posts via GHL API
     const blogsRes = await fetch(
       `https://services.leadconnectorhq.com/blogs/site/all?locationId=${locationId}&limit=20&skip=0`,
       { headers: ghlHeadersV2 }
@@ -124,27 +124,34 @@ Deno.serve(async (req) => {
       const blogsJson = await blogsRes.json();
       const blogs = blogsJson.blogs ?? blogsJson.data ?? blogsJson.sites ?? blogsJson.results ?? [];
 
-      // Fetch posts for all blogs in parallel using correct endpoint
       const postsResults = await Promise.allSettled(
         (blogs as Record<string, unknown>[]).map((blog) => {
           const blogId = blog._id ?? blog.id;
-          return fetch(
-            `https://services.leadconnectorhq.com/blogs/posts/all?locationId=${locationId}&blogId=${blogId}&limit=50&skip=0&status=PUBLISHED`,
-            { headers: ghlHeadersV2 }
-          ).then(r => r.ok ? r.json() : null);
+          const blogDomain = blog.domain ?? blog.url ?? null;
+          const postsUrl = `https://services.leadconnectorhq.com/blogs/posts/all?locationId=${locationId}&blogId=${blogId}&limit=50&offset=0&status=PUBLISHED`;
+          return fetch(postsUrl, { headers: ghlHeadersV2 })
+            .then(async r => {
+              const j = r.ok ? await r.json() : null;
+              return j ? { ...j, _blogDomain: blogDomain } : null;
+            });
         })
       );
 
       for (const result of postsResults) {
         if (result.status !== "fulfilled" || !result.value) continue;
-        const json = result.value;
-        const posts = json.posts ?? json.data ?? [];
+        const json = result.value as Record<string, unknown>;
+        const blogDomain = json._blogDomain as string | null;
+        const posts = json.posts ?? json.blogs ?? json.data ?? [];
         for (const p of posts as Record<string, unknown>[]) {
-          // Only include published posts
-          if (p.status && p.status !== "PUBLISHED") continue;
-          const postUrl = p.url ?? p.canonicalLink ?? null;
-          if (!postUrl) continue;
-          const id = String(p._id ?? p.id ?? "");
+          const slug = p.slug ?? p.urlSlug ?? null;
+          const blogBaseDomain = Deno.env.get("GHL_BLOG_DOMAIN") ?? "https://www.varmacapital.io";
+          const rawUrl = p.url ?? p.canonicalLink ?? null;
+          const resolvedUrl = rawUrl
+            ? (rawUrl.startsWith("http") ? rawUrl : `${blogBaseDomain}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`)
+            : (slug ? `${blogBaseDomain}/post/${slug}` : null);
+          const postUrl = resolvedUrl;
+
+          const id = String(p._id ?? p.id ?? p.title ?? Math.random());
           if (seenIds.has(id)) continue;
           seenIds.add(id);
           files.push({
@@ -154,8 +161,8 @@ Deno.serve(async (req) => {
             type: "blog",
             size: null,
             created_at: p.publishedAt ?? p.createdAt ?? null,
-            thumbnail: p.imageUrl ?? p.featuredImage ?? null,
-            description: p.description ?? p.excerpt ?? null,
+            thumbnail: p.imageUrl ?? p.featuredImage ?? p.image ?? null,
+            description: p.description ?? p.excerpt ?? p.metaDescription ?? null,
             source: "blog",
           });
         }

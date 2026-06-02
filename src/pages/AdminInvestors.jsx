@@ -370,8 +370,25 @@ export default function AdminInvestors() {
                     return (
                       <TableRow key={investor.id} className="border-[#ccab6c]/25 hover:bg-muted/20">
                         <TableCell>
-                          <div className="font-medium text-foreground">{investor.full_name}</div>
-                          <div className="text-sm text-gold/90">{investor.email}</div>
+                          <div className="flex items-center gap-3">
+                            {investor.avatar_url ? (
+                              <img
+                                src={investor.avatar_url}
+                                alt={investor.full_name}
+                                className="w-8 h-8 rounded-full object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-[#ccab6c]/20 border border-[#ccab6c]/30 flex items-center justify-center shrink-0">
+                                <span className="text-xs font-semibold text-gold-bright">
+                                  {investor.full_name?.charAt(0)?.toUpperCase() ?? "?"}
+                                </span>
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-medium text-foreground">{investor.full_name}</div>
+                              <div className="text-sm text-gold/90">{investor.email}</div>
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell className="text-foreground/80 font-mono text-xs">{investor.investor_id}</TableCell>
                         <TableCell>{getKycBadge(investor.kyc_status)}</TableCell>

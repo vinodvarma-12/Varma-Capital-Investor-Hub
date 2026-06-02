@@ -158,7 +158,18 @@ export default function ManageAdmins() {
                     </TableRow>
                   ) : filtered(admins).map(admin => (
                     <TableRow key={admin.id} className="border-[#ccab6c]/25">
-                      <TableCell className="text-foreground font-medium">{admin.full_name || '—'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {admin.avatar_url ? (
+                            <img src={admin.avatar_url} alt={admin.full_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-[#ccab6c]/20 border border-[#ccab6c]/30 flex items-center justify-center shrink-0">
+                              <span className="text-xs font-semibold text-gold-bright">{admin.full_name?.charAt(0)?.toUpperCase() ?? "?"}</span>
+                            </div>
+                          )}
+                          <span className="font-medium text-foreground">{admin.full_name || '—'}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-foreground/80">{admin.email}</TableCell>
                       <TableCell>
                         <Badge className={admin.role === 'super_admin'
@@ -227,7 +238,18 @@ export default function ManageAdmins() {
                     </TableRow>
                   ) : filtered(investors).map(inv => (
                     <TableRow key={inv.id} className="border-[#ccab6c]/25">
-                      <TableCell className="text-foreground font-medium">{inv.full_name || '—'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {inv.avatar_url ? (
+                            <img src={inv.avatar_url} alt={inv.full_name} className="w-8 h-8 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-[#ccab6c]/20 border border-[#ccab6c]/30 flex items-center justify-center shrink-0">
+                              <span className="text-xs font-semibold text-gold-bright">{inv.full_name?.charAt(0)?.toUpperCase() ?? "?"}</span>
+                            </div>
+                          )}
+                          <span className="font-medium text-foreground">{inv.full_name || '—'}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="text-foreground/80">{inv.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`capitalize text-xs ${

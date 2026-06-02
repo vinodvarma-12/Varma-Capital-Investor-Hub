@@ -32,7 +32,7 @@ const setCache = (category, data) => {
   try {
     localStorage.setItem(
       `finnhub_news_${category}`,
-      JSON.stringify({ data, timestamp: Date.now() })
+      JSON.stringify({ data, timestamp: Date.now() }),
     );
   } catch {}
 };
@@ -96,9 +96,21 @@ const NewsArticleCard = ({ article }) => (
 const IMAGE_EXTS = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
 
 const GHLMaterialCard = ({ file }) => {
-  const ext = String(file.name ?? "").split(".").pop()?.toLowerCase() ?? "";
-  const isPdf = ext === "pdf" || String(file.type ?? "").toLowerCase().includes("pdf");
-  const isImage = IMAGE_EXTS.includes(ext) || String(file.type ?? "").toLowerCase().includes("image");
+  const ext =
+    String(file.name ?? "")
+      .split(".")
+      .pop()
+      ?.toLowerCase() ?? "";
+  const isPdf =
+    ext === "pdf" ||
+    String(file.type ?? "")
+      .toLowerCase()
+      .includes("pdf");
+  const isImage =
+    IMAGE_EXTS.includes(ext) ||
+    String(file.type ?? "")
+      .toLowerCase()
+      .includes("image");
   const isDoc = file.source === "documents" || file.type === "document";
   const isBlog = file.source === "blog" || file.type === "blog";
   const extLabel = isDoc ? "DOC" : isBlog ? "BLOG" : ext.toUpperCase();
@@ -110,20 +122,28 @@ const GHLMaterialCard = ({ file }) => {
           src={file.url}
           alt={file.name}
           className="rounded-t-lg h-40 w-full object-cover"
-          onError={(e) => { e.target.style.display = "none"; }}
+          onError={(e) => {
+            e.target.style.display = "none";
+          }}
         />
       ) : file.thumbnail ? (
         <img
           src={file.thumbnail}
           alt={file.name}
           className="rounded-t-lg h-40 w-full object-cover"
-          onError={(e) => { e.target.style.display = "none"; }}
+          onError={(e) => {
+            e.target.style.display = "none";
+          }}
         />
       ) : (
         <div className="rounded-t-lg h-40 w-full bg-muted flex flex-col items-center justify-center gap-2">
           <FileText className="w-10 h-10 text-gold/40" />
-          {isDoc && <span className="text-xs text-gold/60 font-medium">Document</span>}
-          {isBlog && <span className="text-xs text-gold/60 font-medium">Blog Post</span>}
+          {isDoc && (
+            <span className="text-xs text-gold/60 font-medium">Document</span>
+          )}
+          {isBlog && (
+            <span className="text-xs text-gold/60 font-medium">Blog Post</span>
+          )}
         </div>
       )}
       <CardHeader>
@@ -131,18 +151,26 @@ const GHLMaterialCard = ({ file }) => {
           {file.name}
         </CardTitle>
         {extLabel && (
-          <Badge variant="outline" className="w-fit mt-1 text-xs text-muted-foreground">
+          <Badge
+            variant="outline"
+            className="w-fit mt-1 text-xs text-muted-foreground"
+          >
             {extLabel}
           </Badge>
         )}
       </CardHeader>
       <CardContent className="flex-grow">
         {file.description && (
-          <p className="text-sm text-gold/80 line-clamp-2 mb-2">{file.description}</p>
+          <p className="text-sm text-gold/80 line-clamp-2 mb-2">
+            {file.description}
+          </p>
         )}
         {file.created_at && (
           <p className="text-xs text-muted-foreground">
-            {isBlog ? 'Published' : 'Added'} {formatDistanceToNow(new Date(file.created_at), { addSuffix: true })}
+            {isBlog ? "Published" : "Added"}{" "}
+            {formatDistanceToNow(new Date(file.created_at), {
+              addSuffix: true,
+            })}
           </p>
         )}
       </CardContent>
@@ -153,7 +181,8 @@ const GHLMaterialCard = ({ file }) => {
           className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
         >
           <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {isPdf ? "Download" : isBlog ? "Read Post" : "View"} <Download className="w-3 h-3 ml-2" />
+            {isPdf ? "Download" : isBlog ? "Read Post" : "View"}{" "}
+            <Download className="w-3 h-3 ml-2" />
           </a>
         </Button>
       </CardFooter>
@@ -194,7 +223,9 @@ const NewsSection = ({ category }) => {
     }
   };
 
-  useEffect(() => { load(); }, [category]);
+  useEffect(() => {
+    load();
+  }, [category]);
 
   if (loading) {
     return (
@@ -243,7 +274,8 @@ const NewsSection = ({ category }) => {
           {articles.length} articles
           {cachedAt && (
             <span className="ml-2 text-xs text-muted-foreground/60">
-              · updated {formatDistanceToNow(new Date(cachedAt), { addSuffix: true })}
+              · updated{" "}
+              {formatDistanceToNow(new Date(cachedAt), { addSuffix: true })}
             </span>
           )}
         </p>
@@ -274,6 +306,7 @@ const VarmaSection = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log("invokingSupabase function");
       const { data } = await fetchGHLMaterials();
       setFiles(data?.data ?? []);
     } catch (e) {
@@ -284,13 +317,18 @@ const VarmaSection = () => {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="bg-card border border-[#ccab6c]/20 animate-pulse">
+          <Card
+            key={i}
+            className="bg-card border border-[#ccab6c]/20 animate-pulse"
+          >
             <div className="h-40 bg-muted rounded-t-lg" />
             <CardHeader>
               <div className="h-4 bg-muted rounded w-3/4" />
@@ -307,11 +345,11 @@ const VarmaSection = () => {
       <div className="text-center py-16">
         <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <p className="text-lg text-gold/90">
-          {error ? "Could not load materials." : "No materials available at this time."}
+          {error
+            ? "Could not load materials."
+            : "No materials available at this time."}
         </p>
-        {error && (
-          <p className="text-sm text-muted-foreground mt-2">{error}</p>
-        )}
+        {error && <p className="text-sm text-muted-foreground mt-2">{error}</p>}
         {error && (
           <Button variant="outline" size="sm" className="mt-4" onClick={load}>
             <RefreshCw className="w-3 h-3 mr-2" /> Try Again
@@ -324,8 +362,15 @@ const VarmaSection = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{files.length} files from Varma Capital</p>
-        <Button variant="ghost" size="sm" onClick={load} className="text-gold/70 hover:text-gold-bright">
+        <p className="text-sm text-muted-foreground">
+          {files.length} files from Varma Capital
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={load}
+          className="text-gold/70 hover:text-gold-bright"
+        >
           <RefreshCw className="w-3 h-3 mr-1.5" /> Refresh
         </Button>
       </div>
