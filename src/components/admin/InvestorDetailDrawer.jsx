@@ -520,6 +520,11 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
   const [addHoldingOpen, setAddHoldingOpen] = useState(false);
   const [holdingForm, setHoldingForm] = useState(EMPTY_HOLDING_FORM);
   const [holdingSaving, setHoldingSaving] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+
+  useEffect(() => {
+    User.me().then(u => setCurrentUserRole(u.role)).catch(() => {});
+  }, []);
 
   const openModal = (investment, modalSetter) => {
     setSelectedInvestment(investment);
@@ -603,6 +608,14 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
     const minTicket = selectedProduct?.minimum_ticket ?? 0;
     if (minTicket > 0 && amount < minTicket) {
       return alert(`Amount $${amount.toLocaleString()} is below the minimum ticket of $${minTicket.toLocaleString()} for ${selectedProduct?.name}.`);
+    }
+
+    // Layer 2 lock-in validation — cannot go below product minimum (super_admin can override)
+    const productMinLockIn = selectedProduct?.lock_in_months ?? 0;
+    const chosenLockIn = holdingForm.lock_in_months && holdingForm.lock_in_months !== 'none'
+      ? parseInt(holdingForm.lock_in_months) : 0;
+    if (productMinLockIn > 0 && chosenLockIn < productMinLockIn && currentUserRole !== 'super_admin') {
+      return alert(`Lock-in period cannot be less than the product minimum of ${productMinLockIn} months for ${selectedProduct?.name}. Only a Super Admin can override the floor.`);
     }
 
     setHoldingSaving(true);
@@ -810,7 +823,7 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
 
     {/* Add Holding Dialog */}
     <Dialog open={addHoldingOpen} onOpenChange={setAddHoldingOpen}>
-      <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground max-w-lg">
+      <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground" style={{ maxWidth: '40vw' }}>
         <DialogHeader>
           <DialogTitle className="text-foreground">Add Holding</DialogTitle>
           <p className="text-sm text-[#ccab6c]/80 mt-1">{investorEmail}</p>
@@ -899,25 +912,45 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
           </div>
 
           {/* Lock-in Months & Lock-in End Date */}
+          {(() => {
+            const selProduct = products.find(p => p.id === holdingForm.product_id);
+            const productMin = selProduct?.lock_in_months ?? 0;
+            const isSuperAdmin = currentUserRole === 'super_admin';
+            const allOptions = [3, 6, 9, 12, 18, 24, 36, 48, 60];
+            const availableOptions = isSuperAdmin ? allOptions : allOptions.filter(m => m >= productMin);
+            const chosenMonths = holdingForm.lock_in_months && holdingForm.lock_in_months !== 'none'
+              ? parseInt(holdingForm.lock_in_months) : 0;
+            const isOverridingFloor = isSuperAdmin && productMin > 0 && chosenMonths > 0 && chosenMonths < productMin;
+            return (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-gold/90">Lock-in Months <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <Label className="text-gold/90">
+                Lock-in Months
+                {productMin > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">— min {productMin} months</span>}
+              </Label>
               <Select
                 value={holdingForm.lock_in_months ? String(holdingForm.lock_in_months) : 'none'}
                 onValueChange={v => handleHoldingFormChange('lock_in_months', v === 'none' ? '' : v)}
               >
-                <SelectTrigger className="bg-muted border-[#ccab6c]/20 mt-1">
+                <SelectTrigger className={`bg-muted mt-1 ${isOverridingFloor ? 'border-purple-500/60' : 'border-[#ccab6c]/20'}`}>
                   <SelectValue placeholder="Select period…" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No lock-in</SelectItem>
-                  <SelectItem value="6">6 months</SelectItem>
-                  <SelectItem value="12">12 months</SelectItem>
-                  <SelectItem value="18">18 months</SelectItem>
-                  <SelectItem value="24">24 months</SelectItem>
-                  <SelectItem value="36">36 months</SelectItem>
+                  {(productMin === 0 || isSuperAdmin) && <SelectItem value="none">No lock-in</SelectItem>}
+                  {availableOptions.map(m => (
+                    <SelectItem key={m} value={String(m)}>
+                      {m} months{m === productMin ? ' (product min)' : ''}
+                      {isSuperAdmin && m < productMin ? ' ⚠ below floor' : ''}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {isOverridingFloor && (
+                <p className="text-xs text-purple-400 mt-1">⚠ Super Admin override — below product floor of {productMin} months.</p>
+              )}
+              {!isSuperAdmin && productMin > 0 && (
+                <p className="text-xs text-amber-400/80 mt-1">Cannot go below {productMin} months — set by product.</p>
+              )}
             </div>
             <div>
               <Label className="text-gold/90">Lock-in End Date <span className="text-muted-foreground text-xs">(optional)</span></Label>
@@ -929,6 +962,8 @@ const HoldingsTab = ({ investments, products, navs, fabricatedReturns = [], inve
               />
             </div>
           </div>
+            );
+          })()}
 
           {/* Status */}
           <div>
@@ -1420,7 +1455,7 @@ const TransactionsTab = ({ investor, products, investments, onDataChange }) => {
 
       {/* Add Transaction Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground max-w-lg">
+        <DialogContent className="bg-card border border-[#ccab6c]/30 text-foreground" style={{ maxWidth: '40vw' }}>
           <DialogHeader>
             <DialogTitle className="text-foreground">Add Transaction</DialogTitle>
             <p className="text-sm text-[#ccab6c]/80 mt-1">{investor.full_name} — {investor.email}</p>

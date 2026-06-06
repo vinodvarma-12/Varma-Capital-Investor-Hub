@@ -299,9 +299,9 @@ export default function Layout({ children, currentPageName }) {
             <SidebarHeader className="border-b border-sidebar-border p-6">
               <div className="flex items-center gap-3">
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                  src={darkMode ? '/VC logo 2026.png' : '/vc logo black .png'} 
                   alt="Varma Capital" 
-                  className="w-10 h-10 object-contain"
+                  style={{ width: '44px', height: '44px', objectFit: 'contain' }}
                 />
                 <div>
                   <h2 className="font-bold text-lg text-sidebar-foreground">Varma Capital</h2>
@@ -393,9 +393,9 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="rounded-lg p-2 text-foreground transition-colors duration-200 hover:bg-accent" />
                 <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                  src={darkMode ? '/VC logo 2026.png' : '/vc logo black .png'} 
                   alt="Varma Capital" 
-                  className="w-8 h-8 object-contain"
+                  className="w-12 h-12 object-contain"
                 />
                 <h1 className="text-xl font-semibold text-foreground">Varma Capital</h1>
                 {getRoleBadge(user.role)}
@@ -419,9 +419,9 @@ export default function Layout({ children, currentPageName }) {
                           <DialogHeader>
                             <div className="flex justify-center mb-4">
                               <img 
-                                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/be939b4a0_36.png" 
+                                src={darkMode ? '/VC logo 2026.png' : '/vc logo black .png'} 
                                 alt="Varma Capital" 
-                                className="w-12 h-12"
+                                style={{ width: '44px', height: '44px' }}
                               />
                             </div>
                             <DialogTitle className="text-center text-card-foreground">

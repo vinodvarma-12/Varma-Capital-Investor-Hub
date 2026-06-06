@@ -136,7 +136,11 @@ const ProductForm = ({ product, onSave }) => {
       <div><Label>Strategy</Label><Input value={formData.strategy || ''} onChange={e => handleChange('strategy', e.target.value)} placeholder="e.g. Multi-strategy — crypto, commodities, structured products" /></div>
       <div className="grid grid-cols-2 gap-4">
         <div><Label>Minimum Ticket ($)</Label><Input type="number" value={formData.minimum_ticket} onChange={e => handleChange('minimum_ticket', parseFloat(e.target.value))} required /></div>
-        <div><Label>Lock-in (Months)</Label><Input type="number" value={formData.lock_in_months} onChange={e => handleChange('lock_in_months', parseInt(e.target.value))} required /></div>
+        <div>
+          <Label>Lock-in (Months) <span className="text-xs font-normal text-muted-foreground">— product minimum</span></Label>
+          <Input type="number" min="0" value={formData.lock_in_months} onChange={e => handleChange('lock_in_months', parseInt(e.target.value))} required />
+          <p className="text-xs text-muted-foreground mt-1">Admins can only set equal or higher when allotting to investors.</p>
+        </div>
         <div><Label>Management Fee (%)</Label><Input type="number" step="0.1" value={formData.management_fee_percent} onChange={e => handleChange('management_fee_percent', parseFloat(e.target.value))} /></div>
         <div><Label>Performance Fee (%)</Label><Input type="number" step="0.1" value={formData.performance_fee_percent} onChange={e => handleChange('performance_fee_percent', parseFloat(e.target.value))} /></div>
         <div><Label>Hurdle Rate (%)</Label><Input type="number" step="0.1" value={formData.hurdle_rate} onChange={e => handleChange('hurdle_rate', parseFloat(e.target.value))} /></div>
