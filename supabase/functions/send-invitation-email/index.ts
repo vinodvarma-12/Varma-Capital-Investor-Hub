@@ -106,22 +106,22 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
-    if (!SENDGRID_API_KEY) {
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) {
       return Response.json({ success: false, error: "Email service not configured" }, { status: 500, headers: cors });
     }
 
-    const emailResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${SENDGRID_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: { email: "support@varmacapital.io", name: "Varma Capital" },
-        to: [{ email: inviteeEmail, name: fullName }],
+        from: "Varma Capital <admin@varmacapital.io>",
+        to: [inviteeEmail],
         subject: emailSubject,
-        content: [{ type: "text/html", value: emailBody }],
+        html: emailBody,
       }),
     });
 
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       return Response.json({
         success: false,
         error: "Email delivery failed",
-        details: `SendGrid returned ${emailResponse.status}: ${errorText}`,
+        details: `Resend returned ${emailResponse.status}: ${errorText}`,
       }, { status: 500, headers: cors });
     }
 

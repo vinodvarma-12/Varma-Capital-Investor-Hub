@@ -8,9 +8,9 @@ const cors = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
-  const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-  if (!SENDGRID_API_KEY) {
+  if (!RESEND_API_KEY) {
     return Response.json({ success: false, error: "Email service not configured" }, { status: 500, headers: cors });
   }
 
@@ -62,23 +62,25 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const emailRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${SENDGRID_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: { email: "support@varmacapital.io", name: "Varma Capital" },
-        to: [{ email, name: full_name }],
+        from: "Varma Capital <admin@varmacapital.io>",
+        to: [email],
         subject: "You're on the Varma Capital Waitlist",
-        content: [{ type: "text/html", value: emailHtml }],
+        html: emailHtml,
       }),
     });
 
+    const resendBody = await emailRes.text();
+    console.log("Resend status:", emailRes.status, "body:", resendBody);
+
     if (!emailRes.ok) {
-      const errText = await emailRes.text();
-      return Response.json({ success: false, error: "Email delivery failed", details: errText }, { status: 500, headers: cors });
+      return Response.json({ success: false, error: "Email delivery failed", details: resendBody }, { status: 500, headers: cors });
     }
 
     return Response.json({ success: true, message: `Confirmation email sent to ${email}` }, { headers: cors });

@@ -47,24 +47,24 @@ Deno.serve(async (req) => {
       created_by: profile.email,
     });
 
-    const sendGridApiKey = Deno.env.get("SENDGRID_API_KEY");
-    const senderEmail = Deno.env.get("SENDGRID_SENDER_EMAIL");
-    if (sendGridApiKey && senderEmail) {
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (resendApiKey) {
       const emailBody = `
         <p>Your Varma Capital one-time login code is:</p>
         <p style="font-size:28px;font-weight:bold;letter-spacing:4px;">${otpCode}</p>
         <p>This code expires in 15 minutes.</p>
       `;
-      await fetch("https://api.sendgrid.com/v3/mail/send", {
+      await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${sendGridApiKey}`,
+          Authorization: `Bearer ${resendApiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          personalizations: [{ to: [{ email: investor_email }], subject: "Your Varma Capital one-time login code" }],
-          from: { email: senderEmail, name: "Varma Capital" },
-          content: [{ type: "text/html", value: emailBody }],
+          from: "Varma Capital <admin@varmacapital.io>",
+          to: [investor_email],
+          subject: "Your Varma Capital one-time login code",
+          html: emailBody,
         }),
       });
     }
