@@ -150,14 +150,18 @@ const GHLMaterialCard = ({ file }) => {
         <CardTitle className="text-foreground text-base leading-snug line-clamp-2">
           {file.name}
         </CardTitle>
-        {extLabel && (
-          <Badge
-            variant="outline"
-            className="w-fit mt-1 text-xs text-muted-foreground"
-          >
-            {extLabel}
-          </Badge>
-        )}
+        <div className="flex gap-2 flex-wrap mt-1">
+          {extLabel && (
+            <Badge variant="outline" className="w-fit text-xs text-muted-foreground">
+              {extLabel}
+            </Badge>
+          )}
+          {isBlog && !file.url && (
+            <Badge variant="outline" className="w-fit text-xs text-yellow-500 border-yellow-500/50">
+              Draft
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="flex-grow">
         {file.description && (
@@ -175,16 +179,22 @@ const GHLMaterialCard = ({ file }) => {
         )}
       </CardContent>
       <CardFooter>
-        <Button
-          asChild
-          variant="outline"
-          className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
-        >
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {isPdf ? "Download" : isBlog ? "Read Post" : "View"}{" "}
-            <Download className="w-3 h-3 ml-2" />
-          </a>
-        </Button>
+        {file.url ? (
+          <Button
+            asChild
+            variant="outline"
+            className="w-full text-gold-bright border-[#b38922]/50 hover:bg-[#fedea0] hover:text-black"
+          >
+            <a href={file.url} target="_blank" rel="noopener noreferrer">
+              {isPdf ? "Download" : isBlog ? "Read Post" : "View"}{" "}
+              <Download className="w-3 h-3 ml-2" />
+            </a>
+          </Button>
+        ) : (
+          <Button variant="outline" disabled className="w-full text-muted-foreground border-muted">
+            {isBlog ? "Not Published" : "No URL"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
@@ -301,14 +311,27 @@ const VarmaSection = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all");
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log("invokingSupabase function");
+      console.log("[VarmaSection] invoking fetch-ghl-materials...");
       const { data } = await fetchGHLMaterials();
-      setFiles(data?.data ?? []);
+      console.log("[VarmaSection] raw response:", data);
+      if (data?._debug) {
+        console.log("[VarmaSection] debug info:", data._debug);
+      }
+      // Exclude raw image files from media library — keep blogs, documents, and PDFs
+      const all = (data?.data ?? []).filter((f) => {
+        if (f.source !== "media") return true; // always keep blogs & documents
+        const ext = String(f.name ?? "").split(".").pop()?.toLowerCase() ?? "";
+        return !IMAGE_EXTS.includes(ext); // drop jpg/png/gif etc. from media
+      });
+      console.log("[VarmaSection] after filter:", all.length, "items", all.map(f => `${f.source}:${f.name}`));
+      console.log("[VarmaSection] blog URLs:", all.filter(f => f.source === "blog").map(f => ({ name: f.name, url: f.url })));
+      setFiles(all);
     } catch (e) {
       console.error("Could not fetch GHL materials", e);
       setError(e.message);
@@ -359,12 +382,40 @@ const VarmaSection = () => {
     );
   }
 
+  const blogCount = files.filter((f) => f.source === "blog").length;
+  const docCount = files.filter((f) => f.source !== "blog").length;
+
+  const displayed =
+    filter === "blogs"
+      ? files.filter((f) => f.source === "blog")
+      : filter === "docs"
+        ? files.filter((f) => f.source !== "blog")
+        : files;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {files.length} files from Varma Capital
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex gap-2">
+          {[
+            { key: "all", label: `All (${files.length})` },
+            { key: "blogs", label: `Blogs (${blogCount})` },
+            { key: "docs", label: `Documents (${docCount})` },
+          ].map(({ key, label }) => (
+            <Button
+              key={key}
+              variant={filter === key ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setFilter(key)}
+              className={
+                filter === key
+                  ? "bg-[#fedea0] text-black"
+                  : "text-gold/70 hover:text-gold-bright"
+              }
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -375,7 +426,7 @@ const VarmaSection = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {files.map((file) => (
+        {displayed.map((file) => (
           <GHLMaterialCard key={file.url ?? file.name} file={file} />
         ))}
       </div>
