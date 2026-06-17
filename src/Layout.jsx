@@ -39,7 +39,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -352,10 +352,11 @@ export default function Layout({ children, currentPageName }) {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-8 h-8">
-                                          <AvatarFallback className="bg-[#b38922] text-black text-sm font-semibold">
-                                            {user.full_name?.charAt(0) || user.email?.charAt(0)}
-                                          </AvatarFallback>
-                                        </Avatar>
+                    <AvatarImage src={user.avatar_url} alt={user.full_name || user.email} />
+                    <AvatarFallback className="bg-[#b38922] text-black text-sm font-semibold">
+                      {user.full_name?.charAt(0) || user.email?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-medium text-sidebar-foreground">
                       {user.full_name || user.email}
