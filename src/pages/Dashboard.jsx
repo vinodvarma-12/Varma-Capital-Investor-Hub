@@ -529,9 +529,12 @@ export default function Dashboard() {
             <CardContent>
               <div className="h-80">
                 {chartData.length < 2 ? (
-                  <div className="h-full flex flex-col items-center justify-center gap-2">
-                    <p className={`text-sm ${bodyMuted}`}>Not enough NAV data to plot a chart yet.</p>
-                    <p className={`text-xs ${bodyMuted} opacity-60`}>Data will appear once at least two monthly NAV records exist for your fund.</p>
+                  <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-6">
+                    <TrendingUp className={`w-10 h-10 ${bodyMuted} opacity-40`} />
+                    <p className={`text-sm font-medium ${sectionTitle}`}>Your chart will appear soon</p>
+                    <p className={`text-xs ${bodyMuted} max-w-xs`}>
+                      We're still collecting data on your investment. Once we have a couple of months on record, you'll see your growth here.
+                    </p>
                   </div>
                 ) : (
                 <ResponsiveContainer width="100%" height="100%">
