@@ -282,7 +282,7 @@ export default function Profile() {
           <ProfileSection title="Preferences" icon={<Bell className="w-5 h-5 text-gold-bright flex-shrink-0" />}>
             <div className="flex items-center justify-between gap-4">
               <Label htmlFor="email_notifications" className="text-foreground text-sm">Email Notifications</Label>
-              <Switch id="email_notifications" checked={preferences.email_notifications} onCheckedChange={(val) => handlePreferenceChange('email_notifications', val)} />
+              <Switch id="email_notifications" checked={true} disabled />
             </div>
             <div className="flex items-center justify-between gap-4">
               <Label htmlFor="sms_notifications" className="text-foreground text-sm">SMS Notifications</Label>
