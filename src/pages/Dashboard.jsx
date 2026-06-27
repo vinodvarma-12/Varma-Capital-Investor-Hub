@@ -20,7 +20,7 @@ import {
   FileText,
   Bell
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
 import { format, differenceInDays } from "date-fns";
 import {
   GOLD_LIGHT,
@@ -310,13 +310,16 @@ export default function Dashboard() {
     const startIndex = cutoffIndex > 0 ? cutoffIndex - 1 : 0;
     const visibleDates = navDates.slice(startIndex);
 
-    return visibleDates.map(date => {
+    const points = visibleDates.map(date => {
       const totalValue = investments.reduce((sum, inv) => sum + getValueAtDate(inv, date), 0);
-      return {
-        month: format(date, 'MMM yy'),
-        value: Math.round(totalValue),
-      };
+      return { month: format(date, 'MMM yy'), value: Math.round(totalValue) };
     });
+
+    const baseValue = points[0]?.value || 0;
+    return points.map(pt => ({
+      ...pt,
+      growth: baseValue > 0 ? parseFloat(((pt.value - baseValue) / baseValue * 100).toFixed(2)) : 0,
+    }));
   };
 
   const getAllocationData = () => {
@@ -542,22 +545,47 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke={`${GOLD_MID}33`} />
                     <XAxis dataKey="month" stroke={GOLD_MID} tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }} />
                     <YAxis
+                      yAxisId="value"
                       stroke={GOLD_MID}
                       tick={{ fill: darkMode ? GOLD_MID : GOLD_DEEPER }}
-                      tickFormatter={(v) => `$${(v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)}`}
+                      tickFormatter={(v) => `$${v >= 1000000 ? (v / 1000000).toFixed(1) + 'M' : v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`}
                       width={60}
+                    />
+                    <YAxis
+                      yAxisId="growth"
+                      orientation="right"
+                      stroke="#10B981"
+                      tick={{ fill: '#10B981', fontSize: 11 }}
+                      tickFormatter={(v) => `${v}%`}
+                      width={45}
                     />
                     <Tooltip
                       contentStyle={tooltipStyle}
-                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Portfolio Value']}
+                      formatter={(value, name) =>
+                        name === 'growth'
+                          ? [`${value}%`, 'Portfolio Growth']
+                          : [`$${Number(value).toLocaleString()}`, 'Portfolio Value']
+                      }
                     />
+                    <Legend formatter={(v) => <span style={{ color: v === 'growth' ? '#10B981' : (darkMode ? GOLD_MID : GOLD_DEEPER), fontSize: 12 }}>{v === 'growth' ? 'Growth %' : 'Portfolio Value'}</span>} />
                     <Line
+                      yAxisId="value"
                       type="monotone"
                       dataKey="value"
                       stroke={GOLD_DEEP}
                       strokeWidth={3}
                       dot={{ fill: GOLD_LIGHT, stroke: GOLD_DEEP, strokeWidth: 2, r: 4 }}
                       activeDot={{ fill: GOLD_LIGHT, stroke: GOLD_DEEP, r: 6 }}
+                    />
+                    <Line
+                      yAxisId="growth"
+                      type="monotone"
+                      dataKey="growth"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      strokeDasharray="5 3"
+                      dot={{ fill: '#10B981', r: 3, strokeWidth: 0 }}
+                      activeDot={{ r: 5 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>

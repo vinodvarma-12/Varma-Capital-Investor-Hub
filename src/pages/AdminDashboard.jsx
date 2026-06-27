@@ -294,17 +294,26 @@ export default function AdminDashboard() {
       const label = format(monthStart, 'MMM yy');
 
       const point = { month: label };
+      let monthTotal = 0;
       chartProductIds.forEach(productId => {
-        point[productId] = activeInvestments
+        const v = activeInvestments
           .filter(inv =>
             inv.product_id === productId &&
             (!inv.purchase_date || new Date(inv.purchase_date) <= cutoff)
           )
           .reduce((sum, inv) => sum + (parseFloat(inv.invested_amount) || 0), 0);
+        point[productId] = v;
+        monthTotal += v;
       });
+      point.totalAUM = monthTotal;
       points.push(point);
     }
-    return points;
+
+    const baseAUM = points[0]?.totalAUM || 0;
+    return points.map(pt => ({
+      ...pt,
+      growth: baseAUM > 0 ? parseFloat(((pt.totalAUM - baseAUM) / baseAUM * 100).toFixed(2)) : 0,
+    }));
   };
 
   const aumChartData = getAumChartData();
@@ -414,14 +423,11 @@ export default function AdminDashboard() {
             ) : (
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={aumChartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                  <LineChart data={aumChartData} margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
-                    <XAxis
-                      dataKey="month"
-                      stroke="#6b7280"
-                      tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                    />
+                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                     <YAxis
+                      yAxisId="aum"
                       stroke="#6b7280"
                       tick={{ fontSize: 12, fill: '#9CA3AF' }}
                       tickFormatter={(v) =>
@@ -430,29 +436,33 @@ export default function AdminDashboard() {
                         : `$${v}`
                       }
                     />
+                    <YAxis
+                      yAxisId="growth"
+                      orientation="right"
+                      stroke="#10B981"
+                      tick={{ fontSize: 11, fill: '#10B981' }}
+                      tickFormatter={(v) => `${v}%`}
+                      width={45}
+                    />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1a1a1a',
-                        border: '1px solid #ccab6c50',
-                        borderRadius: '8px',
-                        color: '#fff',
-                        fontSize: 13,
-                      }}
-                      formatter={(value, name) => [
-                        `$${Number(value).toLocaleString()}`,
-                        getProductName(name),
-                      ]}
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ccab6c50', borderRadius: '8px', color: '#fff', fontSize: 13 }}
+                      formatter={(value, name) =>
+                        name === 'growth'
+                          ? [`${value}%`, 'AUM Growth']
+                          : [`$${Number(value).toLocaleString()}`, getProductName(name)]
+                      }
                     />
                     <Legend
                       formatter={(value) => (
-                        <span style={{ color: '#9CA3AF', fontSize: 12 }}>
-                          {getProductName(value)}
+                        <span style={{ color: value === 'growth' ? '#10B981' : '#9CA3AF', fontSize: 12 }}>
+                          {value === 'growth' ? 'AUM Growth %' : getProductName(value)}
                         </span>
                       )}
                     />
                     {chartProductIds.map((productId, i) => (
                       <Line
                         key={productId}
+                        yAxisId="aum"
                         type="monotone"
                         dataKey={productId}
                         stroke={fundColors[i % fundColors.length]}
@@ -461,6 +471,16 @@ export default function AdminDashboard() {
                         activeDot={{ r: 6 }}
                       />
                     ))}
+                    <Line
+                      yAxisId="growth"
+                      type="monotone"
+                      dataKey="growth"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      strokeDasharray="5 3"
+                      dot={{ fill: '#10B981', r: 3, strokeWidth: 0 }}
+                      activeDot={{ r: 5 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

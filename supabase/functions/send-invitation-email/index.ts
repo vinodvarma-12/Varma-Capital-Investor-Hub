@@ -71,6 +71,29 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: "DB error", details: dbErr.message }, { status: 500, headers: cors });
     }
 
+    // Restore GHL contact upsert (non-blocking — email still sends if GHL fails)
+    const GHL_API_KEY = Deno.env.get("GHL_API_KEY");
+    const GHL_LOCATION_ID = Deno.env.get("GHL_LOCATION_ID");
+    if (GHL_API_KEY && GHL_LOCATION_ID) {
+      fetch("https://services.leadconnectorhq.com/contacts/upsert", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GHL_API_KEY}`,
+          "Content-Type": "application/json",
+          Version: "2021-07-28",
+        },
+        body: JSON.stringify({
+          locationId: GHL_LOCATION_ID,
+          email: inviteeEmail,
+          name: fullName,
+          firstName: fullName.split(" ")[0],
+          lastName: fullName.split(" ").slice(1).join(" ") || "",
+          phone: phone ?? undefined,
+          tags: inviteeRole === "investor" ? ["investor", "new investor"] : [inviteeRole],
+        }),
+      }).catch(e => console.warn("GHL contact upsert failed:", e));
+    }
+
     const invitationLink = `${baseUrl}/AcceptInvitation?token=${token}`;
     const isAdmin = inviteeRole === "admin";
     const emailSubject = isAdmin

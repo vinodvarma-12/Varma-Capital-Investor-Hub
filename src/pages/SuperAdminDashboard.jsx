@@ -134,7 +134,7 @@ export default function SuperAdminDashboard() {
     }
 
     const now = new Date();
-    return Array.from({ length: monthCount + 1 }, (_, i) => {
+    const raw = Array.from({ length: monthCount + 1 }, (_, i) => {
       const monthDate = subMonths(now, monthCount - i);
       const cutoff = endOfMonth(monthDate);
       const label = format(monthDate, 'MMM yy');
@@ -149,6 +149,12 @@ export default function SuperAdminDashboard() {
 
       return { month: label, aum, users: userCount };
     });
+
+    const baseAUM = raw[0]?.aum || 0;
+    return raw.map(pt => ({
+      ...pt,
+      growth: baseAUM > 0 ? parseFloat(((pt.aum - baseAUM) / baseAUM * 100).toFixed(2)) : 0,
+    }));
   })();
 
   if (loading) {
@@ -264,23 +270,33 @@ export default function SuperAdminDashboard() {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                  <LineChart data={chartData} margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
                     <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12, fill: '#9CA3AF' }} />
                     <YAxis yAxisId="aum" stroke="#6b7280" tick={{ fontSize: 11, fill: '#9CA3AF' }}
                       tickFormatter={v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : v >= 1000 ? `$${(v/1000).toFixed(0)}K` : `$${v}`}
                     />
-                    <YAxis yAxisId="users" orientation="right" stroke="#6b7280" tick={{ fontSize: 11, fill: '#9CA3AF' }} />
+                    <YAxis yAxisId="growth" orientation="right" stroke="#10B981" tick={{ fontSize: 11, fill: '#10B981' }}
+                      tickFormatter={v => `${v}%`} width={45}
+                    />
                     <Tooltip
                       contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ccab6c50', borderRadius: '8px', color: '#fff', fontSize: 13 }}
-                      formatter={(value, name) => name === 'aum' ? [`$${Number(value).toLocaleString()}`, 'AUM'] : [value, 'Users']}
+                      formatter={(value, name) =>
+                        name === 'aum' ? [`$${Number(value).toLocaleString()}`, 'Total AUM']
+                        : name === 'growth' ? [`${value}%`, 'AUM Growth']
+                        : [value, 'Users']
+                      }
                     />
-                    <Legend formatter={v => <span style={{ color: '#9CA3AF', fontSize: 12 }}>{v === 'aum' ? 'AUM' : 'Users'}</span>} />
+                    <Legend formatter={v => (
+                      <span style={{ color: v === 'growth' ? '#10B981' : '#9CA3AF', fontSize: 12 }}>
+                        {v === 'aum' ? 'Total AUM' : v === 'growth' ? 'AUM Growth %' : 'Users'}
+                      </span>
+                    )} />
                     <Line yAxisId="aum" type="monotone" dataKey="aum" stroke="#FFD700" strokeWidth={2.5}
                       dot={{ fill: '#FFD700', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} name="aum"
                     />
-                    <Line yAxisId="users" type="monotone" dataKey="users" stroke="#10B981" strokeWidth={2.5}
-                      dot={{ fill: '#10B981', r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} name="users"
+                    <Line yAxisId="growth" type="monotone" dataKey="growth" stroke="#10B981" strokeWidth={2}
+                      strokeDasharray="5 3" dot={{ fill: '#10B981', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} name="growth"
                     />
                   </LineChart>
                 </ResponsiveContainer>
