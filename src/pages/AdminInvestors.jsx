@@ -157,23 +157,28 @@ export default function AdminInvestors() {
   const loadCrmData = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const [allUsers, allInvestments, productsData, navData, fabricatedData] = await Promise.all([
+      const [allUsers, allInvestments, productsData, navData] = await Promise.all([
         User.list(),
         Investment.list(null, 1000),
         Product.list(),
         NAV.list('-date', 1000),
-        FabricatedReturns.list(),
       ]);
       const investorUsers = allUsers.filter(u => u.role === 'investor');
       setInvestors(investorUsers);
       setInvestments(allInvestments);
       setProducts(productsData);
       setNavs(navData);
-      setFabricatedReturns(fabricatedData);
     } catch (error) {
       console.error("Error loading CRM data:", error);
     } finally {
       if (!silent) setLoading(false);
+    }
+
+    try {
+      const fabricatedData = await FabricatedReturns.list();
+      setFabricatedReturns(fabricatedData);
+    } catch (error) {
+      console.warn("fabricated_returns unavailable:", error.message);
     }
   };
 
