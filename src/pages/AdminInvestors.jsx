@@ -49,6 +49,8 @@ import InvestorDetailDrawer from "@/components/admin/InvestorDetailDrawer";
 import OTPManagement from "@/components/admin/OTPManagement"; // Added OTPManagement import
 import { sendInvitationEmail } from "@/functions/sendInvitationEmail";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 
 const InviteInvestorForm = ({ onInvite, onDone, products = [] }) => {
     const [email, setEmail] = useState('');
@@ -149,6 +151,9 @@ export default function AdminInvestors() {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [selectedInvestor, setSelectedInvestor] = useState(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "OTP management is coming soon. You'll be able to generate and manage one-time passwords for investors here."
+  );
 
   useEffect(() => {
     loadCrmData();
@@ -433,11 +438,13 @@ export default function AdminInvestors() {
                   navs={navs}
                   fabricatedReturns={fabricatedReturns.filter(fr => fr.investor_email === selectedInvestor.email)}
                   onDataChange={() => loadCrmData(true)}
+                  onLockedTabClick={() => showComingSoon()}
                   additionalTabs={[
                     {
                       id: "otp",
                       label: "OTP Management",
                       icon: KeyRound,
+                      locked: !OTP_FEATURES_ENABLED,
                       content: <OTPManagement investorEmail={selectedInvestor.email} />
                     }
                   ]}
@@ -446,6 +453,12 @@ export default function AdminInvestors() {
             )}
           </DialogContent>
         </Dialog>
+
+        <FeatureComingSoonDialog
+          open={comingSoonOpen}
+          onOpenChange={setComingSoonOpen}
+          message={comingSoonMessage}
+        />
       </div>
     </div>
   );

@@ -1888,8 +1888,19 @@ export default function InvestorDetailDrawer({
   fabricatedReturns = [],
   onDataChange,
   additionalTabs = [],
+  onLockedTabClick,
 }) {
-  const allTabs = [...CORE_TABS, ...additionalTabs.map(t => ({ id: t.id, label: t.label, icon: t.icon }))];
+  const lockedTabIds = new Set(additionalTabs.filter((t) => t.locked).map((t) => t.id));
+  const [activeTab, setActiveTab] = useState("overview");
+  const allTabs = [...CORE_TABS, ...additionalTabs.map(t => ({ id: t.id, label: t.label, icon: t.icon, locked: t.locked }))];
+
+  const handleTabChange = (value) => {
+    if (lockedTabIds.has(value)) {
+      onLockedTabClick?.(value);
+      return;
+    }
+    setActiveTab(value);
+  };
 
   return (
     <div className="p-4 h-full flex flex-col min-h-0 flex-1">
@@ -1906,13 +1917,14 @@ export default function InvestorDetailDrawer({
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="mt-4 flex flex-col min-h-0 flex-1">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-4 flex flex-col min-h-0 flex-1">
         <div className="flex-shrink-0 overflow-x-auto pb-1">
           <TabsList className="bg-muted border border-[#ccab6c]/20 w-max min-w-full flex-nowrap h-auto p-1">
             {allTabs.map(tab => (
               <TabsTrigger key={tab.id} value={tab.id} className={TAB_TRIGGER_CLASS}>
                 {tab.icon && <tab.icon className="w-3.5 h-3.5 mr-1" />}
                 {tab.label}
+                {tab.locked && <span className="ml-1 text-[10px] uppercase tracking-wide opacity-60">Soon</span>}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -1946,7 +1958,7 @@ export default function InvestorDetailDrawer({
           <TabsContent value="audit" className="mt-0">
             <AuditTab investor={investor} />
           </TabsContent>
-          {additionalTabs.map(tab => (
+          {additionalTabs.filter((tab) => !tab.locked).map(tab => (
             <TabsContent key={tab.id} value={tab.id} className="mt-0">
               {tab.content}
             </TabsContent>

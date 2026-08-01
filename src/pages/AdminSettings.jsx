@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 import {
   Table,
   TableBody,
@@ -67,8 +69,9 @@ export default function AdminSettings() {
   const [isInviteAdminOpen, setIsInviteAdminOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ full_name: '', email: '', role: 'admin' });
   const [inviting, setInviting] = useState(false);
-
-  // Default settings structure
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "Two-factor authentication settings are coming soon."
+  );
   const defaultSettings = {
     // Branding
     company_name: "Varma Capital",
@@ -517,7 +520,13 @@ export default function AdminSettings() {
                 <Label className="text-foreground/80">Require Two-Factor Authentication</Label>
                 <Switch 
                   checked={settings.require_2fa} 
-                  onCheckedChange={(val) => updateSetting('require_2fa', val)}
+                  onCheckedChange={(val) => {
+                    if (!OTP_FEATURES_ENABLED) {
+                      showComingSoon();
+                      return;
+                    }
+                    updateSetting('require_2fa', val);
+                  }}
                 />
               </div>
               
@@ -721,6 +730,12 @@ export default function AdminSettings() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <FeatureComingSoonDialog
+          open={comingSoonOpen}
+          onOpenChange={setComingSoonOpen}
+          message={comingSoonMessage}
+        />
       </div>
     </div>
   );

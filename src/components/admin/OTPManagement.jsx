@@ -16,14 +16,19 @@ import {
 import { KeyRound, RefreshCw, Clock, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { generateOTP } from "@/functions/generateOTP";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 
 export default function OTPManagement({ investorEmail }) {
   const [otps, setOtps] = useState([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "OTP management is coming soon. You'll be able to generate and send one-time passwords to investors here."
+  );
 
   useEffect(() => {
-    if (investorEmail) {
+    if (investorEmail && OTP_FEATURES_ENABLED) {
       loadOTPs();
     }
   }, [investorEmail]);
@@ -41,6 +46,10 @@ export default function OTPManagement({ investorEmail }) {
   };
 
   const handleGenerateOTP = async () => {
+    if (!OTP_FEATURES_ENABLED) {
+      showComingSoon();
+      return;
+    }
     setGenerating(true);
     try {
       const response = await generateOTP({ investor_email: investorEmail });
@@ -80,6 +89,44 @@ export default function OTPManagement({ investorEmail }) {
 
   if (!investorEmail) {
     return null;
+  }
+
+  if (!OTP_FEATURES_ENABLED) {
+    return (
+      <>
+        <Card className="bg-card border border-[#ccab6c]/30">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-gold-bright" />
+                One-Time Passwords (OTP)
+              </CardTitle>
+              <Badge variant="outline" className="border-[#ccab6c]/40 text-gold/90">
+                Coming Soon
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gold/90 text-sm">
+              Generate secure one-time passwords for investor login. This feature will be available soon.
+            </p>
+            <Button
+              type="button"
+              className="bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+              onClick={() => showComingSoon()}
+            >
+              <KeyRound className="w-4 h-4 mr-2" />
+              Generate New OTP
+            </Button>
+          </CardContent>
+        </Card>
+        <FeatureComingSoonDialog
+          open={comingSoonOpen}
+          onOpenChange={setComingSoonOpen}
+          message={comingSoonMessage}
+        />
+      </>
+    );
   }
 
   return (

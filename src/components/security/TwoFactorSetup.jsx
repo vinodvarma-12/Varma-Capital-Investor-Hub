@@ -25,6 +25,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 
 export default function TwoFactorSetup({ user, onUpdate }) {
   const [step, setStep] = useState(1);
@@ -37,6 +39,52 @@ export default function TwoFactorSetup({ user, onUpdate }) {
   const [showDisableDialog, setShowDisableDialog] = useState(false);
   const [disableCode, setDisableCode] = useState("");
   const [showSecret, setShowSecret] = useState(false);
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "Two-factor authentication is coming soon. You'll be able to secure your account with an authenticator app here."
+  );
+
+  if (!OTP_FEATURES_ENABLED) {
+    return (
+      <>
+        <Card className="bg-card border border-[#ccab6c]/30">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Shield className="w-6 h-6 text-[#b38922]" />
+                <div>
+                  <CardTitle className="text-foreground">Two-Factor Authentication</CardTitle>
+                  <CardDescription className="text-gold/90">
+                    Add an extra layer of security to your account
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant="outline" className="border-[#ccab6c]/40 text-gold/90">
+                Coming Soon
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gold/90 text-sm">
+              Protect your account with an authenticator app. This feature will be available soon.
+            </p>
+            <Button
+              type="button"
+              className="w-full bg-[#fedea0] text-black hover:bg-[#ccab6c]"
+              onClick={() => showComingSoon()}
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Enable Two-Factor Authentication
+            </Button>
+          </CardContent>
+        </Card>
+        <FeatureComingSoonDialog
+          open={comingSoonOpen}
+          onOpenChange={setComingSoonOpen}
+          message={comingSoonMessage}
+        />
+      </>
+    );
+  }
 
   const is2FAEnabled = user?.two_factor_enabled && user?.two_factor_verified;
 

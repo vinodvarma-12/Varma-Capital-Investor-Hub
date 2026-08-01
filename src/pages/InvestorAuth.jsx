@@ -8,14 +8,19 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Mail, KeyRound, AlertCircle, Lock } from "lucide-react";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 
 export default function InvestorAuth() {
   const [email, setEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState("otp"); // otp | password
+  const [mode, setMode] = useState("password"); // otp | password
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "OTP login is coming soon. Please sign in with your password for now."
+  );
 
   const navigate = useNavigate();
 
@@ -53,6 +58,9 @@ export default function InvestorAuth() {
           setError(signErr.message);
           return;
         }
+      } else if (!OTP_FEATURES_ENABLED) {
+        showComingSoon();
+        return;
       } else {
         const out = await invokeEdgeFunction("investor-otp-login", { email, otp_code: otpCode });
         if (!out?.success) {
@@ -107,7 +115,18 @@ export default function InvestorAuth() {
           <div className="bg-card border border-[#ccab6c]/30 rounded-xl p-6 space-y-5">
             <h2 className="text-lg font-semibold text-foreground text-center">Sign in</h2>
             <div className="flex gap-2 justify-center">
-              <Button type="button" variant={mode === "otp" ? "default" : "outline"} size="sm" onClick={() => setMode("otp")}>
+              <Button
+                type="button"
+                variant={mode === "otp" ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (!OTP_FEATURES_ENABLED) {
+                    showComingSoon();
+                    return;
+                  }
+                  setMode("otp");
+                }}
+              >
                 OTP
               </Button>
               <Button type="button" variant={mode === "password" ? "default" : "outline"} size="sm" onClick={() => setMode("password")}>
@@ -198,6 +217,12 @@ export default function InvestorAuth() {
       <footer className="text-center py-6 text-muted-foreground text-sm border-t border-[#ccab6c]/25">
         Varma Capital © 2026 | All Rights Reserved
       </footer>
+
+      <FeatureComingSoonDialog
+        open={comingSoonOpen}
+        onOpenChange={setComingSoonOpen}
+        message={comingSoonMessage}
+      />
     </div>
   );
 }

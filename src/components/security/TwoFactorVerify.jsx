@@ -6,14 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Loader2, AlertTriangle, Key } from "lucide-react";
+import { OTP_FEATURES_ENABLED } from "@/lib/featureFlags";
+import { FeatureComingSoonDialog, useFeatureComingSoon } from "@/components/FeatureComingSoonDialog";
 
 export default function TwoFactorVerify({ email, onVerified, onCancel }) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const { open: comingSoonOpen, setOpen: setComingSoonOpen, message: comingSoonMessage, showComingSoon } = useFeatureComingSoon(
+    "Two-factor authentication is coming soon."
+  );
 
   const handleVerify = async () => {
+    if (!OTP_FEATURES_ENABLED) {
+      showComingSoon();
+      return;
+    }
     if (!code) {
       setError("Please enter a code");
       return;
@@ -123,6 +132,12 @@ export default function TwoFactorVerify({ email, onVerified, onCancel }) {
           )}
         </div>
       </CardContent>
+
+      <FeatureComingSoonDialog
+        open={comingSoonOpen}
+        onOpenChange={setComingSoonOpen}
+        message={comingSoonMessage}
+      />
     </Card>
   );
 }
