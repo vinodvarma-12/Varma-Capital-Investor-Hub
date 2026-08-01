@@ -25,10 +25,12 @@ import {
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
+import { fetchActiveRiskBands, riskBandMap, riskBandBadgeStyle } from "@/lib/riskBands";
 
 export default function Products() {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
+  const [riskBandByCode, setRiskBandByCode] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [requestAmount, setRequestAmount] = useState("");
@@ -57,14 +59,17 @@ export default function Products() {
       const userData = await User.me();
       setUser(userData);
 
-      const [allProductsData, accessData, pendingReqs] = await Promise.all([
+      const [allProductsData, accessData, pendingReqs, riskBandsData] = await Promise.all([
         Product.list("-created_date"),
         ProductAccess.filter({ investor_email: userData.email }),
         AllocationRequest.filter({
           investor_email: userData.email,
           status: "pending",
         }),
+        fetchActiveRiskBands(),
       ]);
+
+      setRiskBandByCode(riskBandMap(riskBandsData));
 
       setPendingProductIds(new Set(pendingReqs.map((r) => r.product_id)));
 
@@ -130,15 +135,12 @@ export default function Products() {
     }
   };
 
-  const getRiskBadgeColor = (risk) => {
-    const colors = {
-      low: "bg-green-900 text-green-400 border-green-700",
-      medium: "bg-[#b38922]/25 text-gold-bright border-[#8a6a1a]/45",
-      medium_high: "bg-orange-900/60 text-orange-300 border-orange-700/60",
-      high: "bg-orange-900 text-orange-400 border-orange-700",
-      very_high: "bg-red-900 text-red-400 border-red-700",
-    };
-    return colors[risk] || colors.medium;
+  const getRiskBadgeStyle = (riskCode) => {
+    return riskBandBadgeStyle(riskBandByCode[riskCode]);
+  };
+
+  const getRiskLabel = (riskCode) => {
+    return riskBandByCode[riskCode]?.label ?? riskCode?.replace(/_/g, " ");
   };
 
   if (loading) {
@@ -195,9 +197,12 @@ export default function Products() {
                         </Badge>
                       )}
                     </div>
-                    <Badge className={getRiskBadgeColor(product.risk_band)}>
+                    <Badge
+                      className="border"
+                      style={getRiskBadgeStyle(product.risk_band)}
+                    >
                       <Shield className="w-3 h-3 mr-1" />
-                      {product.risk_band?.replace(/_/g, "-").toUpperCase()} RISK
+                      {getRiskLabel(product.risk_band)?.toUpperCase()} RISK
                     </Badge>
                   </div>
                   {!product.image_url && (

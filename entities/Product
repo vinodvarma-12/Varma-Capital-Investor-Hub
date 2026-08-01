@@ -39,12 +39,12 @@
     "risk_band": {
       "type": "string",
       "enum": [
-        "low",
-        "medium",
-        "high",
-        "very_high"
+        "conservative",
+        "balanced",
+        "growth",
+        "fixed_return"
       ],
-      "description": "Risk level"
+      "description": "Risk level (references risk_bands.code)"
     },
     "status": {
       "type": "string",

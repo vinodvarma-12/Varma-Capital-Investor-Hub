@@ -18,14 +18,16 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { fetchActiveRiskBands, riskBandMap } from "@/lib/riskBands";
 
-const ProductForm = ({ product, onSave }) => {
+const ProductForm = ({ product, riskBands, onSave }) => {
+  const defaultRiskBand = riskBands[0]?.code ?? 'balanced';
   const [formData, setFormData] = useState(product || {
     name: '', description: '', strategy: '',
     minimum_ticket: 0, lock_in_months: 0,
     management_fee_percent: 0, performance_fee_percent: 0,
     redemption_penalty_percent: 0, redemption_penalty_amount: 0,
-    risk_band: 'medium', status: 'active',
+    risk_band: defaultRiskBand, status: 'active',
     high_water_mark: false, hurdle_rate: 0,
     is_public: false, image_url: '',
   });
@@ -148,11 +150,9 @@ const ProductForm = ({ product, onSave }) => {
           <Select value={formData.risk_band} onValueChange={val => handleChange('risk_band', val)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="medium_high">Medium-High</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="very_high">Very High</SelectItem>
+              {riskBands.map((band) => (
+                <SelectItem key={band.code} value={band.code}>{band.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -174,22 +174,26 @@ const ProductForm = ({ product, onSave }) => {
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
+  const [riskBands, setRiskBands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const riskBandByCode = riskBandMap(riskBands);
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [productsData, userData] = await Promise.all([
+      const [productsData, userData, riskBandsData] = await Promise.all([
         Product.list('-created_date'),
         User.me(),
+        fetchActiveRiskBands(),
       ]);
       setProducts(productsData);
       setCurrentUser(userData);
+      setRiskBands(riskBandsData);
     } catch (error) {
       console.error("Error loading products:", error);
     } finally {
@@ -252,7 +256,7 @@ export default function AdminProducts() {
                 <DialogHeader>
                   <DialogTitle>{editingProduct ? 'Edit Product' : 'Create New Product'}</DialogTitle>
                 </DialogHeader>
-                <ProductForm key={editingProduct?.id ?? 'new'} product={editingProduct} onSave={handleSaveProduct} />
+                <ProductForm key={editingProduct?.id ?? 'new'} product={editingProduct} riskBands={riskBands} onSave={handleSaveProduct} />
               </DialogContent>
             </Dialog>
           )}
@@ -286,7 +290,7 @@ export default function AdminProducts() {
                         }
                       </TableCell>
                       <TableCell className="font-medium text-foreground">{product.name}</TableCell>
-                      <TableCell className="capitalize text-foreground/80">{product.risk_band}</TableCell>
+                      <TableCell className="text-foreground/80">{riskBandByCode[product.risk_band]?.label ?? product.risk_band}</TableCell>
                       <TableCell className="text-foreground/80">${product.minimum_ticket?.toLocaleString()}</TableCell>
                       <TableCell className="text-foreground/80">{product.lock_in_months} months</TableCell>
                       <TableCell className="text-foreground/80">{product.management_fee_percent}%</TableCell>
