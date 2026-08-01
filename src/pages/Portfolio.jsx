@@ -21,6 +21,8 @@ import {
 import { TrendingUp, TrendingDown, Download, Lock, Unlock } from "lucide-react";
 import { format, isAfter } from "date-fns";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import PortalOnboarding from "@/components/investor/PortalOnboarding";
+import { isInvestorPortalReady } from "@/lib/investorPortal";
 
 export default function Portfolio() {
   const [user, setUser] = useState(null);
@@ -30,45 +32,62 @@ export default function Portfolio() {
   const [transactions, setTransactions] = useState([]);
   const [fabricatedReturns, setFabricatedReturns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadPortfolioData();
   }, []);
 
-  const loadPortfolioData = async () => {
+  useEffect(() => {
+    if (loading || isInvestorPortalReady(investments)) return;
+    const onFocus = () => loadPortfolioData(true);
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [loading, investments]);
+
+  const loadPortfolioData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, navResults, transactionsData, fabricatedData] = await Promise.all([
-        Investment.filter({ investor_email: userData.email }),
+      const investmentsData = await Investment.filter({ investor_email: userData.email });
+      setInvestments(investmentsData);
+
+      const productIds = [...new Set(investmentsData.map(inv => inv.product_id).filter(Boolean))];
+      const [
+        navResult,
+        transactionsResult,
+        fabricatedResult,
+        productsResult,
+      ] = await Promise.allSettled([
         NAV.list('-date', 200),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 50),
         FabricatedReturns.filter({ investor_email: userData.email }),
+        productIds.length > 0
+          ? supabase.from('products').select('id, name, status').in('id', productIds).then(({ data, error }) => {
+              if (error) throw error;
+              return data ?? [];
+            })
+          : Promise.resolve([]),
       ]);
 
-      // Fetch products by the exact IDs in this investor's investments
-      // — avoids RLS filtering out products that aren't "visible" but still need their name
-      const productIds = [...new Set(investmentsData.map(inv => inv.product_id).filter(Boolean))];
-      let productsData = [];
-      if (productIds.length > 0) {
-        const { data } = await supabase
-          .from('products')
-          .select('id, name, status')
-          .in('id', productIds);
-        productsData = data ?? [];
-      }
-
-      setInvestments(investmentsData);
-      setProducts(productsData);
-      setNavData(navResults);
-      setTransactions(transactionsData);
-      setFabricatedReturns(fabricatedData);
+      if (navResult.status === 'fulfilled') setNavData(navResult.value);
+      if (transactionsResult.status === 'fulfilled') setTransactions(transactionsResult.value);
+      if (fabricatedResult.status === 'fulfilled') setFabricatedReturns(fabricatedResult.value);
+      else console.warn('return_overrides unavailable:', fabricatedResult.reason?.message);
+      if (productsResult.status === 'fulfilled') setProducts(productsResult.value);
     } catch (error) {
       console.error("Error loading portfolio data:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handlePortalRefresh = async () => {
+    setRefreshing(true);
+    await loadPortfolioData(true);
   };
 
   const getProductName = (productId) => {
@@ -182,6 +201,16 @@ export default function Portfolio() {
 
   if (loading) {
     return <LoadingSpinner message="Loading your portfolio..." />;
+  }
+
+  if (!isInvestorPortalReady(investments)) {
+    return (
+      <PortalOnboarding
+        user={user}
+        onRefresh={handlePortalRefresh}
+        refreshing={refreshing}
+      />
+    );
   }
 
   return (

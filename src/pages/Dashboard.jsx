@@ -30,6 +30,8 @@ import {
   ALLOCATION_COLORS,
 } from "@/lib/varmaTheme";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import PortalOnboarding from "@/components/investor/PortalOnboarding";
+import { isInvestorPortalReady } from "@/lib/investorPortal";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -40,6 +42,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [darkMode, setDarkMode] = useState(
     () => document.documentElement.classList.contains('dark')
   );
@@ -58,13 +61,30 @@ export default function Dashboard() {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
+  useEffect(() => {
+    if (loading || isInvestorPortalReady(investments)) return;
+    const onFocus = () => loadDashboardData(true);
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [loading, investments]);
+
+  const loadDashboardData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const userData = await User.me();
       setUser(userData);
 
-      const [investmentsData, productsData, navResults, transactionsData, documentsData, fabricatedData] = await Promise.all([
-        Investment.filter({ investor_email: userData.email }),
+      // Load investments first — portal readiness depends on this
+      const investmentsData = await Investment.filter({ investor_email: userData.email });
+      setInvestments(investmentsData);
+
+      const [
+        productsResult,
+        navResult,
+        transactionsResult,
+        documentsResult,
+        fabricatedResult,
+      ] = await Promise.allSettled([
         Product.list(),
         NAV.list('-date', 100),
         Transaction.filter({ investor_email: userData.email }, '-transaction_date', 10),
@@ -72,17 +92,23 @@ export default function Dashboard() {
         FabricatedReturns.filter({ investor_email: userData.email }),
       ]);
 
-      setInvestments(investmentsData);
-      setProducts(productsData);
-      setNavData(navResults);
-      setTransactions(transactionsData);
-      setDocuments(documentsData);
-      setFabricatedReturns(fabricatedData);
+      if (productsResult.status === 'fulfilled') setProducts(productsResult.value);
+      if (navResult.status === 'fulfilled') setNavData(navResult.value);
+      if (transactionsResult.status === 'fulfilled') setTransactions(transactionsResult.value);
+      if (documentsResult.status === 'fulfilled') setDocuments(documentsResult.value);
+      if (fabricatedResult.status === 'fulfilled') setFabricatedReturns(fabricatedResult.value);
+      else console.warn('return_overrides unavailable:', fabricatedResult.reason?.message);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handlePortalRefresh = async () => {
+    setRefreshing(true);
+    await loadDashboardData(true);
   };
 
   // Parse date string as local date — avoids UTC timezone shifts
@@ -379,6 +405,16 @@ export default function Dashboard() {
 
   if (loading) {
     return <LoadingSpinner message="Loading your portfolio..." />;
+  }
+
+  if (!isInvestorPortalReady(investments)) {
+    return (
+      <PortalOnboarding
+        user={user}
+        onRefresh={handlePortalRefresh}
+        refreshing={refreshing}
+      />
+    );
   }
 
   return (
