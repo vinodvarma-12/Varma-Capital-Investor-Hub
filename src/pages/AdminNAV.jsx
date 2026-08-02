@@ -489,7 +489,7 @@ const CSVUploadForm = ({ products, onUpload, onCancel }) => {
         <Label className="text-foreground/80">CSV File</Label>
         <Input type="file" accept=".csv" onChange={handleFileChange} className={inputCls} />
         <p className="text-xs text-muted-foreground mt-1">
-          Expected columns: <code>date, nav_per_unit, quarterly_return, notes</code>
+          Expected columns: <code>date, nav_per_unit, return_percent (optional), admin_notes (optional)</code>
         </p>
       </div>
 
