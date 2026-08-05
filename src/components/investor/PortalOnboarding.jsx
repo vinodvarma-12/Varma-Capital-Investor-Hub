@@ -7,15 +7,14 @@ import {
   INVESTOR_ONBOARDING_YOUTUBE_ID,
 } from "@/lib/investorPortal";
 
-useEffect(() => {
-  console.log(INVESTOR_ONBOARDING_YOUTUBE_ID);
-}, []);
-
 export default function PortalOnboarding({
   user,
   onRefresh,
   refreshing = false,
 }) {
+  useEffect(() => {
+    console.log(INVESTOR_ONBOARDING_YOUTUBE_ID);
+  }, []);
   const firstName = user?.full_name?.split(" ")[0] || "Investor";
   const embedUrl = getYouTubeEmbedUrl(INVESTOR_ONBOARDING_YOUTUBE_ID);
 
