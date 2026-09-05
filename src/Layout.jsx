@@ -186,6 +186,15 @@ export default function Layout({ children, currentPageName }) {
     navigate(getDashboardByRole(user.role));
   }, [user, currentPageName, navigate]);
 
+  // Investor dashboard/portfolio are not for staff — they have no holdings and would hit onboarding
+  useEffect(() => {
+    if (!user) return;
+    const isStaff = user.role === 'admin' || user.role === 'super_admin';
+    if (isStaff && (currentPageName === 'Dashboard' || currentPageName === 'Portfolio')) {
+      navigate(getDashboardByRole(user.role), { replace: true });
+    }
+  }, [user, currentPageName, navigate]);
+
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
@@ -201,10 +210,14 @@ export default function Layout({ children, currentPageName }) {
         setShowCompliancePopup(false);
       };
 
-  // Base investor navigation that everyone can see
-  const investorNavItems = [
+  // Investor-only: Dashboard and Portfolio require holdings and show onboarding otherwise
+  const investorOnlyNavItems = [
     { title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
     { title: "Portfolio", url: createPageUrl("Portfolio"), icon: PieChart },
+  ];
+
+  // Shared navigation (investors and staff)
+  const investorNavItems = [
     { title: "Products", url: createPageUrl("Products"), icon: Package },
     { title: "Markets", url: createPageUrl("Markets"), icon: TrendingUp },
     { title: "Documents", url: createPageUrl("Documents"), icon: FileText },
@@ -235,10 +248,13 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   const getNavigationItems = () => {
-    let navItems = [...investorNavItems];
+    const isStaff = user?.role === 'admin' || user?.role === 'super_admin';
+    let navItems = isStaff
+      ? [...investorNavItems]
+      : [...investorOnlyNavItems, ...investorNavItems];
     
     // Add admin features for admin and super_admin
-    if (user?.role === 'admin' || user?.role === 'super_admin') {
+    if (isStaff) {
       navItems = [...navItems, ...adminOnlyItems];
     }
     

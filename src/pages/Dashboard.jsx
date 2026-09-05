@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { User } from "@/entities/User";
+import { createPageUrl } from "@/utils";
 import { Investment } from "@/entities/Investment";
 import { Product } from "@/entities/Product";
 import { NAV } from "@/entities/NAV";
@@ -34,6 +36,7 @@ import PortalOnboarding from "@/components/investor/PortalOnboarding";
 import { isInvestorPortalReady } from "@/lib/investorPortal";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [investments, setInvestments] = useState([]);
   const [products, setProducts] = useState([]);
@@ -60,6 +63,18 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === "admin" || user.role === "super_admin") {
+      navigate(
+        user.role === "super_admin"
+          ? createPageUrl("SuperAdminDashboard")
+          : createPageUrl("AdminDashboard"),
+        { replace: true }
+      );
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (loading || isInvestorPortalReady(investments)) return;
@@ -405,6 +420,10 @@ export default function Dashboard() {
 
   if (loading) {
     return <LoadingSpinner message="Loading your portfolio..." />;
+  }
+
+  if (user?.role === "admin" || user?.role === "super_admin") {
+    return <LoadingSpinner message="Redirecting..." />;
   }
 
   if (!isInvestorPortalReady(investments)) {
